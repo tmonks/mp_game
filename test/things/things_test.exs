@@ -20,9 +20,9 @@ defmodule MPG.ThingsTest do
       |> Things.add_player("Joe")
       |> Things.add_player("Jane")
 
-    assert %State{players: players} = Things.set_player_answer(state, "Joe", "bar")
+    assert %State{players: players} = Things.set_player_answer(state, "Joe", "banana")
     assert [jane, joe] = Enum.sort_by(players, & &1.name)
-    assert joe == %Player{name: "Joe", current_answer: "bar"}
+    assert joe == %Player{name: "Joe", current_answer: "banana"}
     assert jane == %Player{name: "Jane", current_answer: nil}
   end
 end
