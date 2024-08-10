@@ -6,6 +6,18 @@ defmodule MPG.Things do
     %State{topic: topic, players: []}
   end
 
+  @doc """
+  Resets the topic and all player answers
+  """
+  def new_question(state, topic) do
+    players =
+      Enum.map(state.players, fn
+        %Player{name: name} -> %Player{name: name}
+      end)
+
+    %State{state | topic: topic, players: players}
+  end
+
   def add_player(state, name) do
     player = %Player{name: name}
     %State{state | players: state.players ++ [player]}

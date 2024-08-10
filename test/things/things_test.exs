@@ -9,6 +9,23 @@ defmodule MPG.ThingsTest do
     assert %State{topic: "foo", players: []} = Things.new("foo")
   end
 
+  test "new_question/2 resets the topic and player answers" do
+    state = %State{
+      topic: "Things that are red",
+      players: [
+        %Player{name: "Joe", current_answer: "apple"},
+        %Player{name: "Jane", current_answer: "strawberry"}
+      ]
+    }
+
+    assert %State{topic: "Things that are blue", players: players} =
+             Things.new_question(state, "Things that are blue")
+
+    assert [jane, joe] = Enum.sort_by(players, & &1.name)
+    assert jane == %Player{name: "Jane", current_answer: nil}
+    assert joe == %Player{name: "Joe", current_answer: nil}
+  end
+
   test "add_player/2 adds a player to the state" do
     state = Things.new("foo")
     assert %State{topic: "foo", players: [%Player{name: "Joe"}]} = Things.add_player(state, "Joe")
