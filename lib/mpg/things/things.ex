@@ -10,10 +10,7 @@ defmodule MPG.Things do
   Resets the topic and all player answers
   """
   def new_question(state, topic) do
-    players =
-      Enum.map(state.players, fn
-        %Player{name: name} -> %Player{name: name}
-      end)
+    players = Enum.map(state.players, &%Player{&1 | current_answer: nil})
 
     %State{state | topic: topic, players: players}
   end

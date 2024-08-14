@@ -20,9 +20,28 @@ defmodule MPG.Things.SessionTest do
 
   test "can add a player", %{server: server} do
     Session.add_player(server, "Joe")
+    state = :sys.get_state(server)
 
-    new_state = :sys.get_state(server)
+    assert [%Player{name: "Joe", current_answer: nil}] = state.players
+  end
 
-    assert [%Player{name: "Joe"}] = new_state.players
+  test "can set a player answer", %{server: server} do
+    Session.add_player(server, "Joe")
+    Session.set_player_answer(server, "Joe", "42")
+    state = :sys.get_state(server)
+
+    assert [%Player{name: "Joe", current_answer: "42"}] = state.players
+  end
+
+  test "can reset the topic and all player answers", %{server: server} do
+    Session.add_player(server, "Joe")
+    Session.set_player_answer(server, "Joe", "42")
+    Session.new_question(server, "Things that are awesome")
+    state = :sys.get_state(server)
+
+    assert %State{
+             topic: "Things that are awesome",
+             players: [%Player{name: "Joe", current_answer: nil}]
+           } = state
   end
 end
