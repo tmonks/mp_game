@@ -17,7 +17,7 @@ defmodule MPGWeb.Router do
   scope "/", MPGWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", ThingsLive, :play
   end
 
   # Other scopes may use custom stacks.
