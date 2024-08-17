@@ -14,7 +14,8 @@ defmodule MPG.Application do
       # Start a worker by calling: MPG.Worker.start_link(arg)
       # {MPG.Worker, arg},
       # Start to serve requests, typically the last entry
-      MPGWeb.Endpoint
+      MPGWeb.Endpoint,
+      {MPG.Things.Session, name: :things_session}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
