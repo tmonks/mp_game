@@ -8,6 +8,7 @@ defmodule MPGWeb.Router do
     plug :put_root_layout, html: {MPGWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :assign_session_id
   end
 
   pipeline :api do
@@ -20,8 +21,10 @@ defmodule MPGWeb.Router do
     live "/", ThingsLive, :play
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", MPGWeb do
-  #   pipe_through :api
-  # end
+  defp assign_session_id(conn, _opts) do
+    case get_session(conn, :session_id) do
+      nil -> put_session(conn, :session_id, UUID.uuid4())
+      _ -> conn
+    end
+  end
 end

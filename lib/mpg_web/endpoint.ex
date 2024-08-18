@@ -8,7 +8,8 @@ defmodule MPGWeb.Endpoint do
     store: :cookie,
     key: "_mpg_key",
     signing_salt: "vi2DJajF",
-    same_site: "Lax"
+    same_site: "Lax",
+    max_age: 9_999_999_999
   ]
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
