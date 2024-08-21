@@ -1,3 +1,3 @@
 defmodule MPG.Things.Player do
-  defstruct [:name, :current_answer, :revealed]
+  defstruct [:id, :name, :current_answer, :revealed]
 end

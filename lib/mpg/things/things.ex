@@ -15,8 +15,8 @@ defmodule MPG.Things do
     %State{state | topic: topic, players: players}
   end
 
-  def add_player(state, name) do
-    player = %Player{name: name}
+  def add_player(state, id, name) do
+    player = %Player{id: id, name: name}
     %State{state | players: state.players ++ [player]}
   end
 

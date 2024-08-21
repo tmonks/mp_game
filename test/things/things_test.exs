@@ -26,20 +26,24 @@ defmodule MPG.ThingsTest do
     assert joe == %Player{name: "Joe", current_answer: nil}
   end
 
-  test "add_player/2 adds a player to the state" do
+  test "add_player/3 adds a player to the state" do
     state = Things.new("foo")
-    assert %State{topic: "foo", players: [%Player{name: "Joe"}]} = Things.add_player(state, "Joe")
+    id = UUID.uuid4()
+
+    assert %State{topic: "foo", players: [player]} = Things.add_player(state, id, "Joe")
+    assert player.name == "Joe"
+    assert player.id == id
   end
 
   test "set_player_answer/3 sets the current_answer for the specified player" do
     state =
       Things.new("foo")
-      |> Things.add_player("Joe")
-      |> Things.add_player("Jane")
+      |> Things.add_player(UUID.uuid4(), "Joe")
+      |> Things.add_player(UUID.uuid4(), "Jane")
 
     assert %State{players: players} = Things.set_player_answer(state, "Joe", "banana")
     assert [jane, joe] = Enum.sort_by(players, & &1.name)
-    assert joe == %Player{name: "Joe", current_answer: "banana"}
-    assert jane == %Player{name: "Jane", current_answer: nil}
+    assert %Player{name: "Joe", current_answer: "banana"} = joe
+    assert %Player{name: "Jane", current_answer: nil} = jane
   end
 end

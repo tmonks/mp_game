@@ -28,8 +28,8 @@ defmodule MPG.Things.Session do
   @doc """
   Adds a player to the state.
   """
-  def add_player(server, player_name) do
-    GenServer.cast(server, {:add_player, player_name})
+  def add_player(server, id, player_name) do
+    GenServer.cast(server, {:add_player, id, player_name})
   end
 
   @doc """
@@ -62,8 +62,8 @@ defmodule MPG.Things.Session do
   end
 
   @impl true
-  def handle_cast({:add_player, player_name}, state) do
-    state = Things.add_player(state, player_name)
+  def handle_cast({:add_player, id, player_name}, state) do
+    state = Things.add_player(state, id, player_name)
     {:noreply, state}
   end
 
