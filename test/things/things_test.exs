@@ -46,4 +46,19 @@ defmodule MPG.ThingsTest do
     assert %Player{name: "Joe", current_answer: "banana"} = joe
     assert %Player{name: "Jane", current_answer: nil} = jane
   end
+
+  test "get_player/1 retrieves the player with the given id" do
+    state = Things.new("foo")
+    id = UUID.uuid4()
+
+    state = Things.add_player(state, id, "Joe")
+    assert %Player{name: "Joe", id: ^id} = Things.get_player(state, id)
+  end
+
+  test "get_player/1 returns nil if the player is not found" do
+    state = Things.new("foo")
+    id = UUID.uuid4()
+
+    assert Things.get_player(state, id) == nil
+  end
 end
