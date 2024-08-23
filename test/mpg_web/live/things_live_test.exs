@@ -36,4 +36,25 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#player-name", "Peter")
     refute has_element?(view, "#join-form")
   end
+
+  test "shows 'No answer yet' for players that have not provided an answer", %{conn: conn} do
+    id = UUID.uuid4()
+    Session.add_player(:things_session, id, "Peter")
+
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, "#player-#{id}", "Peter")
+    assert has_element?(view, "#player-#{id} [data-role=answer]", "No answer yet")
+  end
+
+  test "shows 'Ready' for players that have provided an answer", %{conn: conn} do
+    id = UUID.uuid4()
+    Session.add_player(:things_session, id, "Peter")
+    Session.set_player_answer(:things_session, "Peter", "bananas")
+
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, "#player-#{id}", "Peter")
+    assert has_element?(view, "#player-#{id} [data-role=answer]", "Ready")
+  end
 end

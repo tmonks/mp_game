@@ -54,7 +54,12 @@ defmodule MPGWeb.ThingsLive do
     <br />
     <h2>Players</h2>
     <%= for player <- @state.players do %>
-      <span><%= player.name %></span>
+      <div id={"player-" <> player.id}>
+        <span data-role="player-name"><%= player.name %></span>
+        <span data-role="answer">
+          <%= if player.current_answer, do: "Ready", else: "No answer yet" %>
+        </span>
+      </div>
     <% end %>
     """
   end
