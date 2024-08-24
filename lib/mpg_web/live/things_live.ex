@@ -38,9 +38,7 @@ defmodule MPGWeb.ThingsLive do
     <h1>Game of Things</h1>
     <br />
 
-    <%= if assigns[:player_name] do %>
-      <div id="player-name"><%= @player_name %></div>
-    <% else %>
+    <%= unless assigns[:player_name] do %>
       <form id="join-form" phx-submit="join">
         <div>
           <input type="text" name="player_name" />
@@ -54,13 +52,34 @@ defmodule MPGWeb.ThingsLive do
     <br />
     <h2>Players</h2>
     <%= for player <- @state.players do %>
-      <div id={"player-" <> player.id}>
-        <span data-role="player-name"><%= player.name %></span>
-        <span data-role="answer">
-          <%= if player.current_answer, do: "Ready", else: "No answer yet" %>
-        </span>
-      </div>
+      <%= if player.id == @session_id do %>
+        <.current_player_row player={player} />
+      <% else %>
+        <.player_row player={player} />
+      <% end %>
     <% end %>
+    """
+  end
+
+  defp player_row(assigns) do
+    ~H"""
+    <div id={"player-" <> @player.id}>
+      <span data-role="player-name"><%= @player.name %></span>
+      <span data-role="answer">
+        <%= if @player.current_answer, do: "Ready", else: "No answer yet" %>
+      </span>
+    </div>
+    """
+  end
+
+  defp current_player_row(assigns) do
+    ~H"""
+    <div id={"player-" <> @player.id}>
+      <span data-role="player-name">Me</span>
+      <span data-role="answer">
+        <%= @player.current_answer || "No answer yet" %>
+      </span>
+    </div>
     """
   end
 end

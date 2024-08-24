@@ -17,14 +17,14 @@ defmodule MPGWeb.ThingsLiveTest do
     assert html =~ "Join"
   end
 
-  test "can join the game", %{conn: conn} do
+  test "can join the game", %{conn: conn, session_id: session_id} do
     {:ok, view, _html} = live(conn, ~p"/")
 
     view
     |> form("#join-form", %{player_name: "Peter"})
     |> render_submit()
 
-    assert has_element?(view, "#player-name", "Peter")
+    assert has_element?(view, "#player-#{session_id} [data-role=player-name]", "Me")
     refute has_element?(view, "#join-form")
   end
 
@@ -33,11 +33,28 @@ defmodule MPGWeb.ThingsLiveTest do
 
     {:ok, view, _html} = live(conn, ~p"/")
 
-    assert has_element?(view, "#player-name", "Peter")
+    assert has_element?(view, "#player-#{session_id} [data-role=player-name]", "Me")
     refute has_element?(view, "#join-form")
   end
 
-  test "shows 'No answer yet' for players that have not provided an answer", %{conn: conn} do
+  test "lists current player as 'Me'", %{conn: conn, session_id: session_id} do
+    Session.add_player(:things_session, session_id, "Peter")
+
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, "#player-#{session_id} [data-role=player-name]", "Me")
+  end
+
+  test "shows current answer for current player", %{conn: conn, session_id: session_id} do
+    Session.add_player(:things_session, session_id, "Peter")
+    Session.set_player_answer(:things_session, "Peter", "bananas")
+
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, "#player-#{session_id} [data-role=answer]", "bananas")
+  end
+
+  test "shows 'No answer yet' for other players that have not provided an answer", %{conn: conn} do
     id = UUID.uuid4()
     Session.add_player(:things_session, id, "Peter")
 
@@ -47,7 +64,7 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#player-#{id} [data-role=answer]", "No answer yet")
   end
 
-  test "shows 'Ready' for players that have provided an answer", %{conn: conn} do
+  test "shows 'Ready' for other players that have provided an answer", %{conn: conn} do
     id = UUID.uuid4()
     Session.add_player(:things_session, id, "Peter")
     Session.set_player_answer(:things_session, "Peter", "bananas")
