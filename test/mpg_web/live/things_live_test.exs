@@ -74,4 +74,24 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#player-#{id}", "Peter")
     assert has_element?(view, "#player-#{id} [data-role=answer]", "Ready")
   end
+
+  test "shows the current question", %{conn: conn} do
+    Session.new_question(:things_session, "Things that are red")
+
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, "#current-question", "Things that are red")
+  end
+
+  test "player can submit answer", %{conn: conn, session_id: session_id} do
+    Session.add_player(:things_session, session_id, "Peter")
+
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    view
+    |> form("#answer-form", %{answer: "bananas"})
+    |> render_submit()
+
+    assert has_element?(view, "#player-#{session_id} [data-role=answer]", "bananas")
+  end
 end

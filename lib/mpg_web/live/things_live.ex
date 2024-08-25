@@ -33,10 +33,20 @@ defmodule MPGWeb.ThingsLive do
   end
 
   @impl true
+  def handle_event("submit_answer", %{"answer" => answer}, socket) do
+    Session.set_player_answer(:things_session, socket.assigns.player_name, answer)
+    state = Session.get_state(:things_session)
+    {:noreply, assign(socket, state: state)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <h1>Game of Things</h1>
     <br />
+
+    <h2>Current Question</h2>
+    <div id="current-question"><%= @state.topic %></div>
 
     <%= unless assigns[:player_name] do %>
       <form id="join-form" phx-submit="join">
@@ -76,9 +86,20 @@ defmodule MPGWeb.ThingsLive do
     ~H"""
     <div id={"player-" <> @player.id}>
       <span data-role="player-name">Me</span>
-      <span data-role="answer">
-        <%= @player.current_answer || "No answer yet" %>
-      </span>
+      <%= if @player.current_answer do %>
+        <span data-role="answer">
+          <%= @player.current_answer %>
+        </span>
+      <% else %>
+        <form id="answer-form" phx-submit="submit_answer">
+          <div>
+            <input type="text" name="answer" />
+          </div>
+          <div>
+            <button class="button">Submit</button>
+          </div>
+        </form>
+      <% end %>
     </div>
     """
   end
