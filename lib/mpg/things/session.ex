@@ -40,6 +40,13 @@ defmodule MPG.Things.Session do
   end
 
   @doc """
+  Sets player to revealed.
+  """
+  def set_player_to_revealed(server, player_id) do
+    GenServer.cast(server, {:set_player_to_revealed, player_id})
+  end
+
+  @doc """
   Sets a new question and resets all player answers.
   """
   def new_question(server, topic) do
@@ -76,6 +83,12 @@ defmodule MPG.Things.Session do
   @impl true
   def handle_cast({:new_question, topic}, state) do
     state = Things.new_question(state, topic)
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_cast({:set_player_to_revealed, player_id}, state) do
+    state = Things.set_player_to_revealed(state, player_id)
     {:noreply, state}
   end
 end

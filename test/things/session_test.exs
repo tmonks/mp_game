@@ -46,4 +46,12 @@ defmodule MPG.Things.SessionTest do
              players: [%Player{name: "Joe", current_answer: nil}]
            } = state
   end
+
+  test "can reveal a player's answer", %{server: server} do
+    Session.add_player(server, @player_id, "Joe")
+    assert %{players: [%Player{name: "Joe", revealed: nil}]} = :sys.get_state(server)
+
+    Session.set_player_to_revealed(server, @player_id)
+    assert %{players: [%Player{name: "Joe", revealed: true}]} = :sys.get_state(server)
+  end
 end

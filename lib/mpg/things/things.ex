@@ -42,4 +42,17 @@ defmodule MPG.Things do
 
     %State{state | players: players}
   end
+
+  @doc """
+  Sets the player with the specified id to revealed
+  """
+  def set_player_to_revealed(state, id) do
+    players =
+      Enum.map(state.players, fn
+        %Player{id: ^id} = player -> %Player{player | revealed: true}
+        player -> player
+      end)
+
+    %State{state | players: players}
+  end
 end
