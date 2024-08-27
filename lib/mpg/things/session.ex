@@ -53,6 +53,13 @@ defmodule MPG.Things.Session do
     GenServer.cast(server, {:new_question, topic})
   end
 
+  @doc """
+  Returns true if all players have answered.
+  """
+  def all_players_answered?(server) do
+    GenServer.call(server, :all_players_answered)
+  end
+
   @impl true
   def init(:ok) do
     {:ok, %State{players: []}}
@@ -66,6 +73,11 @@ defmodule MPG.Things.Session do
   @impl true
   def handle_call(:get_state, _from, state) do
     {:reply, state, state}
+  end
+
+  @impl true
+  def handle_call(:all_players_answered, _from, state) do
+    {:reply, Enum.all?(state.players, &(&1.current_answer != nil)), state}
   end
 
   @impl true

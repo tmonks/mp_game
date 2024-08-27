@@ -54,4 +54,18 @@ defmodule MPG.Things.SessionTest do
     Session.set_player_to_revealed(server, @player_id)
     assert %{players: [%Player{name: "Joe", revealed: true}]} = :sys.get_state(server)
   end
+
+  test "all_players_answered?/1 returns true if all players have an answer", %{server: server} do
+    Session.add_player(server, UUID.uuid4(), "Joe")
+    refute Session.all_players_answered?(server)
+
+    Session.set_player_answer(server, "Joe", "42")
+    assert Session.all_players_answered?(server)
+
+    Session.add_player(server, UUID.uuid4(), "Jane")
+    refute Session.all_players_answered?(server)
+
+    Session.set_player_answer(server, "Jane", "43")
+    assert Session.all_players_answered?(server)
+  end
 end
