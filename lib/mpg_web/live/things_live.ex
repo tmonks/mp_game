@@ -34,7 +34,7 @@ defmodule MPGWeb.ThingsLive do
 
   @impl true
   def handle_event("submit_answer", %{"answer" => answer}, socket) do
-    Session.set_player_answer(:things_session, socket.assigns.player_name, answer)
+    Session.set_player_answer(:things_session, socket.assigns.session_id, answer)
     state = Session.get_state(:things_session)
     {:noreply, assign(socket, state: state)}
   end

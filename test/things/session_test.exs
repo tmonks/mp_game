@@ -27,23 +27,23 @@ defmodule MPG.Things.SessionTest do
     assert [%Player{name: "Joe", current_answer: nil}] = state.players
   end
 
-  test "can set a player answer", %{server: server} do
+  test "set_player_answer/3 can set a player answer", %{server: server} do
     Session.add_player(server, @player_id, "Joe")
-    Session.set_player_answer(server, "Joe", "42")
+    Session.set_player_answer(server, @player_id, "42")
     state = :sys.get_state(server)
 
-    assert [%Player{name: "Joe", current_answer: "42"}] = state.players
+    assert [%Player{name: "Joe", id: @player_id, current_answer: "42"}] = state.players
   end
 
   test "can reset the topic and all player answers", %{server: server} do
     Session.add_player(server, @player_id, "Joe")
-    Session.set_player_answer(server, "Joe", "42")
+    Session.set_player_answer(server, @player_id, "42")
     Session.new_question(server, "Things that are awesome")
     state = :sys.get_state(server)
 
     assert %State{
              topic: "Things that are awesome",
-             players: [%Player{name: "Joe", current_answer: nil}]
+             players: [%Player{id: @player_id, name: "Joe", current_answer: nil}]
            } = state
   end
 
@@ -56,16 +56,19 @@ defmodule MPG.Things.SessionTest do
   end
 
   test "all_players_answered?/1 returns true if all players have an answer", %{server: server} do
-    Session.add_player(server, UUID.uuid4(), "Joe")
+    joe_id = UUID.uuid4()
+    jane_id = UUID.uuid4()
+
+    Session.add_player(server, joe_id, "Joe")
     refute Session.all_players_answered?(server)
 
-    Session.set_player_answer(server, "Joe", "42")
+    Session.set_player_answer(server, joe_id, "42")
     assert Session.all_players_answered?(server)
 
-    Session.add_player(server, UUID.uuid4(), "Jane")
+    Session.add_player(server, jane_id, "Jane")
     refute Session.all_players_answered?(server)
 
-    Session.set_player_answer(server, "Jane", "43")
+    Session.set_player_answer(server, jane_id, "43")
     assert Session.all_players_answered?(server)
   end
 end

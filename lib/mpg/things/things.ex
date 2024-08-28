@@ -33,10 +33,10 @@ defmodule MPG.Things do
   @doc """
   Sets the current_answer for the specified player
   """
-  def set_player_answer(state, player_name, answer) do
+  def set_player_answer(state, player_id, answer) do
     players =
       Enum.map(state.players, fn
-        %Player{name: ^player_name} = player -> %Player{player | current_answer: answer}
+        %Player{id: ^player_id} = player -> %Player{player | current_answer: answer}
         player -> player
       end)
 

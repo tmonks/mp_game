@@ -36,15 +36,17 @@ defmodule MPG.ThingsTest do
   end
 
   test "set_player_answer/3 sets the current_answer for the specified player" do
+    joe_id = UUID.uuid4()
+    jane_id = UUID.uuid4()
+
     state =
       Things.new("foo")
-      |> Things.add_player(UUID.uuid4(), "Joe")
-      |> Things.add_player(UUID.uuid4(), "Jane")
+      |> Things.add_player(joe_id, "Joe")
+      |> Things.add_player(jane_id, "Jane")
 
-    assert %State{players: players} = Things.set_player_answer(state, "Joe", "banana")
-    assert [jane, joe] = Enum.sort_by(players, & &1.name)
-    assert %Player{name: "Joe", current_answer: "banana"} = joe
-    assert %Player{name: "Jane", current_answer: nil} = jane
+    assert %State{players: players} = Things.set_player_answer(state, joe_id, "banana")
+    assert %Player{name: "Joe", current_answer: "banana"} = Enum.find(players, &(&1.id == joe_id))
+    assert %Player{name: "Jane", current_answer: nil} = Enum.find(players, &(&1.id == jane_id))
   end
 
   test "get_player/1 retrieves the player with the given id" do

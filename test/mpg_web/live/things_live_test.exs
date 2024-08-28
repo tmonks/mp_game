@@ -47,7 +47,7 @@ defmodule MPGWeb.ThingsLiveTest do
 
   test "shows current answer for current player", %{conn: conn, session_id: session_id} do
     Session.add_player(:things_session, session_id, "Peter")
-    Session.set_player_answer(:things_session, "Peter", "bananas")
+    Session.set_player_answer(:things_session, session_id, "bananas")
 
     {:ok, view, _html} = live(conn, ~p"/")
 
@@ -67,7 +67,7 @@ defmodule MPGWeb.ThingsLiveTest do
   test "shows 'Ready' for other players that have provided an answer", %{conn: conn} do
     id = UUID.uuid4()
     Session.add_player(:things_session, id, "Peter")
-    Session.set_player_answer(:things_session, "Peter", "bananas")
+    Session.set_player_answer(:things_session, id, "bananas")
 
     {:ok, view, _html} = live(conn, ~p"/")
 

@@ -35,8 +35,8 @@ defmodule MPG.Things.Session do
   @doc """
   Sets a player's answer.
   """
-  def set_player_answer(server, player_name, answer) do
-    GenServer.cast(server, {:set_player_answer, player_name, answer})
+  def set_player_answer(server, player_id, answer) do
+    GenServer.cast(server, {:set_player_answer, player_id, answer})
   end
 
   @doc """
@@ -87,8 +87,8 @@ defmodule MPG.Things.Session do
   end
 
   @impl true
-  def handle_cast({:set_player_answer, player_name, answer}, state) do
-    state = Things.set_player_answer(state, player_name, answer)
+  def handle_cast({:set_player_answer, player_id, answer}, state) do
+    state = Things.set_player_answer(state, player_id, answer)
     {:noreply, state}
   end
 
