@@ -59,6 +59,13 @@ defmodule MPGWeb.ThingsLive do
       </form>
     <% end %>
 
+    <%= if Session.all_players_answered?(:things_session) do %>
+      <div id="unrevealed-answers">
+        <%= for answer <- unrevealed_answers(@state.players) do %>
+          <div><%= answer %></div>
+        <% end %>
+      </div>
+    <% end %>
     <br />
     <h2>Players</h2>
     <%= for player <- @state.players do %>
@@ -102,5 +109,12 @@ defmodule MPGWeb.ThingsLive do
       <% end %>
     </div>
     """
+  end
+
+  defp unrevealed_answers(players) do
+    players
+    |> Enum.filter(&(!&1.revealed))
+    |> Enum.map(& &1.current_answer)
+    |> Enum.shuffle()
   end
 end

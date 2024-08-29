@@ -94,4 +94,24 @@ defmodule MPGWeb.ThingsLiveTest do
 
     assert has_element?(view, "#player-#{session_id} [data-role=answer]", "bananas")
   end
+
+  test "answers are only show after all players have answered", %{conn: conn} do
+    id1 = UUID.uuid4()
+    id2 = UUID.uuid4()
+    Session.add_player(:things_session, id1, "Player 1")
+    Session.add_player(:things_session, id2, "Player 2")
+
+    Session.set_player_answer(:things_session, id1, "apple")
+
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    refute has_element?(view, "#unrevealed-answers")
+
+    Session.set_player_answer(:things_session, id2, "banana")
+
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, "#unrevealed-answers div", "apple")
+    assert has_element?(view, "#unrevealed-answers div", "banana")
+  end
 end
