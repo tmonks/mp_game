@@ -13,23 +13,28 @@ defmodule MPGWeb.ThingsLive do
       socket
       |> assign(session_id: session_id)
       |> assign(state: state)
-      |> maybe_assign_player()
+      |> assign_player()
 
     {:ok, socket}
   end
 
-  defp maybe_assign_player(%{assigns: assigns} = socket) do
+  defp assign_player(%{assigns: assigns} = socket) do
     case Things.get_player(assigns.state, assigns.session_id) do
-      nil -> socket
-      player -> assign(socket, player_name: player.name)
+      nil -> assign(socket, player: nil)
+      player -> assign(socket, player: player)
     end
   end
 
   @impl true
   def handle_event("join", %{"player_name" => player_name}, socket) do
-    Session.add_player(:things_session, socket.assigns.session_id, player_name)
+    session_id = socket.assigns.session_id
+    Session.add_player(:things_session, session_id, player_name)
     state = Session.get_state(:things_session)
-    {:noreply, assign(socket, state: state, player_name: player_name)}
+
+    {:noreply,
+     socket
+     |> assign(state: state)
+     |> assign_player()}
   end
 
   @impl true
@@ -48,7 +53,7 @@ defmodule MPGWeb.ThingsLive do
     <h2>Current Question</h2>
     <div id="current-question"><%= @state.topic %></div>
 
-    <%= unless assigns[:player_name] do %>
+    <%= unless assigns[:player] do %>
       <form id="join-form" phx-submit="join">
         <div>
           <input type="text" name="player_name" />
@@ -74,6 +79,10 @@ defmodule MPGWeb.ThingsLive do
       <% else %>
         <.player_row player={player} />
       <% end %>
+    <% end %>
+
+    <%= if Session.all_players_answered?(:things_session) and !is_nil(@player) and !@player.revealed do %>
+      <button id="reveal-button" phx-click="reveal">Reveal</button>
     <% end %>
     """
   end

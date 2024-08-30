@@ -114,4 +114,23 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#unrevealed-answers div", "apple")
     assert has_element?(view, "#unrevealed-answers div", "banana")
   end
+
+  test "when all players have answered, a 'reveal' button appears", %{
+    conn: conn,
+    session_id: session_id
+  } do
+    id2 = UUID.uuid4()
+    Session.add_player(:things_session, session_id, "Player 1")
+    Session.add_player(:things_session, id2, "Player 2")
+
+    Session.set_player_answer(:things_session, session_id, "apple")
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    refute has_element?(view, "#reveal-button")
+
+    Session.set_player_answer(:things_session, id2, "banana")
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, "#reveal-button")
+  end
 end
