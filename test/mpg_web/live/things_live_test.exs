@@ -8,6 +8,11 @@ defmodule MPGWeb.ThingsLiveTest do
     conn = init_test_session(conn, %{})
     session_id = UUID.uuid4()
     conn = put_session(conn, :session_id, session_id)
+
+    # Restart the session to clear out any state
+    Supervisor.terminate_child(MPG.Supervisor, MPG.Things.Session)
+    Supervisor.restart_child(MPG.Supervisor, MPG.Things.Session)
+
     {:ok, conn: conn, session_id: session_id}
   end
 
@@ -111,16 +116,16 @@ defmodule MPGWeb.ThingsLiveTest do
 
     {:ok, view, _html} = live(conn, ~p"/")
 
-    assert has_element?(view, "#unrevealed-answers div", "apple")
-    assert has_element?(view, "#unrevealed-answers div", "banana")
+    assert has_element?(view, "#unrevealed-answers", "apple")
+    assert has_element?(view, "#unrevealed-answers", "banana")
   end
 
   test "when all players have answered, a 'reveal' button appears", %{
     conn: conn,
     session_id: session_id
   } do
-    id2 = UUID.uuid4()
     Session.add_player(:things_session, session_id, "Player 1")
+    id2 = UUID.uuid4()
     Session.add_player(:things_session, id2, "Player 2")
 
     Session.set_player_answer(:things_session, session_id, "apple")
@@ -132,5 +137,41 @@ defmodule MPGWeb.ThingsLiveTest do
     {:ok, view, _html} = live(conn, ~p"/")
 
     assert has_element?(view, "#reveal-button")
+  end
+
+  test "clicking the 'reveal' button removes player's answer from answers list", ctx do
+    # session with both players answered
+    player1_id = ctx.session_id
+    player2_id = UUID.uuid4()
+    Session.add_player(:things_session, player1_id, "Player 1")
+    Session.add_player(:things_session, player2_id, "Player 2")
+
+    Session.set_player_answer(:things_session, player1_id, "apple")
+    Session.set_player_answer(:things_session, player2_id, "banana")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/")
+
+    assert has_element?(view, "#unrevealed-answers", "apple")
+
+    view
+    |> render_click("reveal")
+
+    refute has_element?(view, "#unrevealed-answers", "apple")
+  end
+
+  test "shows answers next to other players that have been revealed", ctx do
+    player1_id = ctx.session_id
+    player2_id = UUID.uuid4()
+    Session.add_player(:things_session, player1_id, "Player 1")
+    Session.add_player(:things_session, player2_id, "Player 2")
+
+    Session.set_player_answer(:things_session, player1_id, "apple")
+    Session.set_player_answer(:things_session, player2_id, "banana")
+
+    Session.set_player_to_revealed(:things_session, player2_id)
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/")
+
+    assert has_element?(view, "#player-#{player2_id} [data-role=answer]", "banana")
   end
 end

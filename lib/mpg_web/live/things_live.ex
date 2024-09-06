@@ -45,13 +45,21 @@ defmodule MPGWeb.ThingsLive do
   end
 
   @impl true
+  def handle_event("reveal", _, socket) do
+    Session.set_player_to_revealed(:things_session, socket.assigns.session_id)
+    state = Session.get_state(:things_session)
+    {:noreply, assign(socket, state: state)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
-    <h1>Game of Things</h1>
+    <h1 class="text-lg">Game of Things</h1>
     <br />
 
     <h2>Current Question</h2>
     <div id="current-question"><%= @state.topic %></div>
+    <br />
 
     <%= unless assigns[:player] do %>
       <form id="join-form" phx-submit="join">
@@ -59,12 +67,15 @@ defmodule MPGWeb.ThingsLive do
           <input type="text" name="player_name" />
         </div>
         <div>
-          <button class="button">Join</button>
+          <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Join
+          </button>
         </div>
       </form>
     <% end %>
 
     <%= if Session.all_players_answered?(:things_session) do %>
+      <h2>Answers</h2>
       <div id="unrevealed-answers">
         <%= for answer <- unrevealed_answers(@state.players) do %>
           <div><%= answer %></div>
@@ -92,7 +103,7 @@ defmodule MPGWeb.ThingsLive do
     <div id={"player-" <> @player.id}>
       <span data-role="player-name"><%= @player.name %></span>
       <span data-role="answer">
-        <%= if @player.current_answer, do: "Ready", else: "No answer yet" %>
+        <%= get_current_answer(@player) %>
       </span>
     </div>
     """
@@ -118,6 +129,14 @@ defmodule MPGWeb.ThingsLive do
       <% end %>
     </div>
     """
+  end
+
+  defp get_current_answer(player) do
+    cond do
+      player.revealed -> player.current_answer
+      player.current_answer -> "Ready"
+      true -> "No answer yet"
+    end
   end
 
   defp unrevealed_answers(players) do
