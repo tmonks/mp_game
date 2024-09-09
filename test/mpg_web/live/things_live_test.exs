@@ -50,16 +50,11 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#player-#{session_id} [data-role=player-name]", "Me")
   end
 
-  test "shows current answer for current player", %{conn: conn, session_id: session_id} do
-    Session.add_player(:things_session, session_id, "Peter")
-    Session.set_player_answer(:things_session, session_id, "bananas")
-
-    {:ok, view, _html} = live(conn, ~p"/")
-
-    assert has_element?(view, "#player-#{session_id} [data-role=answer]", "bananas")
-  end
-
-  test "shows 'No answer yet' for other players that have not provided an answer", %{conn: conn} do
+  test "shows 'No answer yet' for other players that have not provided an answer", %{
+    conn: conn,
+    session_id: session_id
+  } do
+    Session.add_player(:things_session, session_id, "Tom")
     id = UUID.uuid4()
     Session.add_player(:things_session, id, "Peter")
 
@@ -69,7 +64,11 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#player-#{id} [data-role=answer]", "No answer yet")
   end
 
-  test "shows 'Ready' for other players that have provided an answer", %{conn: conn} do
+  test "shows 'Ready' for other players that have provided an answer", %{
+    conn: conn,
+    session_id: session_id
+  } do
+    Session.add_player(:things_session, session_id, "Tom")
     id = UUID.uuid4()
     Session.add_player(:things_session, id, "Peter")
     Session.set_player_answer(:things_session, id, "bananas")
@@ -97,16 +96,20 @@ defmodule MPGWeb.ThingsLiveTest do
     |> form("#answer-form", %{answer: "bananas"})
     |> render_submit()
 
-    assert has_element?(view, "#player-#{session_id} [data-role=answer]", "bananas")
+    open_browser(view)
+
+    assert has_element?(view, "#my-answer", "bananas")
   end
 
-  test "answers are only show after all players have answered", %{conn: conn} do
-    id1 = UUID.uuid4()
+  test "answers are only show after all players have answered", %{
+    conn: conn,
+    session_id: session_id
+  } do
     id2 = UUID.uuid4()
-    Session.add_player(:things_session, id1, "Player 1")
+    Session.add_player(:things_session, session_id, "Player 1")
     Session.add_player(:things_session, id2, "Player 2")
 
-    Session.set_player_answer(:things_session, id1, "apple")
+    Session.set_player_answer(:things_session, session_id, "apple")
 
     {:ok, view, _html} = live(conn, ~p"/")
 

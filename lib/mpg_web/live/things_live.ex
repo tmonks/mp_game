@@ -41,7 +41,7 @@ defmodule MPGWeb.ThingsLive do
   def handle_event("submit_answer", %{"answer" => answer}, socket) do
     Session.set_player_answer(:things_session, socket.assigns.session_id, answer)
     state = Session.get_state(:things_session)
-    {:noreply, assign(socket, state: state)}
+    {:noreply, assign(socket, state: state) |> assign_player()}
   end
 
   @impl true
@@ -57,7 +57,7 @@ defmodule MPGWeb.ThingsLive do
     <h1 class="text-lg">Game of Things</h1>
     <br />
 
-    <h2>Current Question</h2>
+    <h2 class="font-bold">Current Question</h2>
     <div id="current-question"><%= @state.topic %></div>
     <br />
 
@@ -72,28 +72,48 @@ defmodule MPGWeb.ThingsLive do
           </button>
         </div>
       </form>
-    <% end %>
-
-    <%= if Session.all_players_answered?(:things_session) do %>
-      <h2>Answers</h2>
-      <div id="unrevealed-answers">
-        <%= for answer <- unrevealed_answers(@state.players) do %>
-          <div><%= answer %></div>
-        <% end %>
+    <% else %>
+      <div class="flex mb-6">
+        <div class="flex-1">
+          <h2 class="font-bold">Players</h2>
+          <%= for player <- @state.players do %>
+            <%= if player.id == @session_id do %>
+              <.current_player_row player={player} />
+            <% else %>
+              <.player_row player={player} />
+            <% end %>
+          <% end %>
+        </div>
+        <div class="flex-1">
+          <h2 class="font-bold">Answers</h2>
+          <%= if Session.all_players_answered?(:things_session) do %>
+            <div id="unrevealed-answers">
+              <%= for answer <- unrevealed_answers(@state.players) do %>
+                <div><%= answer %></div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
       </div>
-    <% end %>
-    <br />
-    <h2>Players</h2>
-    <%= for player <- @state.players do %>
-      <%= if player.id == @session_id do %>
-        <.current_player_row player={player} />
-      <% else %>
-        <.player_row player={player} />
-      <% end %>
-    <% end %>
 
-    <%= if Session.all_players_answered?(:things_session) and !is_nil(@player) and !@player.revealed do %>
-      <button id="reveal-button" phx-click="reveal">Reveal</button>
+      <br />
+      <div class="font-bold">My answer</div>
+      <%= if @player.current_answer do %>
+        <div id="my-answer"><%= @player.current_answer %></div>
+      <% else %>
+        <form id="answer-form" phx-submit="submit_answer">
+          <div class="flex">
+            <input type="text" name="answer" />
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Submit
+            </button>
+          </div>
+        </form>
+      <% end %>
+
+      <%= if Session.all_players_answered?(:things_session) and !is_nil(@player) and !@player.revealed do %>
+        <button id="reveal-button" phx-click="reveal">Reveal</button>
+      <% end %>
     <% end %>
     """
   end
@@ -113,20 +133,7 @@ defmodule MPGWeb.ThingsLive do
     ~H"""
     <div id={"player-" <> @player.id}>
       <span data-role="player-name">Me</span>
-      <%= if @player.current_answer do %>
-        <span data-role="answer">
-          <%= @player.current_answer %>
-        </span>
-      <% else %>
-        <form id="answer-form" phx-submit="submit_answer">
-          <div>
-            <input type="text" name="answer" />
-          </div>
-          <div>
-            <button class="button">Submit</button>
-          </div>
-        </form>
-      <% end %>
+      <span data-role="answer"><%= get_current_answer(@player) %></span>
     </div>
     """
   end
