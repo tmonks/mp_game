@@ -9,6 +9,7 @@ defmodule MPG.Things.SessionTest do
 
   setup do
     server = start_supervised!(Session)
+    :ok = Phoenix.PubSub.subscribe(MPG.PubSub, "things_session")
     %{server: server}
   end
 
@@ -20,14 +21,21 @@ defmodule MPG.Things.SessionTest do
     assert %State{} = Session.get_state(server)
   end
 
-  test "can add a player", %{server: server} do
+  test "add_player/3 adds a new player", %{server: server} do
     Session.add_player(server, @player_id, "Joe")
     state = :sys.get_state(server)
 
     assert [%Player{name: "Joe", current_answer: nil}] = state.players
   end
 
-  test "set_player_answer/3 can set a player answer", %{server: server} do
+  test "add_player/3 broadcasts the new state", %{server: server} do
+    Session.add_player(server, @player_id, "Joe")
+
+    assert_receive({:state_updated, state})
+    assert [%Player{name: "Joe", current_answer: nil}] = state.players
+  end
+
+  test "set_player_answer/3 sets a player's answer", %{server: server} do
     Session.add_player(server, @player_id, "Joe")
     Session.set_player_answer(server, @player_id, "42")
     state = :sys.get_state(server)
@@ -35,7 +43,16 @@ defmodule MPG.Things.SessionTest do
     assert [%Player{name: "Joe", id: @player_id, current_answer: "42"}] = state.players
   end
 
-  test "can reset the topic and all player answers", %{server: server} do
+  test "set_player_answer/3 broadcasts the new state", %{server: server} do
+    Session.add_player(server, @player_id, "Joe")
+    assert_receive({:state_updated, _state})
+
+    Session.set_player_answer(server, @player_id, "42")
+    assert_receive({:state_updated, state})
+    assert [%Player{name: "Joe", current_answer: "42"}] = state.players
+  end
+
+  test "new_question/2 resets the topic and all player answers", %{server: server} do
     Session.add_player(server, @player_id, "Joe")
     Session.set_player_answer(server, @player_id, "42")
     Session.new_question(server, "Things that are awesome")
@@ -47,12 +64,35 @@ defmodule MPG.Things.SessionTest do
            } = state
   end
 
-  test "can reveal a player's answer", %{server: server} do
+  test "new_question/2 broadcasts the new state", %{server: server} do
+    Session.add_player(server, @player_id, "Joe")
+    assert_receive({:state_updated, _state})
+
+    Session.new_question(server, "Things that are awesome")
+    assert_receive({:state_updated, state})
+
+    assert %State{
+             topic: "Things that are awesome",
+             players: [%Player{name: "Joe", current_answer: nil}]
+           } = state
+  end
+
+  test "set_player_to_revealed/2 sets a player to revealed", %{server: server} do
     Session.add_player(server, @player_id, "Joe")
     assert %{players: [%Player{name: "Joe", revealed: nil}]} = :sys.get_state(server)
 
     Session.set_player_to_revealed(server, @player_id)
     assert %{players: [%Player{name: "Joe", revealed: true}]} = :sys.get_state(server)
+  end
+
+  test "set_player_to_revealed/2 broadcasts the new state", %{server: server} do
+    Session.add_player(server, @player_id, "Joe")
+    assert_receive({:state_updated, _state})
+
+    Session.set_player_to_revealed(server, @player_id)
+
+    assert_receive({:state_updated, state})
+    assert [%Player{name: "Joe", revealed: true}] = state.players
   end
 
   test "all_players_answered?/1 returns true if all players have an answer", %{server: server} do

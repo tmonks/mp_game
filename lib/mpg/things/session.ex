@@ -3,6 +3,7 @@ defmodule MPG.Things.Session do
 
   alias MPG.Things
   alias MPG.Things.State
+  alias Phoenix.PubSub
 
   @doc """
   Starts the server.
@@ -83,24 +84,32 @@ defmodule MPG.Things.Session do
   @impl true
   def handle_cast({:add_player, id, player_name}, state) do
     state = Things.add_player(state, id, player_name)
+    broadcast_state_updated(state)
     {:noreply, state}
   end
 
   @impl true
   def handle_cast({:set_player_answer, player_id, answer}, state) do
     state = Things.set_player_answer(state, player_id, answer)
+    broadcast_state_updated(state)
     {:noreply, state}
   end
 
   @impl true
   def handle_cast({:new_question, topic}, state) do
     state = Things.new_question(state, topic)
+    broadcast_state_updated(state)
     {:noreply, state}
   end
 
   @impl true
   def handle_cast({:set_player_to_revealed, player_id}, state) do
     state = Things.set_player_to_revealed(state, player_id)
+    broadcast_state_updated(state)
     {:noreply, state}
+  end
+
+  defp broadcast_state_updated(state) do
+    PubSub.broadcast(MPG.PubSub, "things_session", {:state_updated, state})
   end
 end
