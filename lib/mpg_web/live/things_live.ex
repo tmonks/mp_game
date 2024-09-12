@@ -3,9 +3,14 @@ defmodule MPGWeb.ThingsLive do
 
   alias MPG.Things
   alias MPG.Things.Session
+  alias Phoenix.PubSub
 
   @impl true
   def mount(_params, session, socket) do
+    if connected?(socket) do
+      :ok = PubSub.subscribe(MPG.PubSub, "things_session")
+    end
+
     state = Session.get_state(:things_session)
     %{"session_id" => session_id} = session
 
@@ -49,6 +54,11 @@ defmodule MPGWeb.ThingsLive do
     Session.set_player_to_revealed(:things_session, socket.assigns.session_id)
     state = Session.get_state(:things_session)
     {:noreply, assign(socket, state: state)}
+  end
+
+  @impl true
+  def handle_info({:state_updated, state}, socket) do
+    {:noreply, assign(socket, state: state) |> assign_player()}
   end
 
   @impl true

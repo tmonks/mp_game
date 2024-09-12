@@ -13,6 +13,9 @@ defmodule MPGWeb.ThingsLiveTest do
     Supervisor.terminate_child(MPG.Supervisor, MPG.Things.Session)
     Supervisor.restart_child(MPG.Supervisor, MPG.Things.Session)
 
+    # subscribe to PubSub
+    :ok = Phoenix.PubSub.subscribe(MPG.PubSub, "things_session")
+
     {:ok, conn: conn, session_id: session_id}
   end
 
@@ -96,8 +99,6 @@ defmodule MPGWeb.ThingsLiveTest do
     |> form("#answer-form", %{answer: "bananas"})
     |> render_submit()
 
-    open_browser(view)
-
     assert has_element?(view, "#my-answer", "bananas")
   end
 
@@ -176,5 +177,19 @@ defmodule MPGWeb.ThingsLiveTest do
     {:ok, view, _html} = live(ctx.conn, ~p"/")
 
     assert has_element?(view, "#player-#{player2_id} [data-role=answer]", "banana")
+  end
+
+  test "receives and renders state updates", ctx do
+    player1_id = ctx.session_id
+    Session.add_player(:things_session, player1_id, "Player 1")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/")
+
+    Session.new_question(:things_session, "Things that are awesome")
+
+    assert_receive({:state_updated, _state})
+    # TODO: is there a way to do this without needing a sleep?
+    :timer.sleep(100)
+    assert has_element?(view, "#current-question", "Things that are awesome")
   end
 end
