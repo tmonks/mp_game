@@ -34,26 +34,19 @@ defmodule MPGWeb.ThingsLive do
   def handle_event("join", %{"player_name" => player_name}, socket) do
     session_id = socket.assigns.session_id
     Session.add_player(:things_session, session_id, player_name)
-    state = Session.get_state(:things_session)
-
-    {:noreply,
-     socket
-     |> assign(state: state)
-     |> assign_player()}
+    {:noreply, socket}
   end
 
   @impl true
   def handle_event("submit_answer", %{"answer" => answer}, socket) do
     Session.set_player_answer(:things_session, socket.assigns.session_id, answer)
-    state = Session.get_state(:things_session)
-    {:noreply, assign(socket, state: state) |> assign_player()}
+    {:noreply, socket}
   end
 
   @impl true
   def handle_event("reveal", _, socket) do
     Session.set_player_to_revealed(:things_session, socket.assigns.session_id)
-    state = Session.get_state(:things_session)
-    {:noreply, assign(socket, state: state)}
+    {:noreply, socket}
   end
 
   @impl true

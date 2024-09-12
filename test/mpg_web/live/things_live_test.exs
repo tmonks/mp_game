@@ -32,6 +32,7 @@ defmodule MPGWeb.ThingsLiveTest do
     |> form("#join-form", %{player_name: "Peter"})
     |> render_submit()
 
+    assert_receive({:state_updated, _state})
     assert has_element?(view, "#player-#{session_id} [data-role=player-name]", "Me")
     refute has_element?(view, "#join-form")
   end
@@ -99,6 +100,7 @@ defmodule MPGWeb.ThingsLiveTest do
     |> form("#answer-form", %{answer: "bananas"})
     |> render_submit()
 
+    assert_receive({:state_updated, _state})
     assert has_element?(view, "#my-answer", "bananas")
   end
 
@@ -160,6 +162,7 @@ defmodule MPGWeb.ThingsLiveTest do
     view
     |> render_click("reveal")
 
+    assert_receive({:state_updated, _state})
     refute has_element?(view, "#unrevealed-answers", "apple")
   end
 
