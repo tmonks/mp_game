@@ -55,12 +55,13 @@ defmodule MPG.Things.GameTest do
   test "new_question/2 resets the topic and all player answers", %{server: server} do
     Game.add_player(server, @player_id, "Joe")
     Game.set_player_answer(server, @player_id, "42")
+    Game.set_player_to_revealed(server, @player_id)
     Game.new_question(server, "Things that are awesome")
     state = :sys.get_state(server)
 
     assert %State{
              topic: "Things that are awesome",
-             players: [%Player{id: @player_id, name: "Joe", current_answer: nil}]
+             players: [%Player{id: @player_id, name: "Joe", current_answer: nil, revealed: false}]
            } = state
   end
 
@@ -79,7 +80,7 @@ defmodule MPG.Things.GameTest do
 
   test "set_player_to_revealed/2 sets a player to revealed", %{server: server} do
     Game.add_player(server, @player_id, "Joe")
-    assert %{players: [%Player{name: "Joe", revealed: nil}]} = :sys.get_state(server)
+    assert %{players: [%Player{name: "Joe", revealed: false}]} = :sys.get_state(server)
 
     Game.set_player_to_revealed(server, @player_id)
     assert %{players: [%Player{name: "Joe", revealed: true}]} = :sys.get_state(server)

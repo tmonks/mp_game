@@ -22,8 +22,8 @@ defmodule MPG.ThingsTest do
              Things.new_question(state, "Things that are blue")
 
     assert [jane, joe] = Enum.sort_by(players, & &1.name)
-    assert jane == %Player{name: "Jane", current_answer: nil}
-    assert joe == %Player{name: "Joe", current_answer: nil}
+    assert jane == %Player{name: "Jane", current_answer: nil, revealed: false}
+    assert joe == %Player{name: "Joe", current_answer: nil, revealed: false}
   end
 
   test "add_player/3 adds a player to the state" do
@@ -33,6 +33,8 @@ defmodule MPG.ThingsTest do
     assert %State{topic: "foo", players: [player]} = Things.add_player(state, id, "Joe")
     assert player.name == "Joe"
     assert player.id == id
+    assert player.current_answer == nil
+    assert player.revealed == false
   end
 
   test "set_player_answer/3 sets the current_answer for the specified player" do
