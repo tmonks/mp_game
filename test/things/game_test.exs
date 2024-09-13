@@ -1,61 +1,61 @@
-defmodule MPG.Things.SessionTest do
+defmodule MPG.Things.GameTest do
   use ExUnit.Case, async: true
 
   alias MPG.Things.Player
-  alias MPG.Things.Session
+  alias MPG.Things.Game
   alias MPG.Things.State
 
   @player_id UUID.uuid4()
 
   setup do
-    server = start_supervised!(Session)
+    server = start_supervised!(Game)
     :ok = Phoenix.PubSub.subscribe(MPG.PubSub, "things_session")
     %{server: server}
   end
 
   test "can ping the server", %{server: server} do
-    assert Session.ping(server) == :pong
+    assert Game.ping(server) == :pong
   end
 
   test "can retrieve the state", %{server: server} do
-    assert %State{} = Session.get_state(server)
+    assert %State{} = Game.get_state(server)
   end
 
   test "add_player/3 adds a new player", %{server: server} do
-    Session.add_player(server, @player_id, "Joe")
+    Game.add_player(server, @player_id, "Joe")
     state = :sys.get_state(server)
 
     assert [%Player{name: "Joe", current_answer: nil}] = state.players
   end
 
   test "add_player/3 broadcasts the new state", %{server: server} do
-    Session.add_player(server, @player_id, "Joe")
+    Game.add_player(server, @player_id, "Joe")
 
     assert_receive({:state_updated, state})
     assert [%Player{name: "Joe", current_answer: nil}] = state.players
   end
 
   test "set_player_answer/3 sets a player's answer", %{server: server} do
-    Session.add_player(server, @player_id, "Joe")
-    Session.set_player_answer(server, @player_id, "42")
+    Game.add_player(server, @player_id, "Joe")
+    Game.set_player_answer(server, @player_id, "42")
     state = :sys.get_state(server)
 
     assert [%Player{name: "Joe", id: @player_id, current_answer: "42"}] = state.players
   end
 
   test "set_player_answer/3 broadcasts the new state", %{server: server} do
-    Session.add_player(server, @player_id, "Joe")
+    Game.add_player(server, @player_id, "Joe")
     assert_receive({:state_updated, _state})
 
-    Session.set_player_answer(server, @player_id, "42")
+    Game.set_player_answer(server, @player_id, "42")
     assert_receive({:state_updated, state})
     assert [%Player{name: "Joe", current_answer: "42"}] = state.players
   end
 
   test "new_question/2 resets the topic and all player answers", %{server: server} do
-    Session.add_player(server, @player_id, "Joe")
-    Session.set_player_answer(server, @player_id, "42")
-    Session.new_question(server, "Things that are awesome")
+    Game.add_player(server, @player_id, "Joe")
+    Game.set_player_answer(server, @player_id, "42")
+    Game.new_question(server, "Things that are awesome")
     state = :sys.get_state(server)
 
     assert %State{
@@ -65,10 +65,10 @@ defmodule MPG.Things.SessionTest do
   end
 
   test "new_question/2 broadcasts the new state", %{server: server} do
-    Session.add_player(server, @player_id, "Joe")
+    Game.add_player(server, @player_id, "Joe")
     assert_receive({:state_updated, _state})
 
-    Session.new_question(server, "Things that are awesome")
+    Game.new_question(server, "Things that are awesome")
     assert_receive({:state_updated, state})
 
     assert %State{
@@ -78,18 +78,18 @@ defmodule MPG.Things.SessionTest do
   end
 
   test "set_player_to_revealed/2 sets a player to revealed", %{server: server} do
-    Session.add_player(server, @player_id, "Joe")
+    Game.add_player(server, @player_id, "Joe")
     assert %{players: [%Player{name: "Joe", revealed: nil}]} = :sys.get_state(server)
 
-    Session.set_player_to_revealed(server, @player_id)
+    Game.set_player_to_revealed(server, @player_id)
     assert %{players: [%Player{name: "Joe", revealed: true}]} = :sys.get_state(server)
   end
 
   test "set_player_to_revealed/2 broadcasts the new state", %{server: server} do
-    Session.add_player(server, @player_id, "Joe")
+    Game.add_player(server, @player_id, "Joe")
     assert_receive({:state_updated, _state})
 
-    Session.set_player_to_revealed(server, @player_id)
+    Game.set_player_to_revealed(server, @player_id)
 
     assert_receive({:state_updated, state})
     assert [%Player{name: "Joe", revealed: true}] = state.players
@@ -99,16 +99,16 @@ defmodule MPG.Things.SessionTest do
     joe_id = UUID.uuid4()
     jane_id = UUID.uuid4()
 
-    Session.add_player(server, joe_id, "Joe")
-    refute Session.all_players_answered?(server)
+    Game.add_player(server, joe_id, "Joe")
+    refute Game.all_players_answered?(server)
 
-    Session.set_player_answer(server, joe_id, "42")
-    assert Session.all_players_answered?(server)
+    Game.set_player_answer(server, joe_id, "42")
+    assert Game.all_players_answered?(server)
 
-    Session.add_player(server, jane_id, "Jane")
-    refute Session.all_players_answered?(server)
+    Game.add_player(server, jane_id, "Jane")
+    refute Game.all_players_answered?(server)
 
-    Session.set_player_answer(server, jane_id, "43")
-    assert Session.all_players_answered?(server)
+    Game.set_player_answer(server, jane_id, "43")
+    assert Game.all_players_answered?(server)
   end
 end

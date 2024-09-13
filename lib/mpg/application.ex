@@ -15,7 +15,7 @@ defmodule MPG.Application do
       # {MPG.Worker, arg},
       # Start to serve requests, typically the last entry
       MPGWeb.Endpoint,
-      {MPG.Things.Session, name: :things_session}
+      {MPG.Things.Game, name: :things_session}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

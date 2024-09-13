@@ -1,4 +1,4 @@
-defmodule MPG.Things.Session do
+defmodule MPG.Things.Game do
   use GenServer
 
   alias MPG.Things

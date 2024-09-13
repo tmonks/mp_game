@@ -2,7 +2,7 @@ defmodule MPGWeb.ThingsLive do
   use MPGWeb, :live_view
 
   alias MPG.Things
-  alias MPG.Things.Session
+  alias MPG.Things.Game
   alias Phoenix.PubSub
 
   @impl true
@@ -11,7 +11,7 @@ defmodule MPGWeb.ThingsLive do
       :ok = PubSub.subscribe(MPG.PubSub, "things_session")
     end
 
-    state = Session.get_state(:things_session)
+    state = Game.get_state(:things_session)
     %{"session_id" => session_id} = session
 
     socket =
@@ -33,19 +33,19 @@ defmodule MPGWeb.ThingsLive do
   @impl true
   def handle_event("join", %{"player_name" => player_name}, socket) do
     session_id = socket.assigns.session_id
-    Session.add_player(:things_session, session_id, player_name)
+    Game.add_player(:things_session, session_id, player_name)
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("submit_answer", %{"answer" => answer}, socket) do
-    Session.set_player_answer(:things_session, socket.assigns.session_id, answer)
+    Game.set_player_answer(:things_session, socket.assigns.session_id, answer)
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("reveal", _, socket) do
-    Session.set_player_to_revealed(:things_session, socket.assigns.session_id)
+    Game.set_player_to_revealed(:things_session, socket.assigns.session_id)
     {:noreply, socket}
   end
 
@@ -89,7 +89,7 @@ defmodule MPGWeb.ThingsLive do
         </div>
         <div class="flex-1">
           <h2 class="font-bold">Answers</h2>
-          <%= if Session.all_players_answered?(:things_session) do %>
+          <%= if Game.all_players_answered?(:things_session) do %>
             <div id="unrevealed-answers">
               <%= for answer <- unrevealed_answers(@state.players) do %>
                 <div><%= answer %></div>
@@ -114,7 +114,7 @@ defmodule MPGWeb.ThingsLive do
         </form>
       <% end %>
 
-      <%= if Session.all_players_answered?(:things_session) and !is_nil(@player) and !@player.revealed do %>
+      <%= if Game.all_players_answered?(:things_session) and !is_nil(@player) and !@player.revealed do %>
         <button id="reveal-button" phx-click="reveal">Reveal</button>
       <% end %>
     <% end %>
