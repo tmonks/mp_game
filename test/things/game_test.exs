@@ -28,6 +28,15 @@ defmodule MPG.Things.GameTest do
     assert [%Player{name: "Joe", current_answer: nil}] = state.players
   end
 
+  test "add_player/3 sets first player as the host", %{server: server} do
+    Game.add_player(server, @player_id, "Joe")
+    Game.add_player(server, UUID.uuid4(), "Jane")
+    state = :sys.get_state(server)
+
+    assert [%Player{name: "Joe", is_host: true}, %Player{name: "Jane", is_host: false}] =
+             state.players
+  end
+
   test "add_player/3 broadcasts the new state", %{server: server} do
     Game.add_player(server, @player_id, "Joe")
 

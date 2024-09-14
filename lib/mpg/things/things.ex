@@ -19,7 +19,8 @@ defmodule MPG.Things do
   Adds a player to the state
   """
   def add_player(state, id, name) do
-    player = %Player{id: id, name: name, current_answer: nil, revealed: false}
+    is_host = Enum.empty?(state.players)
+    player = %Player{id: id, name: name, current_answer: nil, revealed: false, is_host: is_host}
     %State{state | players: state.players ++ [player]}
   end
 
