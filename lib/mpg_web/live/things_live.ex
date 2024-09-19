@@ -50,6 +50,16 @@ defmodule MPGWeb.ThingsLive do
   end
 
   @impl true
+  def handle_event("set_new_question", %{"question" => question}, socket) do
+    Game.new_question(:things_session, question)
+
+    # hide the modal
+    socket = push_event(socket, "js-exec", %{to: "#new-question-modal", attr: "phx-remove"})
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:state_updated, state}, socket) do
     {:noreply, assign(socket, state: state) |> assign_player()}
   end
@@ -58,10 +68,6 @@ defmodule MPGWeb.ThingsLive do
   def render(assigns) do
     ~H"""
     <h1 class="text-lg">Game of Things</h1>
-    <br />
-
-    <h2 class="font-bold">Current Question</h2>
-    <div id="current-question"><%= @state.topic %></div>
     <br />
 
     <%= unless assigns[:player] do %>
@@ -76,6 +82,26 @@ defmodule MPGWeb.ThingsLive do
         </div>
       </form>
     <% else %>
+      <h2 class="font-bold">Current Question</h2>
+      <div id="current-question"><%= @state.topic %></div>
+      <br />
+
+      <.modal id="new-question-modal">
+        <div class="font-bold">New Question</div>
+        <form id="new-question-form" phx-submit="set_new_question">
+          <div class="flex">
+            <div>
+              <input type="text" name="question" value="" />
+            </div>
+            <div>
+              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Submit
+              </button>
+            </div>
+          </div>
+        </form>
+      </.modal>
+
       <div class="flex mb-6">
         <div class="flex-1">
           <h2 class="font-bold">Players</h2>
@@ -116,6 +142,18 @@ defmodule MPGWeb.ThingsLive do
 
       <%= if Game.all_players_answered?(:things_session) and !is_nil(@player) and !@player.revealed do %>
         <button id="reveal-button" phx-click="reveal">Reveal</button>
+      <% end %>
+
+      <%= if @player.is_host do %>
+        <div>
+          <button
+            id="new-question-button"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-6"
+            phx-click={show_modal("new-question-modal")}
+          >
+            New Question
+          </button>
+        </div>
       <% end %>
     <% end %>
     """

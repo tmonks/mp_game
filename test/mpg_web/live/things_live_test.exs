@@ -54,6 +54,36 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#player-#{session_id} [data-role=player-name]", "Me")
   end
 
+  test "host gets a 'New Question' button", %{conn: conn, session_id: session_id} do
+    Game.add_player(:things_session, session_id, "Host")
+
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, "#new-question-button")
+  end
+
+  test "other players cannot see the 'New Question' button", ctx do
+    Game.add_player(:things_session, UUID.uuid4(), "Host")
+    Game.add_player(:things_session, ctx.session_id, "Player")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/")
+
+    refute has_element?(view, "#new-question-button")
+  end
+
+  test "host can set a new question", ctx do
+    Game.add_player(:things_session, ctx.session_id, "Host")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/")
+
+    view
+    |> form("#new-question-form", %{question: "Things that are red"})
+    |> render_submit()
+
+    assert_receive({:state_updated, _state})
+    assert has_element?(view, "#current-question", "Things that are red")
+  end
+
   test "shows 'No answer yet' for other players that have not provided an answer", %{
     conn: conn,
     session_id: session_id
@@ -83,8 +113,9 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#player-#{id} [data-role=answer]", "Ready")
   end
 
-  test "shows the current question", %{conn: conn} do
+  test "shows the current question", %{conn: conn, session_id: session_id} do
     Game.new_question(:things_session, "Things that are red")
+    Game.add_player(:things_session, session_id, "Peter")
 
     {:ok, view, _html} = live(conn, ~p"/")
 
