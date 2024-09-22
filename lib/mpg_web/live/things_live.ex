@@ -67,7 +67,7 @@ defmodule MPGWeb.ThingsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <h1 class="text-lg">Game of Things</h1>
+    <h1 class="text-3xl font-semibold text-gray-800">Game of Things</h1>
     <br />
 
     <%= unless assigns[:player] do %>
@@ -82,14 +82,26 @@ defmodule MPGWeb.ThingsLive do
         </div>
       </form>
     <% else %>
-      <h2 class="font-bold">Current Question</h2>
-      <div id="current-question"><%= @state.topic %></div>
-      <br />
+      <div class="flex justify-between items-center">
+        <h2 id="current-question" class="text-xl text-gray-600"><%= @state.topic %>...</h2>
+
+        <%= if @player.is_host do %>
+          <div>
+            <button
+              id="new-question-button"
+              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-6"
+              phx-click={show_modal("new-question-modal")}
+            >
+              New Question
+            </button>
+          </div>
+        <% end %>
+      </div>
 
       <.modal id="new-question-modal">
         <div class="font-bold">New Question</div>
         <form id="new-question-form" phx-submit="set_new_question">
-          <div class="flex">
+          <div class="flex gap-4">
             <div>
               <input type="text" name="question" value="" />
             </div>
@@ -102,59 +114,78 @@ defmodule MPGWeb.ThingsLive do
         </form>
       </.modal>
 
-      <div class="flex mb-6">
+      <div class="flex my-6 gap-8">
         <div class="flex-1">
-          <h2 class="font-bold">Players</h2>
-          <%= for player <- @state.players do %>
-            <%= if player.id == @session_id do %>
-              <.current_player_row player={player} />
-            <% else %>
-              <.player_row player={player} />
-            <% end %>
-          <% end %>
+          <div class="bg-white shadow-md rounded-md overflow-hidden max-w-lg mx-auto">
+            <div class="bg-gray-100 py-2 px-4">
+              <h2 class="text-xl font-semibold text-gray-800">Players</h2>
+            </div>
+            <ul class="divide-y divide-gray-200">
+              <%= for player <- @state.players do %>
+                <li class="flex items-center py-4 px-6">
+                  <img
+                    class="w-12 h-12 rounded-full object-cover mr-4"
+                    src="https://randomuser.me/api/portraits/women/72.jpg"
+                    alt="User avatar"
+                  />
+                  <div class="flex-1">
+                    <h3 class="text-lg font-medium text-gray-800"><%= player.name %></h3>
+                    <p class="text-gray-600 text-base"><%= get_current_answer(player) %></p>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
+          </div>
         </div>
         <div class="flex-1">
-          <h2 class="font-bold">Answers</h2>
-          <%= if Game.all_players_answered?(:things_session) do %>
-            <div id="unrevealed-answers">
-              <%= for answer <- unrevealed_answers(@state.players) do %>
-                <div><%= answer %></div>
-              <% end %>
+          <div class="bg-white shadow-md rounded-md overflow-hidden max-w-lg mx-auto">
+            <div class="bg-gray-100 py-2 px-4">
+              <h2 class="text-xl font-semibold text-gray-800">Answers</h2>
             </div>
-          <% end %>
+            <ul class="divide-y divide-gray-200">
+              <%= if Game.all_players_answered?(:things_session) do %>
+                <div id="unrevealed-answers">
+                  <%= for answer <- unrevealed_answers(@state.players) do %>
+                    <li class="flex items-center py-4 px-6">
+                      <p class="text-gray-600 text-base"><%= answer %></p>
+                    </li>
+                  <% end %>
+                </div>
+              <% end %>
+            </ul>
+          </div>
         </div>
       </div>
 
       <br />
-      <div class="font-bold">My answer</div>
-      <%= if @player.current_answer do %>
-        <div id="my-answer"><%= @player.current_answer %></div>
-      <% else %>
-        <form id="answer-form" phx-submit="submit_answer">
-          <div class="flex">
-            <input type="text" name="answer" />
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              Submit
-            </button>
-          </div>
-        </form>
-      <% end %>
-
-      <%= if Game.all_players_answered?(:things_session) and !is_nil(@player) and !@player.revealed do %>
-        <button id="reveal-button" phx-click="reveal">Reveal</button>
-      <% end %>
-
-      <%= if @player.is_host do %>
-        <div>
-          <button
-            id="new-question-button"
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-6"
-            phx-click={show_modal("new-question-modal")}
-          >
-            New Question
-          </button>
+      <div class="bg-white shadow-md rounded-md overflow-hidden">
+        <div class="bg-gray-100 py-2 px-4">
+          <h2 class="text-xl font-semibold text-gray-800">My Answer</h2>
         </div>
-      <% end %>
+        <div class="flex p-4 justify-between items-center gap-4">
+          <%= if @player.current_answer do %>
+            <div id="my-answer" class="text-gray-600 text-base"><%= @player.current_answer %></div>
+            <%= if Game.all_players_answered?(:things_session) and !is_nil(@player) and !@player.revealed do %>
+              <button
+                id="reveal-button"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                phx-click="reveal"
+              >
+                Reveal
+              </button>
+            <% end %>
+          <% else %>
+            <form id="answer-form" phx-submit="submit_answer">
+              <div class="flex gap-4">
+                <input type="text" name="answer" />
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                  Submit
+                </button>
+              </div>
+            </form>
+          <% end %>
+        </div>
+      </div>
     <% end %>
     """
   end
