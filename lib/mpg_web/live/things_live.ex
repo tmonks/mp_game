@@ -72,13 +72,20 @@ defmodule MPGWeb.ThingsLive do
 
     <%= unless assigns[:player] do %>
       <form id="join-form" phx-submit="join">
-        <div>
-          <input type="text" name="player_name" />
-        </div>
-        <div>
-          <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Join
-          </button>
+        <div class="flex gap-4">
+          <div>
+            <input
+              type="text"
+              name="player_name"
+              placeholder="Name"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+          <div>
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Join
+            </button>
+          </div>
         </div>
       </form>
     <% else %>
@@ -99,12 +106,15 @@ defmodule MPGWeb.ThingsLive do
       </div>
 
       <.modal id="new-question-modal">
-        <div class="font-bold">New Question</div>
+        <div class="font-bold mb-4">New Question</div>
         <form id="new-question-form" phx-submit="set_new_question">
-          <div class="flex gap-4">
-            <div>
-              <input type="text" name="question" value="" />
-            </div>
+          <div class="flex justify-between gap-4">
+            <input
+              type="text"
+              name="question"
+              value=""
+              class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
             <div>
               <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                 Submit
@@ -158,34 +168,34 @@ defmodule MPGWeb.ThingsLive do
       </div>
 
       <br />
-      <div class="bg-white shadow-md rounded-md overflow-hidden">
-        <div class="bg-gray-100 py-2 px-4">
-          <h2 class="text-xl font-semibold text-gray-800">My Answer</h2>
-        </div>
-        <div class="flex p-4 justify-between items-center gap-4">
-          <%= if @player.current_answer do %>
-            <div id="my-answer" class="text-gray-600 text-base"><%= @player.current_answer %></div>
-            <%= if Game.all_players_answered?(:things_session) and !is_nil(@player) and !@player.revealed do %>
-              <button
-                id="reveal-button"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                phx-click="reveal"
-              >
-                Reveal
-              </button>
-            <% end %>
-          <% else %>
-            <form id="answer-form" phx-submit="submit_answer">
-              <div class="flex gap-4">
-                <input type="text" name="answer" />
-                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                  Submit
-                </button>
-              </div>
-            </form>
+      <%= if @player.current_answer do %>
+        <div class="flex p-4 items-center gap-4">
+          <div id="my-answer" class="text-gray-600 text-base"><%= @player.current_answer %></div>
+          <%= if Game.all_players_answered?(:things_session) and !is_nil(@player) and !@player.revealed do %>
+            <button
+              id="reveal-button"
+              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              phx-click="reveal"
+            >
+              Reveal
+            </button>
           <% end %>
         </div>
-      </div>
+      <% else %>
+        <form id="answer-form" phx-submit="submit_answer">
+          <div class="flex justify-between items-center gap-4">
+            <input
+              type="text"
+              name="answer"
+              placeholder="My answer"
+              class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Submit
+            </button>
+          </div>
+        </form>
+      <% end %>
     <% end %>
     """
   end
