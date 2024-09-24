@@ -132,15 +132,19 @@ defmodule MPGWeb.ThingsLive do
             </div>
             <ul class="divide-y divide-gray-200">
               <%= for player <- @state.players do %>
-                <li class="flex items-center py-4 px-6">
+                <li id={"player-" <> player.id} class="flex items-center py-4 px-6">
                   <img
                     class="w-12 h-12 rounded-full object-cover mr-4"
                     src="https://randomuser.me/api/portraits/women/72.jpg"
                     alt="User avatar"
                   />
                   <div class="flex-1">
-                    <h3 class="text-lg font-medium text-gray-800"><%= player.name %></h3>
-                    <p class="text-gray-600 text-base"><%= get_current_answer(player) %></p>
+                    <h3 class="text-lg font-medium text-gray-800" data-role="player-name">
+                      <%= if player.id == @player.id, do: "Me", else: player.name %>
+                    </h3>
+                    <p data-role="answer" class="text-gray-600 text-base">
+                      <%= get_current_answer(player) %>
+                    </p>
                   </div>
                 </li>
               <% end %>
@@ -197,26 +201,6 @@ defmodule MPGWeb.ThingsLive do
         </form>
       <% end %>
     <% end %>
-    """
-  end
-
-  defp player_row(assigns) do
-    ~H"""
-    <div id={"player-" <> @player.id}>
-      <span data-role="player-name"><%= @player.name %></span>
-      <span data-role="answer">
-        <%= get_current_answer(@player) %>
-      </span>
-    </div>
-    """
-  end
-
-  defp current_player_row(assigns) do
-    ~H"""
-    <div id={"player-" <> @player.id}>
-      <span data-role="player-name">Me</span>
-      <span data-role="answer"><%= get_current_answer(@player) %></span>
-    </div>
     """
   end
 
