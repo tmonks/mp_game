@@ -157,7 +157,7 @@ defmodule MPGWeb.ThingsLive do
               <h2 class="text-xl font-semibold text-gray-800">Answers</h2>
             </div>
             <ul class="divide-y divide-gray-200">
-              <%= if Game.all_players_answered?(:things_session) do %>
+              <%= if Things.all_players_answered?(@state) do %>
                 <div id="unrevealed-answers">
                   <%= for answer <- unrevealed_answers(@state.players) do %>
                     <li class="flex items-center py-4 px-6">
@@ -181,7 +181,7 @@ defmodule MPGWeb.ThingsLive do
               </div>
               <div id="my-answer" class="text-gray-600 text-base"><%= @player.current_answer %></div>
             </div>
-            <%= if Game.all_players_answered?(:things_session) and !is_nil(@player) and !@player.revealed do %>
+            <%= if Things.all_players_answered?(@state) and !is_nil(@player) and !@player.revealed do %>
               <button
                 id="reveal-button"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"

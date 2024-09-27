@@ -65,4 +65,20 @@ defmodule MPG.ThingsTest do
 
     assert Things.get_player(state, id) == nil
   end
+
+  test "all_players_answered?/1 returns true if all players have answered" do
+    joe_id = UUID.uuid4()
+    jane_id = UUID.uuid4()
+
+    state =
+      Things.new("foo")
+      |> Things.add_player(joe_id, "Joe")
+      |> Things.add_player(jane_id, "Jane")
+
+    state = Things.set_player_answer(state, joe_id, "banana")
+    refute Things.all_players_answered?(state)
+
+    state = Things.set_player_answer(state, jane_id, "apple")
+    assert Things.all_players_answered?(state)
+  end
 end

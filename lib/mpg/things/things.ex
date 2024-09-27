@@ -56,4 +56,11 @@ defmodule MPG.Things do
 
     %State{state | players: players}
   end
+
+  @doc """
+  Returns true if all players have answered
+  """
+  def all_players_answered?(%State{players: players}) do
+    Enum.all?(players, &(&1.current_answer != nil))
+  end
 end

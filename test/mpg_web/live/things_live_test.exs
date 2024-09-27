@@ -171,7 +171,8 @@ defmodule MPGWeb.ThingsLiveTest do
     refute has_element?(view, "#reveal-button")
 
     Game.set_player_answer(:things_session, id2, "banana")
-    {:ok, view, _html} = live(conn, ~p"/")
+    assert_receive({:state_updated, _state})
+    :timer.sleep(100)
 
     assert has_element?(view, "#reveal-button")
   end
@@ -194,6 +195,7 @@ defmodule MPGWeb.ThingsLiveTest do
     |> render_click("reveal")
 
     assert_receive({:state_updated, _state})
+    :timer.sleep(100)
     refute has_element?(view, "#unrevealed-answers", "apple")
   end
 
