@@ -104,21 +104,4 @@ defmodule MPG.Things.GameTest do
     assert_receive({:state_updated, state})
     assert [%Player{name: "Joe", revealed: true}] = state.players
   end
-
-  test "all_players_answered?/1 returns true if all players have an answer", %{server: server} do
-    joe_id = UUID.uuid4()
-    jane_id = UUID.uuid4()
-
-    Game.add_player(server, joe_id, "Joe")
-    refute Game.all_players_answered?(server)
-
-    Game.set_player_answer(server, joe_id, "42")
-    assert Game.all_players_answered?(server)
-
-    Game.add_player(server, jane_id, "Jane")
-    refute Game.all_players_answered?(server)
-
-    Game.set_player_answer(server, jane_id, "43")
-    assert Game.all_players_answered?(server)
-  end
 end

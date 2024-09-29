@@ -54,13 +54,6 @@ defmodule MPG.Things.Game do
     GenServer.cast(server, {:new_question, topic})
   end
 
-  @doc """
-  Returns true if all players have answered.
-  """
-  def all_players_answered?(server) do
-    GenServer.call(server, :all_players_answered)
-  end
-
   @impl true
   def init(:ok) do
     {:ok, %State{players: []}}
