@@ -23,6 +23,11 @@ defmodule MPGWeb.ThingsLive do
     {:ok, socket}
   end
 
+  @impl true
+  def handle_params(_params, _url, socket) do
+    {:noreply, socket}
+  end
+
   defp assign_player(%{assigns: assigns} = socket) do
     case Things.get_player(assigns.state, assigns.session_id) do
       nil -> assign(socket, player: nil)
@@ -53,10 +58,7 @@ defmodule MPGWeb.ThingsLive do
   def handle_event("set_new_question", %{"question" => question}, socket) do
     Game.new_question(:things_session, question)
 
-    # hide the modal
-    socket = push_event(socket, "js-exec", %{to: "#new-question-modal", attr: "phx-remove"})
-
-    {:noreply, socket}
+    {:noreply, push_patch(socket, to: "/")}
   end
 
   @impl true
@@ -94,18 +96,23 @@ defmodule MPGWeb.ThingsLive do
 
         <%= if @player.is_host do %>
           <div>
-            <button
+            <.link
               id="new-question-button"
               class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-6"
-              phx-click={show_modal("new-question-modal")}
+              patch={~p"/new_question"}
             >
               New Question
-            </button>
+            </.link>
           </div>
         <% end %>
       </div>
 
-      <.modal id="new-question-modal">
+      <.modal
+        :if={@live_action == :new_question}
+        id="new-question-modal"
+        show={true}
+        on_cancel={JS.patch("/")}
+      >
         <div class="font-bold mb-4">New Question</div>
         <form id="new-question-form" phx-submit="set_new_question">
           <div class="flex justify-between gap-4">

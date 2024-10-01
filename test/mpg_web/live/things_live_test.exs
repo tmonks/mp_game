@@ -54,12 +54,22 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#player-#{session_id} [data-role=player-name]", "Me")
   end
 
-  test "host gets a 'New Question' button", %{conn: conn, session_id: session_id} do
+  test "host gets a 'New Question' button which opens a modal", %{
+    conn: conn,
+    session_id: session_id
+  } do
     Game.add_player(:things_session, session_id, "Host")
 
     {:ok, view, _html} = live(conn, ~p"/")
 
     assert has_element?(view, "#new-question-button")
+    refute has_element?(view, "#new-question-modal")
+
+    # click the New Question button
+    view |> element("#new-question-button") |> render_click()
+
+    # check that the modal is now visible
+    assert has_element?(view, "#new-question-modal")
   end
 
   test "other players cannot see the 'New Question' button", ctx do
@@ -77,8 +87,16 @@ defmodule MPGWeb.ThingsLiveTest do
     {:ok, view, _html} = live(ctx.conn, ~p"/")
 
     view
+    |> element("#new-question-button")
+    |> render_click()
+
+    assert_patch(view, "/new_question")
+
+    view
     |> form("#new-question-form", %{question: "Things that are red"})
     |> render_submit()
+
+    assert_patch(view, "/")
 
     assert_receive({:state_updated, _state})
     assert has_element?(view, "#current-question", "Things that are red")
