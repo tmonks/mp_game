@@ -140,7 +140,19 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#current-question", "Things that are red")
   end
 
+  test "players see a waiting message if the host has not set a question", %{
+    conn: conn,
+    session_id: session_id
+  } do
+    Game.add_player(:things_session, session_id, "Peter")
+
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, "#waiting-message")
+  end
+
   test "player can submit answer", %{conn: conn, session_id: session_id} do
+    Game.new_question(:things_session, "Things that are yummy")
     Game.add_player(:things_session, session_id, "Peter")
 
     {:ok, view, _html} = live(conn, ~p"/")
@@ -179,6 +191,7 @@ defmodule MPGWeb.ThingsLiveTest do
     conn: conn,
     session_id: session_id
   } do
+    Game.new_question(:things_session, "Things that are red")
     Game.add_player(:things_session, session_id, "Player 1")
     id2 = UUID.uuid4()
     Game.add_player(:things_session, id2, "Player 2")

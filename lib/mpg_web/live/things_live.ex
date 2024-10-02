@@ -180,42 +180,49 @@ defmodule MPGWeb.ThingsLive do
 
       <br />
       <div class="flex">
-        <%= if @player.current_answer do %>
-          <div class="flex flex-col p-4 gap-6 flex-1">
-            <div>
-              <div class="block text-gray-700 font-bold mb-2">
-                My answer
-              </div>
-              <div id="my-answer" class="text-gray-600 text-base"><%= @player.current_answer %></div>
+        <%= cond do %>
+          <% is_nil(@state.topic) -> %>
+            <div id="waiting-message" class="text-gray-600 text-base">
+              Waiting for the game to begin...
             </div>
-            <%= if Things.all_players_answered?(@state) and !is_nil(@player) and !@player.revealed do %>
-              <button
-                id="reveal-button"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                phx-click="reveal"
-              >
-                Reveal
-              </button>
-            <% end %>
-          </div>
-        <% else %>
-          <form id="answer-form" phx-submit="submit_answer" class="flex-1">
-            <div class="flex flex-col gap-4">
+          <% @player.current_answer -> %>
+            <div class="flex flex-col p-4 gap-6 flex-1">
               <div>
-                <label class="block text-gray-700 font-bold mb-2" for="answer">
+                <div class="block text-gray-700 font-bold mb-2">
                   My answer
-                </label>
-                <input
-                  type="text"
-                  name="answer"
-                  class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
+                </div>
+                <div id="my-answer" class="text-gray-600 text-base">
+                  <%= @player.current_answer %>
+                </div>
               </div>
-              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Submit
-              </button>
+              <%= if Things.all_players_answered?(@state) and !is_nil(@player) and !@player.revealed do %>
+                <button
+                  id="reveal-button"
+                  class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  phx-click="reveal"
+                >
+                  Reveal
+                </button>
+              <% end %>
             </div>
-          </form>
+          <% true -> %>
+            <form id="answer-form" phx-submit="submit_answer" class="flex-1">
+              <div class="flex flex-col gap-4">
+                <div>
+                  <label class="block text-gray-700 font-bold mb-2" for="answer">
+                    My answer
+                  </label>
+                  <input
+                    type="text"
+                    name="answer"
+                    class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                  Submit
+                </button>
+              </div>
+            </form>
         <% end %>
         <div class="flex-1"></div>
       </div>
