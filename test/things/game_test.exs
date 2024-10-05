@@ -37,6 +37,19 @@ defmodule MPG.Things.GameTest do
              state.players
   end
 
+  test "add_player/3 adds player with a different color (in sequence)", %{server: server} do
+    Game.add_player(server, @player_id, "Joe")
+    Game.add_player(server, UUID.uuid4(), "Jane")
+    Game.add_player(server, UUID.uuid4(), "Justin")
+    state = :sys.get_state(server)
+
+    assert [
+             %Player{name: "Joe", color: "CadetBlue"},
+             %Player{name: "Jane", color: "Crimson"},
+             %Player{name: "Justin", color: "DarkMagenta"}
+           ] = state.players
+  end
+
   test "add_player/3 broadcasts the new state", %{server: server} do
     Game.add_player(server, @player_id, "Joe")
 

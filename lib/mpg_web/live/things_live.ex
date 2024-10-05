@@ -140,12 +140,8 @@ defmodule MPGWeb.ThingsLive do
             <ul class="divide-y divide-gray-200">
               <%= for player <- @state.players do %>
                 <li id={"player-" <> player.id} class="flex items-center py-4 px-6">
-                  <img
-                    class="w-12 h-12 rounded-full object-cover mr-4"
-                    src="https://randomuser.me/api/portraits/women/72.jpg"
-                    alt="User avatar"
-                  />
-                  <div class="flex-1">
+                  <.player_avatar player={player} />
+                  <div class="flex-1 ml-4">
                     <h3 class="text-lg font-medium text-gray-800" data-role="player-name">
                       <%= if player.id == @player.id, do: "Me", else: player.name %>
                     </h3>
@@ -243,5 +239,16 @@ defmodule MPGWeb.ThingsLive do
     |> Enum.filter(&(!&1.revealed))
     |> Enum.map(& &1.current_answer)
     |> Enum.shuffle()
+  end
+
+  defp player_avatar(assigns) do
+    ~H"""
+    <div
+      class="flex items-center justify-center w-12 h-12 text-white font-bold rounded-full"
+      style={"background-color: #{@player.color}"}
+    >
+      <%= String.slice(assigns.player.name, 0..2) %>
+    </div>
+    """
   end
 end

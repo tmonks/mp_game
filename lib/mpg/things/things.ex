@@ -19,9 +19,37 @@ defmodule MPG.Things do
   Adds a player to the state
   """
   def add_player(state, id, name) do
+    player_num = Enum.count(state.players)
     is_host = Enum.empty?(state.players)
-    player = %Player{id: id, name: name, current_answer: nil, revealed: false, is_host: is_host}
+
+    player = %Player{
+      id: id,
+      name: name,
+      color: get_color_for_player(player_num),
+      current_answer: nil,
+      revealed: false,
+      is_host: is_host
+    }
+
     %State{state | players: state.players ++ [player]}
+  end
+
+  # gets a color in sequence starting with 0 (wraps back to 0)
+  defp get_color_for_player(num) do
+    colors = [
+      "CadetBlue",
+      "Crimson",
+      "DarkMagenta",
+      "DarkSlateBlue",
+      "FireBrick",
+      "Indigo",
+      "LightSeaGreen",
+      "RoyalBlue"
+    ]
+
+    # wrap back to 0 if num is greater than the length of colors
+    num = rem(num, length(colors))
+    Enum.at(colors, num)
   end
 
   @doc """
