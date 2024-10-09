@@ -131,46 +131,27 @@ defmodule MPGWeb.ThingsLive do
         </form>
       </.modal>
 
-      <div class="flex my-6 gap-8">
-        <div class="flex-1">
-          <div class="bg-white shadow-md rounded-md overflow-hidden max-w-lg mx-auto">
-            <div class="bg-gray-100 py-2 px-4">
-              <h2 class="text-xl font-semibold text-gray-800">Players</h2>
-            </div>
-            <ul class="divide-y divide-gray-200">
-              <%= for player <- @state.players do %>
-                <li id={"player-" <> player.id} class="flex items-center py-4 px-6">
-                  <.player_avatar player={player} />
-                  <div class="flex-1 ml-4">
-                    <h3 class="text-lg font-medium text-gray-800" data-role="player-name">
-                      <%= if player.id == @player.id, do: "Me", else: player.name %>
-                    </h3>
-                    <p data-role="answer" class="text-gray-600 text-base">
-                      <%= get_current_answer(player) %>
-                    </p>
-                  </div>
-                </li>
-              <% end %>
-            </ul>
-          </div>
+      <div class="my-6">
+        <div id="player-list" class="flex gap-2">
+          <%= for player <- Enum.filter(@state.players, & !&1.revealed) do %>
+            <.player_avatar player={player} />
+          <% end %>
         </div>
-        <div class="flex-1">
-          <div class="bg-white shadow-md rounded-md overflow-hidden max-w-lg mx-auto">
-            <div class="bg-gray-100 py-2 px-4">
-              <h2 class="text-xl font-semibold text-gray-800">Answers</h2>
-            </div>
-            <ul class="divide-y divide-gray-200">
-              <%= if Things.all_players_answered?(@state) do %>
-                <div id="unrevealed-answers">
-                  <%= for answer <- unrevealed_answers(@state.players) do %>
-                    <li class="flex items-center py-4 px-6">
-                      <p class="text-gray-600 text-base"><%= answer %></p>
-                    </li>
-                  <% end %>
-                </div>
-              <% end %>
-            </ul>
+      </div>
+      <div>
+        <div class="bg-white shadow-md rounded-md overflow-hidden">
+          <div class="bg-gray-100 py-2 px-4">
+            <h2 class="text-xl font-semibold text-gray-800">Answers</h2>
           </div>
+          <ul class="divide-y divide-gray-200">
+            <%= if Things.all_players_answered?(@state) do %>
+              <div id="unrevealed-answers">
+                <%= for player <- Enum.shuffle(@state.players) do %>
+                  <.player_answer player={player} />
+                <% end %>
+              </div>
+            <% end %>
+          </ul>
         </div>
       </div>
 
@@ -226,29 +207,27 @@ defmodule MPGWeb.ThingsLive do
     """
   end
 
-  defp get_current_answer(player) do
-    cond do
-      player.revealed -> player.current_answer
-      player.current_answer -> "Ready"
-      true -> "No answer yet"
-    end
-  end
-
-  defp unrevealed_answers(players) do
-    players
-    |> Enum.filter(&(!&1.revealed))
-    |> Enum.map(& &1.current_answer)
-    |> Enum.shuffle()
-  end
-
   defp player_avatar(assigns) do
     ~H"""
     <div
       class="flex items-center justify-center w-12 h-12 text-white font-bold rounded-full"
+      data-role="avatar"
       style={"background-color: #{@player.color}"}
+      id={"player-" <> @player.id}
     >
       <%= String.slice(assigns.player.name, 0..2) %>
     </div>
+    """
+  end
+
+  defp player_answer(assigns) do
+    ~H"""
+    <li id={"answer-#{@player.id}"} class="flex items-center py-4 px-6 gap-2">
+      <p class="text-gray-600 text-base"><%= @player.current_answer %></p>
+      <%= if @player.revealed do %>
+        <.player_avatar player={@player} />
+      <% end %>
+    </li>
     """
   end
 end

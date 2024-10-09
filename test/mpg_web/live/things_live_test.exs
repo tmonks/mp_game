@@ -33,7 +33,7 @@ defmodule MPGWeb.ThingsLiveTest do
     |> render_submit()
 
     assert_receive({:state_updated, _state})
-    assert has_element?(view, "#player-#{session_id} [data-role=player-name]", "Me")
+    assert has_element?(view, "#player-#{session_id}[data-role=avatar]", "Pet")
     refute has_element?(view, "#join-form")
   end
 
@@ -42,16 +42,8 @@ defmodule MPGWeb.ThingsLiveTest do
 
     {:ok, view, _html} = live(conn, ~p"/")
 
-    assert has_element?(view, "#player-#{session_id} [data-role=player-name]", "Me")
+    assert has_element?(view, "#player-#{session_id}[data-role=avatar]", "Pet")
     refute has_element?(view, "#join-form")
-  end
-
-  test "lists current player as 'Me'", %{conn: conn, session_id: session_id} do
-    Game.add_player(:things_session, session_id, "Peter")
-
-    {:ok, view, _html} = live(conn, ~p"/")
-
-    assert has_element?(view, "#player-#{session_id} [data-role=player-name]", "Me")
   end
 
   test "host gets a 'New Question' button which opens a modal", %{
@@ -208,42 +200,31 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#reveal-button")
   end
 
-  test "clicking the 'reveal' button removes player's answer from answers list", ctx do
-    # session with both players answered
+  test "moves the player icon next to their answer once they've been revealed", ctx do
     player1_id = ctx.session_id
     player2_id = UUID.uuid4()
-    Game.add_player(:things_session, player1_id, "Player 1")
-    Game.add_player(:things_session, player2_id, "Player 2")
+    Game.add_player(:things_session, player1_id, "Bart")
+    Game.add_player(:things_session, player2_id, "Homer")
 
     Game.set_player_answer(:things_session, player1_id, "apple")
     Game.set_player_answer(:things_session, player2_id, "banana")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/")
 
-    assert has_element?(view, "#unrevealed-answers", "apple")
-
-    view
-    |> render_click("reveal")
-
-    assert_receive({:state_updated, _state})
-    :timer.sleep(100)
-    refute has_element?(view, "#unrevealed-answers", "apple")
-  end
-
-  test "shows answers next to other players that have been revealed", ctx do
-    player1_id = ctx.session_id
-    player2_id = UUID.uuid4()
-    Game.add_player(:things_session, player1_id, "Player 1")
-    Game.add_player(:things_session, player2_id, "Player 2")
-
-    Game.set_player_answer(:things_session, player1_id, "apple")
-    Game.set_player_answer(:things_session, player2_id, "banana")
+    # player icon shown in player list
+    assert has_element?(view, "#player-list #player-#{player2_id}")
+    # player icon not shown with answer
+    refute has_element?(view, "#answer-#{player2_id} #player-#{player2_id}")
 
     Game.set_player_to_revealed(:things_session, player2_id)
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    assert_received({:state_updated, _state})
+    :timer.sleep(100)
 
-    assert has_element?(view, "#player-#{player2_id} [data-role=answer]", "banana")
+    # player icon no longer shown in player list
+    refute has_element?(view, "#player-list #player-#{player2_id}")
+    # player icon shown with answer
+    assert has_element?(view, "#answer-#{player2_id} #player-#{player2_id}")
   end
 
   test "receives and renders state updates", ctx do
