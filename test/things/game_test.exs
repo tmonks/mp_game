@@ -44,9 +44,9 @@ defmodule MPG.Things.GameTest do
     state = :sys.get_state(server)
 
     assert [
-             %Player{name: "Joe", color: "CadetBlue"},
-             %Player{name: "Jane", color: "Crimson"},
-             %Player{name: "Justin", color: "DarkMagenta"}
+             %Player{name: "Joe", color: "Gold"},
+             %Player{name: "Jane", color: "DarkSlateBlue"},
+             %Player{name: "Justin", color: "DeepPink"}
            ] = state.players
   end
 

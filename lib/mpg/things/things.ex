@@ -34,20 +34,19 @@ defmodule MPG.Things do
     %State{state | players: state.players ++ [player]}
   end
 
-  # gets a color in sequence starting with 0 (wraps back to 0)
   defp get_color_for_player(num) do
     colors = [
-      "CadetBlue",
-      "Crimson",
-      "DarkMagenta",
+      "Gold",
       "DarkSlateBlue",
-      "FireBrick",
-      "Indigo",
-      "LightSeaGreen",
-      "RoyalBlue"
+      "DeepPink",
+      "DeepSkyBlue",
+      "DarkOrange",
+      "DarkViolet",
+      "YellowGreen",
+      "Teal"
     ]
 
-    # wrap back to 0 if num is greater than the length of colors
+    # start with 0, and wrap around if we go over the length of the list
     num = rem(num, length(colors))
     Enum.at(colors, num)
   end
