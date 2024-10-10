@@ -210,12 +210,28 @@ defmodule MPGWeb.ThingsLive do
   defp player_avatar(assigns) do
     ~H"""
     <div
-      class="flex items-center justify-center w-12 h-12 text-white font-bold rounded-full"
+      class="relative flex items-center justify-center w-12 h-12 text-white font-bold rounded-full"
       data-role="avatar"
       style={"background-color: #{@player.color}"}
       id={"player-" <> @player.id}
     >
       <%= String.slice(assigns.player.name, 0..2) %>
+      <%= if @player.current_answer do %>
+        <div
+          data-role="ready-check-mark"
+          class="absolute top-0 right-0 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-3 w-3 text-white"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      <% end %>
     </div>
     """
   end

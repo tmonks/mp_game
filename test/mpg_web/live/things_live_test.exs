@@ -94,7 +94,7 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#current-question", "Things that are red")
   end
 
-  test "shows 'No answer yet' for other players that have not provided an answer", %{
+  test "indicates that players that have provided an answer are ready", %{
     conn: conn,
     session_id: session_id
   } do
@@ -103,24 +103,14 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.add_player(:things_session, id, "Peter")
 
     {:ok, view, _html} = live(conn, ~p"/")
+    refute has_element?(view, "#player-#{id} [data-role=ready-check-mark]")
 
-    assert has_element?(view, "#player-#{id}", "Peter")
-    assert has_element?(view, "#player-#{id} [data-role=answer]", "No answer yet")
-  end
-
-  test "shows 'Ready' for other players that have provided an answer", %{
-    conn: conn,
-    session_id: session_id
-  } do
-    Game.add_player(:things_session, session_id, "Tom")
-    id = UUID.uuid4()
-    Game.add_player(:things_session, id, "Peter")
+    # Set the player's answer
     Game.set_player_answer(:things_session, id, "bananas")
+    assert_receive({:state_updated, _state})
+    :timer.sleep(100)
 
-    {:ok, view, _html} = live(conn, ~p"/")
-
-    assert has_element?(view, "#player-#{id}", "Peter")
-    assert has_element?(view, "#player-#{id} [data-role=answer]", "Ready")
+    assert has_element?(view, "#player-#{id} [data-role=ready-check-mark]")
   end
 
   test "shows the current question", %{conn: conn, session_id: session_id} do
