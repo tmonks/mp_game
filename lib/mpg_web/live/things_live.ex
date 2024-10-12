@@ -91,20 +91,19 @@ defmodule MPGWeb.ThingsLive do
         </div>
       </form>
     <% else %>
-      <div class="flex justify-between items-center">
-        <h2 id="current-question" class="text-xl text-gray-600"><%= @state.topic %>...</h2>
-
+      <div class="flex items-center gap-4">
         <%= if @player.is_host do %>
           <div>
             <.link
               id="new-question-button"
-              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-6"
+              class="bg-gray-500 hover:bg-gray-700 text-white font-bold pt-2 pb-3 px-2 rounded-full mt-6"
               patch={~p"/new_question"}
             >
-              New Question
+              <.icon name="hero-arrow-path" class="h-5 w-5" />
             </.link>
           </div>
         <% end %>
+        <h2 id="current-question" class="text-xl text-gray-600"><%= @state.topic %>...</h2>
       </div>
 
       <.modal
