@@ -138,20 +138,20 @@ defmodule MPGWeb.ThingsLive do
         </div>
       </div>
       <div>
-        <div class="bg-white shadow-md rounded-md overflow-hidden">
-          <div class="bg-gray-100 py-2 px-4">
-            <h2 class="text-xl font-semibold text-gray-800">Answers</h2>
-          </div>
-          <ul class="divide-y divide-gray-200">
-            <%= if Things.all_players_answered?(@state) do %>
-              <div id="unrevealed-answers">
+        <%= if Things.all_players_answered?(@state) do %>
+          <div id="answers" class="bg-white shadow-md rounded-md overflow-hidden">
+            <div class="bg-gray-100 py-2 px-4">
+              <h2 class="text-xl font-semibold text-gray-800">Answers</h2>
+            </div>
+            <ul class="divide-y divide-gray-200">
+              <div>
                 <%= for player <- Enum.shuffle(@state.players) do %>
                   <.player_answer player={player} />
                 <% end %>
               </div>
-            <% end %>
-          </ul>
-        </div>
+            </ul>
+          </div>
+        <% end %>
       </div>
 
       <br />
@@ -177,7 +177,7 @@ defmodule MPGWeb.ThingsLive do
                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                   phx-click="reveal"
                 >
-                  Reveal
+                  Reveal my answer
                 </button>
               <% end %>
             </div>

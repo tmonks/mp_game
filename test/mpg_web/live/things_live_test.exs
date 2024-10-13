@@ -159,14 +159,14 @@ defmodule MPGWeb.ThingsLiveTest do
 
     {:ok, view, _html} = live(conn, ~p"/")
 
-    refute has_element?(view, "#unrevealed-answers")
+    refute has_element?(view, "#answers")
 
     Game.set_player_answer(:things_session, id2, "banana")
 
     {:ok, view, _html} = live(conn, ~p"/")
 
-    assert has_element?(view, "#unrevealed-answers", "apple")
-    assert has_element?(view, "#unrevealed-answers", "banana")
+    assert has_element?(view, "#answers", "apple")
+    assert has_element?(view, "#answers", "banana")
   end
 
   test "when all players have answered, a 'reveal' button appears", %{
