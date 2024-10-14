@@ -103,7 +103,9 @@ defmodule MPGWeb.ThingsLive do
             </.link>
           </div>
         <% end %>
-        <h2 id="current-question" class="text-xl text-gray-600"><%= @state.topic %>...</h2>
+        <h2 id="current-question" class="text-xl text-gray-600">
+          Things that are... <%= @state.topic %>
+        </h2>
       </div>
 
       <.modal
@@ -112,7 +114,7 @@ defmodule MPGWeb.ThingsLive do
         show={true}
         on_cancel={JS.patch("/")}
       >
-        <div class="font-bold mb-4">New Question</div>
+        <div class="font-bold mb-4">Things that are...</div>
         <form id="new-question-form" phx-submit="set_new_question">
           <div class="flex justify-between gap-4">
             <input
@@ -185,7 +187,7 @@ defmodule MPGWeb.ThingsLive do
             <form id="answer-form" phx-submit="submit_answer" class="flex-1">
               <div class="flex flex-col gap-4">
                 <div>
-                  <label class="block text-gray-700 font-bold mb-2" for="answer">
+                  <label class="block text-gray-700 text-xl font-bold mb-2" for="answer">
                     My answer
                   </label>
                   <input
