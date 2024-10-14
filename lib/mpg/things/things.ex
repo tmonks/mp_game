@@ -90,4 +90,21 @@ defmodule MPG.Things do
   def all_players_answered?(%State{players: players}) do
     Enum.all?(players, &(&1.current_answer != nil))
   end
+
+  @doc """
+  Returns the current state of the game
+
+  :new - The game has just started
+  :answering - Players are answering the question
+  :guessing - Players are guessing the answer
+  :complete - All player answers have been revealed
+  """
+  def current_state(%State{players: players, topic: topic}) do
+    cond do
+      topic == nil -> :new
+      Enum.any?(players, &(&1.current_answer == nil)) -> :answering
+      Enum.any?(players, &(&1.revealed == false)) -> :guessing
+      true -> :complete
+    end
+  end
 end
