@@ -69,9 +69,6 @@ defmodule MPGWeb.ThingsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <h1 class="text-3xl font-semibold text-gray-800">Game of Things</h1>
-    <br />
-
     <%= unless assigns[:player] do %>
       <form id="join-form" phx-submit="join">
         <div class="flex gap-4">
@@ -103,8 +100,8 @@ defmodule MPGWeb.ThingsLive do
             </.link>
           </div>
         <% end %>
-        <h2 id="current-question" class="text-xl text-gray-600">
-          Things that are... <%= @state.topic %>
+        <h2 id="current-question" class="text-2xl text-gray-600">
+          Things that are... <%= @state.topic %>?
         </h2>
       </div>
 
