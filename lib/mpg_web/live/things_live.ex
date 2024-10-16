@@ -89,17 +89,6 @@ defmodule MPGWeb.ThingsLive do
       </form>
     <% else %>
       <div class="flex items-center gap-4">
-        <%= if @player.is_host do %>
-          <div>
-            <.link
-              id="new-question-button"
-              class="bg-gray-500 hover:bg-gray-700 text-white font-bold pt-2 pb-3 px-2 rounded-full mt-6"
-              patch={~p"/new_question"}
-            >
-              <.icon name="hero-arrow-path" class="h-5 w-5" />
-            </.link>
-          </div>
-        <% end %>
         <h2 id="current-question" class="text-2xl text-gray-600">
           Things that are... <%= @state.topic %>?
         </h2>
@@ -152,16 +141,15 @@ defmodule MPGWeb.ThingsLive do
           </div>
         <% end %>
       </div>
-
-      <br />
-      <div class="flex">
+      <!-- player controls section -->
+      <div class="flex flex-col mt-6 gap-4">
         <%= cond do %>
           <% is_nil(@state.topic) -> %>
             <div id="waiting-message" class="text-gray-600 text-base">
               Waiting for the game to begin...
             </div>
           <% @player.current_answer -> %>
-            <div class="flex flex-col p-4 gap-6 flex-1">
+            <div class="flex flex-col p-4 gap-6">
               <div>
                 <div class="block text-gray-700 font-bold mb-2">
                   My answer
@@ -181,7 +169,7 @@ defmodule MPGWeb.ThingsLive do
               <% end %>
             </div>
           <% true -> %>
-            <form id="answer-form" phx-submit="submit_answer" class="flex-1">
+            <form id="answer-form" phx-submit="submit_answer">
               <div class="flex flex-col gap-4">
                 <div>
                   <label class="block text-gray-700 text-xl font-bold mb-2" for="answer">
@@ -199,7 +187,15 @@ defmodule MPGWeb.ThingsLive do
               </div>
             </form>
         <% end %>
-        <div class="flex-1"></div>
+        <%= if @player.is_host do %>
+          <.link
+            id="new-question-button"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center"
+            patch={~p"/new_question"}
+          >
+            Next Question <.icon name="hero-arrow-path" class="h-5 w-5" />
+          </.link>
+        <% end %>
       </div>
     <% end %>
     """
