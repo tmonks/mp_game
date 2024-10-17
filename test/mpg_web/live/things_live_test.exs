@@ -46,13 +46,13 @@ defmodule MPGWeb.ThingsLiveTest do
     refute has_element?(view, "#join-form")
   end
 
-  test "host gets a 'New Question' button which opens a modal", %{
-    conn: conn,
-    session_id: session_id
-  } do
-    Game.add_player(:things_session, session_id, "Host")
+  test "host gets a 'New Question' button which opens a modal", ctx do
+    Game.add_player(:things_session, ctx.session_id, "Host")
+    Game.new_question(:things_session, "Things that are red")
+    Game.set_player_answer(:things_session, ctx.session_id, "apple")
+    Game.set_player_to_revealed(:things_session, ctx.session_id)
 
-    {:ok, view, _html} = live(conn, ~p"/")
+    {:ok, view, _html} = live(ctx.conn, ~p"/")
 
     assert has_element?(view, "#new-question-button")
     refute has_element?(view, "#new-question-modal")
@@ -62,6 +62,23 @@ defmodule MPGWeb.ThingsLiveTest do
 
     # check that the modal is now visible
     assert has_element?(view, "#new-question-modal")
+  end
+
+  test "host's 'New Question' button only shows when all players have been revealed", ctx do
+    Game.add_player(:things_session, ctx.session_id, "Host")
+    Game.new_question(:things_session, "Things that are red")
+    Game.set_player_answer(:things_session, ctx.session_id, "apple")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/")
+
+    refute has_element?(view, "#new-question-button")
+
+    Game.set_player_to_revealed(:things_session, ctx.session_id)
+
+    assert_receive({:state_updated, _state})
+    :timer.sleep(100)
+
+    assert has_element?(view, "#new-question-button")
   end
 
   test "other players cannot see the 'New Question' button", ctx do
@@ -75,6 +92,9 @@ defmodule MPGWeb.ThingsLiveTest do
 
   test "host can set a new question", ctx do
     Game.add_player(:things_session, ctx.session_id, "Host")
+    Game.new_question(:things_session, "Things that are red")
+    Game.set_player_answer(:things_session, ctx.session_id, "apple")
+    Game.set_player_to_revealed(:things_session, ctx.session_id)
 
     {:ok, view, _html} = live(ctx.conn, ~p"/")
 

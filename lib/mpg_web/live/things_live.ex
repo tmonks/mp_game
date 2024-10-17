@@ -149,8 +149,8 @@ defmodule MPGWeb.ThingsLive do
               Waiting for the game to begin...
             </div>
           <% @player.current_answer -> %>
-            <div class="flex flex-col p-4 gap-6">
-              <div>
+            <div class="flex flex-col gap-6">
+              <div class="p-2">
                 <div class="block text-gray-700 font-bold mb-2">
                   My answer
                 </div>
@@ -187,7 +187,7 @@ defmodule MPGWeb.ThingsLive do
               </div>
             </form>
         <% end %>
-        <%= if @player.is_host do %>
+        <%= if @player.is_host and Things.current_state(@state) == :complete do %>
           <.link
             id="new-question-button"
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center"
