@@ -63,7 +63,12 @@ defmodule MPGWeb.ThingsLive do
 
   @impl true
   def handle_info({:state_updated, state}, socket) do
-    {:noreply, assign(socket, state: state) |> assign_player()}
+    socket =
+      socket
+      |> assign(state: state)
+      |> assign_player()
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -95,7 +100,9 @@ defmodule MPGWeb.ThingsLive do
       </div>
 
       <.modal
-        :if={@live_action == :new_question}
+        :if={
+          @live_action == :new_question or (@player.is_host and Things.current_state(@state) == :new)
+        }
         id="new-question-modal"
         show={true}
         on_cancel={JS.patch("/")}

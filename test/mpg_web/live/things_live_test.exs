@@ -46,6 +46,14 @@ defmodule MPGWeb.ThingsLiveTest do
     refute has_element?(view, "#join-form")
   end
 
+  test "host is prompted to enter a question right after joining", ctx do
+    Game.add_player(:things_session, ctx.session_id, "Host")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/")
+
+    assert has_element?(view, "#new-question-modal")
+  end
+
   test "host gets a 'New Question' button which opens a modal", ctx do
     Game.add_player(:things_session, ctx.session_id, "Host")
     Game.new_question(:things_session, "Things that are red")
