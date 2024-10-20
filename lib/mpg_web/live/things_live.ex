@@ -93,11 +93,15 @@ defmodule MPGWeb.ThingsLive do
         </div>
       </form>
     <% else %>
-      <div class="flex items-center gap-4">
-        <h2 id="current-question" class="text-2xl text-gray-600">
-          Things that are... <%= @state.topic %>?
-        </h2>
-      </div>
+      <%= if is_nil(@state.topic) do %>
+        <div id="waiting-message" class="text-gray-600 text-base">
+          Waiting for the game to begin...
+        </div>
+      <% else %>
+        <div id="current-question" class="text-gray-600 text-2xl">
+          Things that are... <%= @state.topic %>
+        </div>
+      <% end %>
 
       <.modal
         :if={
@@ -150,50 +154,48 @@ defmodule MPGWeb.ThingsLive do
       </div>
       <!-- player controls section -->
       <div class="flex flex-col mt-6 gap-4">
-        <%= cond do %>
-          <% is_nil(@state.topic) -> %>
-            <div id="waiting-message" class="text-gray-600 text-base">
-              Waiting for the game to begin...
-            </div>
-          <% @player.current_answer -> %>
-            <div class="flex flex-col gap-6">
-              <div class="p-2">
-                <div class="block text-gray-700 font-bold mb-2">
-                  My answer
-                </div>
-                <div id="my-answer" class="text-gray-600 text-base">
-                  <%= @player.current_answer %>
-                </div>
+        <%= if @player.current_answer do %>
+          <div class="flex flex-col gap-6">
+            <div class="p-2">
+              <div class="block text-gray-700 font-bold mb-2">
+                My answer
               </div>
-              <%= if Things.all_players_answered?(@state) and !is_nil(@player) and !@player.revealed do %>
-                <button
-                  id="reveal-button"
-                  class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                  phx-click="reveal"
-                >
-                  Reveal my answer
-                </button>
-              <% end %>
-            </div>
-          <% true -> %>
-            <form id="answer-form" phx-submit="submit_answer">
-              <div class="flex flex-col gap-4">
-                <div>
-                  <label class="block text-gray-700 text-xl font-bold mb-2" for="answer">
-                    My answer
-                  </label>
-                  <input
-                    type="text"
-                    name="answer"
-                    class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                  Submit
-                </button>
+              <div id="my-answer" class="text-gray-600 text-base">
+                <%= @player.current_answer %>
               </div>
-            </form>
+            </div>
+            <%= if Things.all_players_answered?(@state) and !is_nil(@player) and !@player.revealed do %>
+              <button
+                id="reveal-button"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                phx-click="reveal"
+              >
+                Reveal my answer
+              </button>
+            <% end %>
+          </div>
         <% end %>
+
+        <%= if is_nil(@player.current_answer) and !is_nil(@state.topic) do %>
+          <form id="answer-form" phx-submit="submit_answer">
+            <div class="flex flex-col gap-4">
+              <div>
+                <label class="block text-gray-700 text-xl font-bold mb-2" for="answer">
+                  My answer
+                </label>
+                <input
+                  type="text"
+                  name="answer"
+                  class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+              </div>
+              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Submit
+              </button>
+            </div>
+          </form>
+        <% end %>
+
         <%= if @player.is_host and Things.current_state(@state) == :complete do %>
           <.link
             id="new-question-button"
