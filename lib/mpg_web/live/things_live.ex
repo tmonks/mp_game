@@ -132,7 +132,10 @@ defmodule MPGWeb.ThingsLive do
       <div class="my-6">
         <div id="player-list" class="flex gap-2">
           <%= for player <- Enum.filter(@state.players, & !&1.revealed) do %>
-            <.player_avatar player={player} />
+            <.player_avatar
+              player={player}
+              show_answer_status={Things.current_state(@state) == :answering}
+            />
           <% end %>
         </div>
       </div>
@@ -219,7 +222,7 @@ defmodule MPGWeb.ThingsLive do
       id={"player-" <> @player.id}
     >
       <%= String.slice(assigns.player.name, 0..2) %>
-      <%= if @player.current_answer do %>
+      <%= if @player.current_answer != nil and @show_answer_status do %>
         <div
           data-role="ready-check-mark"
           class="absolute top-0 right-0 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center"
@@ -244,7 +247,7 @@ defmodule MPGWeb.ThingsLive do
     <li id={"answer-#{@player.id}"} class="flex items-center py-4 px-6 gap-2">
       <p class="text-gray-600 text-base"><%= @player.current_answer %></p>
       <%= if @player.revealed do %>
-        <.player_avatar player={@player} />
+        <.player_avatar player={@player} show_answer_status={false} />
       <% end %>
     </li>
     """

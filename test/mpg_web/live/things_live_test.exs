@@ -122,23 +122,47 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#current-question", "Things that are red")
   end
 
-  test "indicates that players that have provided an answer are ready", %{
-    conn: conn,
-    session_id: session_id
-  } do
-    Game.add_player(:things_session, session_id, "Tom")
-    id = UUID.uuid4()
-    Game.add_player(:things_session, id, "Peter")
+  test "shows check marks for players that have provided an answer", ctx do
+    player1_id = ctx.session_id
+    player2_id = UUID.uuid4()
 
-    {:ok, view, _html} = live(conn, ~p"/")
-    refute has_element?(view, "#player-#{id} [data-role=ready-check-mark]")
+    Game.add_player(:things_session, player1_id, "Player 1")
+    Game.new_question(:things_session, "Things that are red")
+    Game.add_player(:things_session, player2_id, "Player 2")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    refute has_element?(view, "#player-#{player2_id} [data-role=ready-check-mark]")
 
     # Set the player's answer
-    Game.set_player_answer(:things_session, id, "bananas")
+    Game.set_player_answer(:things_session, player2_id, "bananas")
     assert_receive({:state_updated, _state})
     :timer.sleep(100)
 
-    assert has_element?(view, "#player-#{id} [data-role=ready-check-mark]")
+    assert has_element?(view, "#player-#{player2_id} [data-role=ready-check-mark]")
+  end
+
+  test "stops showing check marks after all players have answered", ctx do
+    player1_id = ctx.session_id
+    player2_id = UUID.uuid4()
+
+    Game.add_player(:things_session, player1_id, "Player 1")
+    Game.new_question(:things_session, "Things that are yellow")
+    Game.add_player(:things_session, player2_id, "Player 2")
+    # Set Player 1's answer
+    Game.set_player_answer(:things_session, player1_id, "bananas")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/")
+
+    # Player 1 has check mark
+    assert has_element?(view, "#player-#{player1_id} [data-role=ready-check-mark]")
+
+    # Set Player 2's answer
+    Game.set_player_answer(:things_session, player2_id, "peeps")
+    assert_receive({:state_updated, _state})
+    :timer.sleep(100)
+
+    # Player 1 no longer has check mark
+    refute has_element?(view, "#player-#{player1_id} [data-role=ready-check-mark]")
   end
 
   test "shows the current question", %{conn: conn, session_id: session_id} do
