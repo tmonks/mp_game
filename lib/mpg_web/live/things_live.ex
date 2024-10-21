@@ -86,7 +86,7 @@ defmodule MPGWeb.ThingsLive do
             />
           </div>
           <div>
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
               Join
             </button>
           </div>
@@ -121,7 +121,7 @@ defmodule MPGWeb.ThingsLive do
               class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
             <div>
-              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
                 Submit
               </button>
             </div>
@@ -170,7 +170,7 @@ defmodule MPGWeb.ThingsLive do
             <%= if Things.all_players_answered?(@state) and !is_nil(@player) and !@player.revealed do %>
               <button
                 id="reveal-button"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
                 phx-click="reveal"
               >
                 Reveal my answer
@@ -192,7 +192,7 @@ defmodule MPGWeb.ThingsLive do
                   class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
               </div>
-              <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
                 Submit
               </button>
             </div>
@@ -202,7 +202,7 @@ defmodule MPGWeb.ThingsLive do
         <%= if @player.is_host and Things.current_state(@state) == :complete do %>
           <.link
             id="new-question-button"
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center"
+            class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded text-center"
             patch={~p"/new_question"}
           >
             Next Question <.icon name="hero-arrow-path" class="h-5 w-5" />
