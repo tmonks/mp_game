@@ -76,7 +76,7 @@ defmodule MPGWeb.ThingsLive do
     ~H"""
     <%= unless assigns[:player] do %>
       <form id="join-form" phx-submit="join">
-        <div class="flex gap-4">
+        <div class="flex gap-4 pt-16">
           <div>
             <input
               type="text"
@@ -93,16 +93,32 @@ defmodule MPGWeb.ThingsLive do
         </div>
       </form>
     <% else %>
-      <%= if is_nil(@state.topic) do %>
-        <div id="waiting-message" class="text-gray-600 text-base">
-          Waiting for the game to begin...
-        </div>
-      <% else %>
-        <div id="current-question" class="text-gray-600 text-2xl">
-          Things that are... <%= @state.topic %>
+      <!-- CURRENT TOPIC -->
+      <div class="mt-2 mb-8">
+        <%= if is_nil(@state.topic) do %>
+          <div id="waiting-message" class="text-gray-600 text-2xl">
+            Waiting for the game to begin...
+          </div>
+        <% else %>
+          <div id="current-question" class="text-gray-600 text-2xl">
+            Things that are... <%= @state.topic %>
+          </div>
+        <% end %>
+      </div>
+      <!-- PLAYER LIST -->
+      <%= if Things.current_state(@state) != :complete do %>
+        <div class="mb-8">
+          <div id="player-list" class="flex gap-2">
+            <%= for player <- Enum.filter(@state.players, & !&1.revealed) do %>
+              <.player_avatar
+                player={player}
+                show_answer_status={Things.current_state(@state) == :answering}
+              />
+            <% end %>
+          </div>
         </div>
       <% end %>
-
+      <!-- NEW QUESTION MODAL -->
       <.modal
         :if={
           @live_action == :new_question or (@player.is_host and Things.current_state(@state) == :new)
@@ -113,32 +129,20 @@ defmodule MPGWeb.ThingsLive do
       >
         <div class="font-bold mb-4">Things that are...</div>
         <form id="new-question-form" phx-submit="set_new_question">
-          <div class="flex justify-between gap-4">
+          <div class="flex flex-col gap-4">
             <input
               type="text"
               name="question"
               value=""
               class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
-            <div>
-              <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
-                Submit
-              </button>
-            </div>
+            <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
+              Submit
+            </button>
           </div>
         </form>
       </.modal>
-
-      <div class="my-6">
-        <div id="player-list" class="flex gap-2">
-          <%= for player <- Enum.filter(@state.players, & !&1.revealed) do %>
-            <.player_avatar
-              player={player}
-              show_answer_status={Things.current_state(@state) == :answering}
-            />
-          <% end %>
-        </div>
-      </div>
+      <!-- ANSWERS LIST -->
       <div>
         <%= if Things.all_players_answered?(@state) do %>
           <div id="answers" class="bg-white shadow-md rounded-md overflow-hidden">
