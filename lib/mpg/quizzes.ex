@@ -48,4 +48,17 @@ defmodule MPG.Quizzes do
     num = rem(num, length(colors))
     Enum.at(colors, num)
   end
+
+  @doc """
+  Sets the current answer for the specified player
+  """
+  def answer_question(state, player_id, answer) do
+    players =
+      Enum.map(state.players, fn
+        %Player{id: ^player_id} = player -> %Player{player | current_answer: answer}
+        player -> player
+      end)
+
+    %State{state | players: players}
+  end
 end

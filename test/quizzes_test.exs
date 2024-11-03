@@ -55,6 +55,19 @@ defmodule MPG.QuizzesTest do
     end
   end
 
+  describe "answer_question/3" do
+    test "sets the current_answer for the specified player" do
+      state = state_fixture()
+      player1_id = UUID.uuid4()
+
+      state = %{players: [player1]} = Quizzes.add_player(state, player1_id, "Joe")
+      assert player1.current_answer == nil
+
+      %{players: [player1]} = Quizzes.answer_question(state, player1_id, 1)
+      assert player1.current_answer == 1
+    end
+  end
+
   defp state_fixture do
     %State{
       title: "Marvel characters",
