@@ -20,10 +20,11 @@ defmodule MPG.QuizzesTest do
         ]
       }
 
-      assert {:ok, %State{title: "Marvel characters", questions: questions}} =
-               Quizzes.create_quiz(attrs)
+      assert {:ok, %State{} = state} = Quizzes.create_quiz(attrs)
 
-      assert [%Question{} = question] = questions
+      assert state.title == "Marvel characters"
+      assert state.current_question == 0
+      assert [%Question{} = question] = state.questions
       assert question.text == "Who is the strongest Avenger?"
       assert question.answers == ["Hulk", "Thor", "Iron Man", "Captain America"]
       assert question.correct_answer == 0
@@ -68,8 +69,38 @@ defmodule MPG.QuizzesTest do
     end
   end
 
+  describe "next_question/1" do
+    test "increments the current question" do
+      state = state_fixture()
+      assert state.current_question == 0
+
+      state = Quizzes.next_question(state)
+      assert state.current_question == 1
+    end
+
+    test "updates each player's score and resets their current answer" do
+      player1_id = UUID.uuid4()
+      player2_id = UUID.uuid4()
+
+      state =
+        state_fixture()
+        |> Quizzes.add_player(player1_id, "Leonardo")
+        |> Quizzes.add_player(player2_id, "Donatello")
+        |> Quizzes.answer_question(player1_id, 0)
+        |> Quizzes.answer_question(player2_id, 1)
+        |> Quizzes.next_question()
+
+      assert state.current_question == 1
+      assert [leo, don] = state.players
+      assert leo.number_correct == 1
+      assert leo.current_answer == nil
+      assert don.number_correct == 0
+      assert don.current_answer == nil
+    end
+  end
+
   defp state_fixture do
-    %State{
+    attrs = %{
       title: "Marvel characters",
       questions: [
         %{
@@ -77,8 +108,17 @@ defmodule MPG.QuizzesTest do
           answers: ["Hulk", "Thor", "Iron Man", "Captain America"],
           correct_answer: 0,
           explanation: "Hulk is the strongest Avenger."
+        },
+        %{
+          text: "Who is the smartest Avenger?",
+          answers: ["Hulk", "Thor", "Iron Man", "Captain America"],
+          correct_answer: 2,
+          explanation: "Iron Man is the smartest Avenger."
         }
       ]
     }
+
+    {:ok, state} = Quizzes.create_quiz(attrs)
+    state
   end
 end

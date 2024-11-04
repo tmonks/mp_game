@@ -10,6 +10,7 @@ defmodule MPG.Quizzes do
     {:ok,
      %State{
        title: attrs.title,
+       current_question: 0,
        questions: Enum.map(attrs.questions, &struct(Question, &1))
      }}
   end
@@ -60,5 +61,34 @@ defmodule MPG.Quizzes do
       end)
 
     %State{state | players: players}
+  end
+
+  @doc """
+  Updates all players' scores based on the current question and moves to the next question
+  """
+  def next_question(state) do
+    correct_answer = get_answer_for_current_question(state)
+    players = Enum.map(state.players, &update_player_score(&1, correct_answer))
+
+    %State{
+      state
+      | players: players,
+        current_question: state.current_question + 1
+    }
+  end
+
+  defp get_answer_for_current_question(state) do
+    state.questions
+    |> Enum.at(state.current_question)
+    |> Map.get(:correct_answer)
+  end
+
+  defp update_player_score(%Player{} = player, correct_answer) do
+    new_score =
+      if player.current_answer == correct_answer,
+        do: player.number_correct + 1,
+        else: player.number_correct
+
+    %Player{player | number_correct: new_score, current_answer: nil}
   end
 end
