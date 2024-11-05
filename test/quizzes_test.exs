@@ -92,9 +92,9 @@ defmodule MPG.QuizzesTest do
 
       assert state.current_question == 1
       assert [leo, don] = state.players
-      assert leo.number_correct == 1
+      assert leo.score == 1
       assert leo.current_answer == nil
-      assert don.number_correct == 0
+      assert don.score == 0
       assert don.current_answer == nil
     end
   end

@@ -27,7 +27,7 @@ defmodule MPG.Quizzes do
       name: name,
       color: get_color_for_player(player_num),
       is_host: is_host,
-      number_correct: 0
+      score: 0
     }
 
     %State{state | players: state.players ++ [player]}
@@ -86,9 +86,9 @@ defmodule MPG.Quizzes do
   defp update_player_score(%Player{} = player, correct_answer) do
     new_score =
       if player.current_answer == correct_answer,
-        do: player.number_correct + 1,
-        else: player.number_correct
+        do: player.score + 1,
+        else: player.score
 
-    %Player{player | number_correct: new_score, current_answer: nil}
+    %Player{player | score: new_score, current_answer: nil}
   end
 end
