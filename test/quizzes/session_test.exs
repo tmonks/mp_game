@@ -49,4 +49,31 @@ defmodule MPG.Quizzes.SessionTest do
     assert state.current_question == 0
     assert length(state.questions) == 10
   end
+
+  test "next_question/2 progresses state to the next question", %{server: server} do
+    Session.create_quiz(server, "MCU Movie trivia")
+    state = :sys.get_state(server)
+
+    assert state.current_question == 0
+
+    Session.next_question(server)
+    state = :sys.get_state(server)
+
+    assert state.current_question == 1
+  end
+
+  test "next_question/2 updates players' scores", %{server: server} do
+    Session.create_quiz(server, "MCU Movie trivia")
+    Session.add_player(server, @player_id, "Joe")
+    state = :sys.get_state(server)
+
+    assert Enum.at(state.players, 0).score == 0
+
+    # correct answer to the first question is 0
+    Session.answer_question(server, @player_id, 0)
+    Session.next_question(server)
+    state = :sys.get_state(server)
+
+    assert Enum.at(state.players, 0).score == 1
+  end
 end
