@@ -77,6 +77,19 @@ defmodule MPG.Quizzes do
     }
   end
 
+  @doc """
+  Returns the current state of the quiz
+  """
+  def current_state(state) do
+    cond do
+      state.title == nil -> :new
+      length(state.questions) == 0 -> :generating
+      state.current_question == nil -> :joining
+      state.current_question > length(state.questions) - 1 -> :complete
+      true -> :playing
+    end
+  end
+
   defp get_answer_for_current_question(state) do
     state.questions
     |> Enum.at(state.current_question)

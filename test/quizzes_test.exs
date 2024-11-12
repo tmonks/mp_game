@@ -99,6 +99,64 @@ defmodule MPG.QuizzesTest do
     end
   end
 
+  describe "current_state/1" do
+    test "returns :new if the quiz has no title" do
+      state = %State{}
+      assert Quizzes.current_state(state) == :new
+    end
+
+    test "returns :generating if the quiz has a title, but no questions" do
+      state = %State{title: "Marvel characters"}
+      assert Quizzes.current_state(state) == :generating
+    end
+
+    test "returns :joining if the quiz has a title and questions, but the current_question is nil" do
+      state = %State{
+        title: "Marvel characters",
+        questions: [
+          %{
+            text: "Who is the strongest Avenger?",
+            answers: ["Hulk", "Thor", "Iron Man", "Captain America"],
+            correct_answer: 0,
+            explanation: "Hulk is the strongest Avenger."
+          },
+          %{
+            text: "Who is the smartest Avenger?",
+            answers: ["Hulk", "Thor", "Iron Man", "Captain America"],
+            correct_answer: 2,
+            explanation: "Iron Man is the smartest Avenger."
+          }
+        ],
+        current_question: nil
+      }
+
+      assert Quizzes.current_state(state) == :joining
+    end
+
+    test "returns :answering if current_question is valid but not all players have answered" do
+    end
+
+    test "returns :reviewing if all players have answered" do
+    end
+
+    test "returns :complete if the current_question is greater than the number of answers" do
+      state = %State{
+        title: "Marvel characters",
+        questions: [
+          %{
+            text: "Who is the strongest Avenger?",
+            answers: ["Hulk", "Thor", "Iron Man", "Captain America"],
+            correct_answer: 0,
+            explanation: "Hulk is the strongest Avenger."
+          }
+        ],
+        current_question: 1
+      }
+
+      assert Quizzes.current_state(state) == :complete
+    end
+  end
+
   defp state_fixture do
     attrs = %{
       title: "Marvel characters",
