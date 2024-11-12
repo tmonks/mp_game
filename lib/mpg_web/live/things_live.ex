@@ -101,7 +101,7 @@ defmodule MPGWeb.ThingsLive do
           </div>
         <% else %>
           <div id="current-question" class="text-gray-600 text-2xl">
-            Things that are... <%= @state.topic %>
+            Things... <%= @state.topic %>
           </div>
         <% end %>
       </div>
@@ -127,7 +127,7 @@ defmodule MPGWeb.ThingsLive do
         show={true}
         on_cancel={JS.patch("/")}
       >
-        <div class="font-bold mb-4">Things that are...</div>
+        <div class="font-bold mb-4">Things...</div>
         <form id="new-question-form" phx-submit="set_new_question">
           <div class="flex flex-col gap-4">
             <input
