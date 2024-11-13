@@ -3,6 +3,7 @@ defmodule MPG.Quizzes.Session do
 
   alias MPG.Quizzes
   alias MPG.Quizzes.State
+  alias Phoenix.PubSub
 
   @doc """
   Starts the server.
@@ -72,6 +73,7 @@ defmodule MPG.Quizzes.Session do
   def handle_cast({:create_quiz, title}, _state) do
     quiz_attrs = generate_quiz(title)
     {:ok, state} = Quizzes.create_quiz(quiz_attrs)
+    broadcast_state_updated(state)
 
     {:noreply, state}
   end
@@ -79,21 +81,21 @@ defmodule MPG.Quizzes.Session do
   @impl true
   def handle_cast({:add_player, id, player_name}, state) do
     state = Quizzes.add_player(state, id, player_name)
-    # broadcast_state_updated(state)
+    broadcast_state_updated(state)
     {:noreply, state}
   end
 
   @impl true
   def handle_cast({:answer_question, player_id, answer}, state) do
     state = Quizzes.answer_question(state, player_id, answer)
-    # broadcast_state_updated(state)
+    broadcast_state_updated(state)
     {:noreply, state}
   end
 
   @impl true
   def handle_cast(:next_question, state) do
     state = Quizzes.next_question(state)
-    # broadcast_state_updated(state)
+    broadcast_state_updated(state)
     {:noreply, state}
   end
 
@@ -167,5 +169,9 @@ defmodule MPG.Quizzes.Session do
     """
     |> Jason.decode!(keys: :atoms)
     |> Map.put(:title, title)
+  end
+
+  defp broadcast_state_updated(state) do
+    PubSub.broadcast(MPG.PubSub, "quiz_session", {:state_updated, state})
   end
 end
