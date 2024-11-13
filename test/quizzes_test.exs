@@ -134,9 +134,45 @@ defmodule MPG.QuizzesTest do
     end
 
     test "returns :answering if current_question is valid but not all players have answered" do
+      state = %State{
+        title: "Marvel characters",
+        questions: [
+          %{
+            text: "Who is the strongest Avenger?",
+            answers: ["Hulk", "Thor", "Iron Man", "Captain America"],
+            correct_answer: 0,
+            explanation: "Hulk is the strongest Avenger."
+          }
+        ],
+        current_question: 0,
+        players: [
+          %Player{id: 1, name: "Joe", current_answer: 0},
+          %Player{id: 2, name: "Jane", current_answer: nil}
+        ]
+      }
+
+      assert Quizzes.current_state(state) == :answering
     end
 
     test "returns :reviewing if all players have answered" do
+      state = %State{
+        title: "Marvel characters",
+        questions: [
+          %{
+            text: "Who is the strongest Avenger?",
+            answers: ["Hulk", "Thor", "Iron Man", "Captain America"],
+            correct_answer: 0,
+            explanation: "Hulk is the strongest Avenger."
+          }
+        ],
+        current_question: 0,
+        players: [
+          %Player{id: 1, name: "Joe", current_answer: 1},
+          %Player{id: 2, name: "Jane", current_answer: 2}
+        ]
+      }
+
+      assert Quizzes.current_state(state) == :reviewing
     end
 
     test "returns :complete if the current_question is greater than the number of answers" do

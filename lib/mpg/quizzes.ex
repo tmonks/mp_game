@@ -86,8 +86,13 @@ defmodule MPG.Quizzes do
       length(state.questions) == 0 -> :generating
       state.current_question == nil -> :joining
       state.current_question > length(state.questions) - 1 -> :complete
-      true -> :playing
+      !all_players_answered?(state) -> :answering
+      true -> :reviewing
     end
+  end
+
+  def all_players_answered?(%State{players: players}) do
+    Enum.all?(players, &(&1.current_answer != nil))
   end
 
   defp get_answer_for_current_question(state) do
