@@ -6,6 +6,8 @@ defmodule MPGWeb.ThingsLiveTest do
 
   setup %{conn: conn} do
     conn = init_test_session(conn, %{})
+
+    # populate a session_id on the conn
     session_id = UUID.uuid4()
     conn = put_session(conn, :session_id, session_id)
 
@@ -20,9 +22,9 @@ defmodule MPGWeb.ThingsLiveTest do
   end
 
   test "if the player with the session_id does not exist, prompts for name", %{conn: conn} do
-    {:ok, _view, html} = live(conn, ~p"/")
+    {:ok, view, _html} = live(conn, ~p"/")
 
-    assert html =~ "Join"
+    assert has_element?(view, "#join-form")
   end
 
   test "can join the game", %{conn: conn, session_id: session_id} do

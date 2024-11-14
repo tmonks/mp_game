@@ -20,6 +20,8 @@ defmodule MPGWeb.Router do
 
     live "/", ThingsLive, :play
     live "/new_question", ThingsLive, :new_question
+
+    live "/quiz", QuizLive, :play
   end
 
   defp assign_session_id(conn, _opts) do
