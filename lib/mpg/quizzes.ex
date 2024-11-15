@@ -109,4 +109,11 @@ defmodule MPG.Quizzes do
 
     %Player{player | score: new_score, current_answer: nil}
   end
+
+  @doc """
+  Retrieves a player with the given id
+  """
+  def get_player(state, id) do
+    Enum.find(state.players, &(&1.id == id))
+  end
 end

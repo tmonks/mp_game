@@ -51,7 +51,7 @@ defmodule MPG.ThingsTest do
     assert %Player{name: "Jane", current_answer: nil} = Enum.find(players, &(&1.id == jane_id))
   end
 
-  test "get_player/1 retrieves the player with the given id" do
+  test "get_player/2 retrieves the player with the given id" do
     state = Things.new("foo")
     id = UUID.uuid4()
 
@@ -59,7 +59,7 @@ defmodule MPG.ThingsTest do
     assert %Player{name: "Joe", id: ^id} = Things.get_player(state, id)
   end
 
-  test "get_player/1 returns nil if the player is not found" do
+  test "get_player/2 returns nil if the player is not found" do
     state = Things.new("foo")
     id = UUID.uuid4()
 

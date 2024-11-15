@@ -193,6 +193,23 @@ defmodule MPG.QuizzesTest do
     end
   end
 
+  describe "get_player/2" do
+    test "retrieves the player with the given id" do
+      state = state_fixture()
+      id = UUID.uuid4()
+
+      state = Quizzes.add_player(state, id, "Joe")
+      assert %Player{name: "Joe", id: ^id} = Quizzes.get_player(state, id)
+    end
+
+    test "returns nil if the player is not found" do
+      state = state_fixture()
+      id = UUID.uuid4()
+
+      assert Quizzes.get_player(state, id) == nil
+    end
+  end
+
   defp state_fixture do
     attrs = %{
       title: "Marvel characters",
