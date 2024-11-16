@@ -49,7 +49,7 @@ defmodule MPGWeb.QuizLive do
   def render(assigns) do
     ~H"""
     <!-- JOIN FORM -->
-    <%= unless assigns[:player] do %>
+    <%= if assigns[:player] == nil do %>
       <form id="join-form" phx-submit="join">
         <div class="flex gap-4 pt-16">
           <div>
@@ -67,15 +67,38 @@ defmodule MPGWeb.QuizLive do
           </div>
         </div>
       </form>
-    <% end %>
-    <!-- PLAYER LIST -->
-    <div class="mb-8">
-      <div id="player-list" class="flex gap-2">
-        <%= for player <- @state.players do %>
-          <.player_avatar player={player} />
-        <% end %>
+    <% else %>
+      <!-- NEW QUIZ MODAL -->
+      <.modal
+        :if={@live_action == :new_quiz or (@player.is_host and Quizzes.current_state(@state) == :new)}
+        id="new-quiz-modal"
+        show={true}
+        on_cancel={JS.patch("/")}
+      >
+        <div class="font-bold mb-4">Quiz Topic</div>
+        <form id="new-quiz-form" phx-submit="new_quiz">
+          <div class="flex flex-col gap-4">
+            <input
+              type="text"
+              name="topic"
+              value=""
+              class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+            <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
+              Submit
+            </button>
+          </div>
+        </form>
+      </.modal>
+      <!-- PLAYER LIST -->
+      <div class="mb-8">
+        <div id="player-list" class="flex gap-2">
+          <%= for player <- @state.players do %>
+            <.player_avatar player={player} />
+          <% end %>
+        </div>
       </div>
-    </div>
+    <% end %>
     """
   end
 

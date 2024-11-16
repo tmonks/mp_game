@@ -1,6 +1,9 @@
 defmodule MPGWeb.QuizLiveTest do
   use MPGWeb.ConnCase
+
   import Phoenix.LiveViewTest
+
+  alias MPG.Quizzes.Session
 
   setup %{conn: conn} do
     conn = init_test_session(conn, %{})
@@ -35,5 +38,22 @@ defmodule MPGWeb.QuizLiveTest do
     assert_receive({:state_updated, _state})
     assert has_element?(view, "#player-#{session_id}[data-role=avatar]", "Pet")
     refute has_element?(view, "#join-form")
+  end
+
+  test "loads user from session_id if it exists", %{conn: conn, session_id: session_id} do
+    Session.add_player(:quiz_session, session_id, "Peter")
+
+    {:ok, view, _html} = live(conn, ~p"/quiz")
+
+    assert has_element?(view, "#player-#{session_id}[data-role=avatar]", "Pet")
+    refute has_element?(view, "#join-form")
+  end
+
+  test "host is prompted to enter a question right after joining", ctx do
+    Session.add_player(:quiz_session, ctx.session_id, "Host")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+
+    assert has_element?(view, "#new-quiz-modal")
   end
 end
