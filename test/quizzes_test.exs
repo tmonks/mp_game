@@ -6,6 +6,38 @@ defmodule MPG.QuizzesTest do
   alias MPG.Quizzes.Question
   alias MPG.Quizzes.State
 
+  describe "set_title/2" do
+    test "sets the title of the quiz" do
+      state = %State{}
+
+      assert {:ok, %State{title: "Marvel characters"}} =
+               Quizzes.set_title(state, "Marvel characters")
+    end
+  end
+
+  describe "set_questions/2" do
+    test "sets the questions of the quiz" do
+      state = %State{}
+
+      questions = [
+        %{
+          text: "Who is the fastest Avenger?",
+          answers: ["Hulk", "Thor", "Iron Man", "Captain America"],
+          correct_answer: 1,
+          explanation: "Thor is the fastest Avenger."
+        }
+      ]
+
+      assert {:ok, %State{questions: [%Question{} = question]}} =
+               Quizzes.set_questions(state, questions)
+
+      assert question.text == "Who is the fastest Avenger?"
+      assert question.answers == ["Hulk", "Thor", "Iron Man", "Captain America"]
+      assert question.correct_answer == 1
+      assert question.explanation == "Thor is the fastest Avenger."
+    end
+  end
+
   describe "create_quiz/1" do
     test "creates a new state with valid attributes" do
       attrs = %{
