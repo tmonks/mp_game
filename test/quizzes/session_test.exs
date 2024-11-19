@@ -51,6 +51,15 @@ defmodule MPG.Quizzes.SessionTest do
     assert length(state.questions) == 10
   end
 
+  test "generate_questions/1 generates questions and adds them to the quiz", %{server: server} do
+    Session.generate_questions(server, "MCU Movie trivia")
+
+    assert_receive({:state_updated, state})
+
+    assert length(state.questions) == 10
+    assert Enum.at(state.questions, 0).text == "What is the first movie in the MCU?"
+  end
+
   test "next_question/2 progresses state to the next question", %{server: server} do
     Session.create_quiz(server, "MCU Movie trivia")
 
