@@ -77,10 +77,12 @@ defmodule MPG.Quizzes.Session do
   end
 
   @impl true
-  def handle_cast({:create_quiz, title}, _state) do
-    quiz_attrs = generate_quiz(title)
-    {:ok, state} = Quizzes.create_quiz(quiz_attrs)
+  def handle_cast({:create_quiz, title}, state) do
+    {:ok, state} = Quizzes.set_title(state, title)
     broadcast_state_updated(state)
+
+    # Generate questions
+    GenServer.cast(self(), {:generate_questions, title})
 
     {:noreply, state}
   end

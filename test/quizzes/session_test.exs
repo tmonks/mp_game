@@ -42,13 +42,19 @@ defmodule MPG.Quizzes.SessionTest do
     assert player.current_answer == 1
   end
 
-  test "create_quiz/2 creates a new quiz", %{server: server} do
+  test "create_quiz/2 sets the title and generates questions", %{server: server} do
     Session.create_quiz(server, "MCU Movie trivia")
 
+    # title is set
     assert_receive({:state_updated, state})
     assert state.title == "MCU Movie trivia"
-    assert state.current_question == 0
+    assert state.current_question == nil
+    assert state.questions == []
+
+    # questions are generated
+    assert_receive({:state_updated, state})
     assert length(state.questions) == 10
+    assert Enum.at(state.questions, 0).text == "What is the first movie in the MCU?"
   end
 
   test "generate_questions/1 generates questions and adds them to the quiz", %{server: server} do
@@ -61,15 +67,22 @@ defmodule MPG.Quizzes.SessionTest do
   end
 
   test "next_question/2 progresses state to the next question", %{server: server} do
+    Session.add_player(server, @player_id, "Joe")
+    assert_receive({:state_updated, _state})
+
     Session.create_quiz(server, "MCU Movie trivia")
 
+    # title set
+    assert_receive({:state_updated, _state})
+    # questions generated
     assert_receive({:state_updated, state})
-    assert state.current_question == 0
+
+    assert state.current_question == nil
 
     Session.next_question(server)
 
     assert_receive({:state_updated, state})
-    assert state.current_question == 1
+    assert state.current_question == 0
   end
 
   test "next_question/2 updates players' scores", %{server: server} do
