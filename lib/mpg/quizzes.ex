@@ -7,14 +7,14 @@ defmodule MPG.Quizzes do
   Sets the title of the quiz
   """
   def set_title(state, title) do
-    {:ok, %State{state | title: title}}
+    %State{state | title: title}
   end
 
   @doc """
   Sets the questions of the quiz
   """
   def set_questions(state, questions) do
-    {:ok, %State{state | questions: Enum.map(questions, &struct(Question, &1))}}
+    %State{state | questions: Enum.map(questions, &struct(Question, &1))}
   end
 
   @doc """
@@ -28,12 +28,11 @@ defmodule MPG.Quizzes do
   Creates a new quiz state with the given attributes
   """
   def create_quiz(attrs) do
-    {:ok,
-     %State{
-       title: attrs.title,
-       current_question: 0,
-       questions: Enum.map(attrs.questions, &struct(Question, &1))
-     }}
+    %State{
+      title: attrs.title,
+      current_question: 0,
+      questions: Enum.map(attrs.questions, &struct(Question, &1))
+    }
   end
 
   @doc """

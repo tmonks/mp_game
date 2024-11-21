@@ -10,8 +10,7 @@ defmodule MPG.QuizzesTest do
     test "sets the title of the quiz" do
       state = %State{}
 
-      assert {:ok, %State{title: "Marvel characters"}} =
-               Quizzes.set_title(state, "Marvel characters")
+      assert %State{title: "Marvel characters"} = Quizzes.set_title(state, "Marvel characters")
     end
   end
 
@@ -28,8 +27,7 @@ defmodule MPG.QuizzesTest do
         }
       ]
 
-      assert {:ok, %State{questions: [%Question{} = question]}} =
-               Quizzes.set_questions(state, questions)
+      assert %State{questions: [%Question{} = question]} = Quizzes.set_questions(state, questions)
 
       assert question.text == "Who is the fastest Avenger?"
       assert question.answers == ["Hulk", "Thor", "Iron Man", "Captain America"]
@@ -61,7 +59,7 @@ defmodule MPG.QuizzesTest do
         ]
       }
 
-      assert {:ok, %State{} = state} = Quizzes.create_quiz(attrs)
+      assert %State{} = state = Quizzes.create_quiz(attrs)
 
       assert state.title == "Marvel characters"
       assert state.current_question == 0
@@ -270,7 +268,6 @@ defmodule MPG.QuizzesTest do
       ]
     }
 
-    {:ok, state} = Quizzes.create_quiz(attrs)
-    state
+    Quizzes.create_quiz(attrs)
   end
 end

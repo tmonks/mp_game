@@ -85,7 +85,7 @@ defmodule MPG.Quizzes.Session do
 
   @impl true
   def handle_cast({:create_quiz, title}, state) do
-    {:ok, state} = Quizzes.set_title(state, title)
+    state = Quizzes.set_title(state, title)
     broadcast_state_updated(state)
 
     # Generate questions
@@ -97,7 +97,7 @@ defmodule MPG.Quizzes.Session do
   @impl true
   def handle_cast({:generate_questions, _title}, state) do
     questions = generate_questions()
-    {:ok, state} = Quizzes.set_questions(state, questions)
+    state = Quizzes.set_questions(state, questions)
 
     broadcast_state_updated(state)
     {:noreply, state}
