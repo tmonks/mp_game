@@ -18,6 +18,7 @@ defmodule MPGWeb.QuizLive do
       socket
       |> assign(session_id: session_id)
       |> assign(state: state)
+      |> assign(quiz_state: Quizzes.current_state(state))
       |> assign_player()
 
     {:ok, socket}
@@ -36,10 +37,17 @@ defmodule MPGWeb.QuizLive do
   end
 
   @impl true
+  def handle_event("new_quiz", %{"title" => title}, socket) do
+    Session.create_quiz(:quiz_session, title)
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:state_updated, state}, socket) do
     socket =
       socket
       |> assign(state: state)
+      |> assign(quiz_state: Quizzes.current_state(state))
       |> assign_player()
 
     {:noreply, socket}
@@ -75,12 +83,12 @@ defmodule MPGWeb.QuizLive do
         show={true}
         on_cancel={JS.patch("/")}
       >
-        <div class="font-bold mb-4">Quiz Topic</div>
+        <div class="font-bold mb-4">Quiz Title</div>
         <form id="new-quiz-form" phx-submit="new_quiz">
           <div class="flex flex-col gap-4">
             <input
               type="text"
-              name="topic"
+              name="title"
               value=""
               class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
@@ -90,6 +98,12 @@ defmodule MPGWeb.QuizLive do
           </div>
         </form>
       </.modal>
+      <!-- QUIZ TITLE -->
+      <div id="quiz-title" class="text-gray-600 text-2xl font-bold mb-4">
+        <%= @state.title %>
+      </div>
+      <!-- STATUS MESSAGE -->
+      <.status_message quiz_state={@quiz_state} />
       <!-- PLAYER LIST -->
       <div class="mb-8">
         <div id="player-list" class="flex gap-2">
@@ -99,6 +113,18 @@ defmodule MPGWeb.QuizLive do
         </div>
       </div>
     <% end %>
+    """
+  end
+
+  defp status_message(assigns) do
+    ~H"""
+    <div id="current-status" class="text-gray-600 text-xl mb-4">
+      <%= case assigns.quiz_state do
+        :new -> "Waiting for the game to begin..."
+        :generating -> "Generating quiz..."
+        :joining -> "Waiting for players to join..."
+      end %>
+    </div>
     """
   end
 

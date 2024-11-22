@@ -88,7 +88,8 @@ defmodule MPG.Quizzes.Session do
     state = Quizzes.set_title(state, title)
     broadcast_state_updated(state)
 
-    # Generate questions
+    # sleep for 1 second to simulate generating questions
+    Process.sleep(1000)
     GenServer.cast(self(), {:generate_questions, title})
 
     {:noreply, state}

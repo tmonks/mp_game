@@ -13,8 +13,8 @@ defmodule MPGWeb.QuizLiveTest do
     conn = put_session(conn, :session_id, session_id)
 
     # Restart the session to clear out any state
-    Supervisor.terminate_child(MPG.Supervisor, MPG.Things.Game)
-    Supervisor.restart_child(MPG.Supervisor, MPG.Things.Game)
+    Supervisor.terminate_child(MPG.Supervisor, MPG.Quizzes.Session)
+    Supervisor.restart_child(MPG.Supervisor, MPG.Quizzes.Session)
 
     # subscribe to PubSub
     :ok = Phoenix.PubSub.subscribe(MPG.PubSub, "quiz_session")
@@ -55,5 +55,35 @@ defmodule MPGWeb.QuizLiveTest do
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
 
     assert has_element?(view, "#new-quiz-modal")
+
+    view
+    |> form("#new-quiz-form", %{title: "Marvel characters"})
+    |> render_submit()
+
+    assert_receive({:state_updated, _state})
+
+    refute has_element?(view, "#new-quiz-modal")
+  end
+
+  test "players see a status message with the current quiz status", ctx do
+    Session.add_player(:quiz_session, ctx.session_id, "Host")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+
+    assert has_element?(view, "#current-status", "Waiting")
+
+    view
+    |> form("#new-quiz-form", %{title: "Marvel characters"})
+    |> render_submit()
+
+    assert_receive({:state_updated, _state})
+    assert has_element?(view, "#current-status", "Generating")
+
+    # TODO: come up with a better way to wait for the state to be updated
+    Process.sleep(1500)
+    assert has_element?(view, "#current-status", "Waiting for players to join")
+  end
+
+  test "players can see the quiz title" do
   end
 end
