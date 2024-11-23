@@ -30,7 +30,7 @@ defmodule MPGWeb.QuizLive do
   end
 
   defp assign_current_status(%{assigns: assigns} = socket) do
-    quiz_status = Quizzes.current_state(assigns.state)
+    quiz_status = Quizzes.current_status(assigns.state)
     assign(socket, quiz_status: quiz_status)
   end
 
@@ -83,7 +83,9 @@ defmodule MPGWeb.QuizLive do
     <% else %>
       <!-- NEW QUIZ MODAL -->
       <.modal
-        :if={@live_action == :new_quiz or (@player.is_host and Quizzes.current_state(@state) == :new)}
+        :if={
+          @live_action == :new_quiz or (@player.is_host and Quizzes.current_status(@state) == :new)
+        }
         id="new-quiz-modal"
         show={true}
         on_cancel={JS.patch("/")}

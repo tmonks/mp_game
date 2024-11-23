@@ -138,15 +138,15 @@ defmodule MPG.QuizzesTest do
     end
   end
 
-  describe "current_state/1" do
+  describe "current_status/1" do
     test "returns :new if the quiz has no title" do
       state = %State{}
-      assert Quizzes.current_state(state) == :new
+      assert Quizzes.current_status(state) == :new
     end
 
     test "returns :generating if the quiz has a title, but no questions" do
       state = %State{title: "Marvel characters"}
-      assert Quizzes.current_state(state) == :generating
+      assert Quizzes.current_status(state) == :generating
     end
 
     test "returns :joining if the quiz has a title and questions, but the current_question is nil" do
@@ -169,7 +169,7 @@ defmodule MPG.QuizzesTest do
         current_question: nil
       }
 
-      assert Quizzes.current_state(state) == :joining
+      assert Quizzes.current_status(state) == :joining
     end
 
     test "returns :answering if current_question is valid but not all players have answered" do
@@ -190,7 +190,7 @@ defmodule MPG.QuizzesTest do
         ]
       }
 
-      assert Quizzes.current_state(state) == :answering
+      assert Quizzes.current_status(state) == :answering
     end
 
     test "returns :reviewing if all players have answered" do
@@ -211,7 +211,7 @@ defmodule MPG.QuizzesTest do
         ]
       }
 
-      assert Quizzes.current_state(state) == :reviewing
+      assert Quizzes.current_status(state) == :reviewing
     end
 
     test "returns :complete if the current_question is greater than the number of answers" do
@@ -228,7 +228,7 @@ defmodule MPG.QuizzesTest do
         current_question: 1
       }
 
-      assert Quizzes.current_state(state) == :complete
+      assert Quizzes.current_status(state) == :complete
     end
   end
 

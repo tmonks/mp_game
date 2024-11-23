@@ -100,7 +100,7 @@ defmodule MPG.Quizzes do
   @doc """
   Returns the current state of the quiz
   """
-  def current_state(state) do
+  def current_status(state) do
     cond do
       state.title == nil -> :new
       length(state.questions) == 0 -> :generating

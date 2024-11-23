@@ -82,12 +82,12 @@ defmodule MPG.ThingsTest do
     assert Things.all_players_answered?(state)
   end
 
-  test "current_state/1 returns :new if a question has not yet been set" do
+  test "current_status/1 returns :new if a question has not yet been set" do
     state = %State{topic: nil}
-    assert Things.current_state(state) == :new
+    assert Things.current_status(state) == :new
   end
 
-  test "current_state/1 returns :answering if a question has been set but not all players have answered" do
+  test "current_status/1 returns :answering if a question has been set but not all players have answered" do
     joe_id = UUID.uuid4()
 
     state =
@@ -95,10 +95,10 @@ defmodule MPG.ThingsTest do
       |> Things.add_player(joe_id, "Joe")
 
     refute Things.all_players_answered?(state)
-    assert Things.current_state(state) == :answering
+    assert Things.current_status(state) == :answering
   end
 
-  test "current_state/1 returns :guessing if all players have answered the question" do
+  test "current_status/1 returns :guessing if all players have answered the question" do
     joe_id = UUID.uuid4()
 
     state =
@@ -107,10 +107,10 @@ defmodule MPG.ThingsTest do
       |> Things.set_player_answer(joe_id, "banana")
 
     assert Things.all_players_answered?(state)
-    assert Things.current_state(state) == :guessing
+    assert Things.current_status(state) == :guessing
   end
 
-  test "current_state/1 returns :complete if all player answers have been revealed" do
+  test "current_status/1 returns :complete if all player answers have been revealed" do
     joe_id = UUID.uuid4()
 
     state =
@@ -119,6 +119,6 @@ defmodule MPG.ThingsTest do
       |> Things.set_player_answer(joe_id, "banana")
       |> Things.set_player_to_revealed(joe_id)
 
-    assert Things.current_state(state) == :complete
+    assert Things.current_status(state) == :complete
   end
 end

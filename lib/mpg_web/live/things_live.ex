@@ -106,13 +106,13 @@ defmodule MPGWeb.ThingsLive do
         <% end %>
       </div>
       <!-- PLAYER LIST -->
-      <%= if Things.current_state(@state) != :complete do %>
+      <%= if Things.current_status(@state) != :complete do %>
         <div class="mb-8">
           <div id="player-list" class="flex gap-2">
             <%= for player <- Enum.filter(@state.players, & !&1.revealed) do %>
               <.player_avatar
                 player={player}
-                show_answer_status={Things.current_state(@state) == :answering}
+                show_answer_status={Things.current_status(@state) == :answering}
               />
             <% end %>
           </div>
@@ -121,7 +121,7 @@ defmodule MPGWeb.ThingsLive do
       <!-- NEW QUESTION MODAL -->
       <.modal
         :if={
-          @live_action == :new_question or (@player.is_host and Things.current_state(@state) == :new)
+          @live_action == :new_question or (@player.is_host and Things.current_status(@state) == :new)
         }
         id="new-question-modal"
         show={true}
@@ -203,7 +203,7 @@ defmodule MPGWeb.ThingsLive do
           </form>
         <% end %>
 
-        <%= if @player.is_host and Things.current_state(@state) == :complete do %>
+        <%= if @player.is_host and Things.current_status(@state) == :complete do %>
           <.link
             id="new-question-button"
             class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded text-center"

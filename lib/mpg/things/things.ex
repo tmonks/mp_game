@@ -99,7 +99,7 @@ defmodule MPG.Things do
   :guessing - Players are guessing the answer
   :complete - All player answers have been revealed
   """
-  def current_state(%State{players: players, topic: topic}) do
+  def current_status(%State{players: players, topic: topic}) do
     cond do
       topic == nil -> :new
       Enum.any?(players, &(&1.current_answer == nil)) -> :answering
