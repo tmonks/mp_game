@@ -18,7 +18,7 @@ defmodule MPGWeb.QuizLive do
       socket
       |> assign(session_id: session_id)
       |> assign(state: state)
-      |> assign(quiz_state: Quizzes.current_state(state))
+      |> assign_current_status()
       |> assign_player()
 
     {:ok, socket}
@@ -27,6 +27,11 @@ defmodule MPGWeb.QuizLive do
   defp assign_player(%{assigns: assigns} = socket) do
     player = Quizzes.get_player(assigns.state, assigns.session_id)
     assign(socket, player: player)
+  end
+
+  defp assign_current_status(%{assigns: assigns} = socket) do
+    quiz_status = Quizzes.current_state(assigns.state)
+    assign(socket, quiz_status: quiz_status)
   end
 
   @impl true
@@ -47,7 +52,7 @@ defmodule MPGWeb.QuizLive do
     socket =
       socket
       |> assign(state: state)
-      |> assign(quiz_state: Quizzes.current_state(state))
+      |> assign_current_status()
       |> assign_player()
 
     {:noreply, socket}
@@ -103,7 +108,7 @@ defmodule MPGWeb.QuizLive do
         <%= @state.title %>
       </div>
       <!-- STATUS MESSAGE -->
-      <.status_message quiz_state={@quiz_state} />
+      <.status_message quiz_status={@quiz_status} />
       <!-- PLAYER LIST -->
       <div class="mb-8">
         <div id="player-list" class="flex gap-2">
@@ -119,7 +124,7 @@ defmodule MPGWeb.QuizLive do
   defp status_message(assigns) do
     ~H"""
     <div id="current-status" class="text-gray-600 text-xl mb-4">
-      <%= case assigns.quiz_state do
+      <%= case assigns.quiz_status do
         :new -> "Waiting for the game to begin..."
         :generating -> "Generating quiz..."
         :joining -> "Waiting for players to join..."

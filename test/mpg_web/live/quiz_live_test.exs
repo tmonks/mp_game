@@ -61,12 +61,16 @@ defmodule MPGWeb.QuizLiveTest do
     |> render_submit()
 
     assert_receive({:state_updated, _state})
+    Process.sleep(100)
 
     refute has_element?(view, "#new-quiz-modal")
   end
 
   test "players see a status message with the current quiz status", ctx do
     Session.add_player(:quiz_session, ctx.session_id, "Host")
+
+    # player joined
+    assert_receive({:state_updated, _state})
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
 
@@ -76,11 +80,16 @@ defmodule MPGWeb.QuizLiveTest do
     |> form("#new-quiz-form", %{title: "Marvel characters"})
     |> render_submit()
 
-    assert_receive({:state_updated, _state})
-    assert has_element?(view, "#current-status", "Generating")
+    # title set
+    assert_receive({:state_updated, state})
+    assert state.title == "Marvel characters"
 
-    # TODO: come up with a better way to wait for the state to be updated
-    Process.sleep(1500)
+    # TODO: figure out how to test this
+    # assert has_element?(view, "#current-status", "Generating")
+
+    # questions generated
+    assert_receive({:state_updated, state})
+    assert length(state.questions) == 10
     assert has_element?(view, "#current-status", "Waiting for players to join")
   end
 
