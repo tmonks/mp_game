@@ -124,6 +124,21 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#current-question", "Things that are red")
   end
 
+  test "host can click a button on the modal to generate a new question", ctx do
+    Game.add_player(:things_session, ctx.session_id, "Host")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/new_question")
+
+    assert has_element?(view, "#new-question-form")
+    assert has_element?(view, "input#question[value='']")
+
+    view
+    |> element("#generate-question-button")
+    |> render_click()
+
+    assert has_element?(view, "input#question[value='work like magic!']")
+  end
+
   test "shows check marks for players that have provided an answer", ctx do
     player1_id = ctx.session_id
     player2_id = UUID.uuid4()

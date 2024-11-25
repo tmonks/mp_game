@@ -19,8 +19,15 @@ defmodule MPGWeb.ThingsLive do
       |> assign(session_id: session_id)
       |> assign(state: state)
       |> assign_player()
+      |> assign_question_form("")
 
     {:ok, socket}
+  end
+
+  defp assign_question_form(socket, question) do
+    fields = %{"question" => question}
+    form = to_form(fields)
+    assign(socket, new_question_form: form)
   end
 
   @impl true
@@ -52,6 +59,17 @@ defmodule MPGWeb.ThingsLive do
   def handle_event("reveal", _, socket) do
     Game.set_player_to_revealed(:things_session, socket.assigns.session_id)
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("generate_question", _, socket) do
+    question = "work like magic!"
+    {:noreply, assign_question_form(socket, question)}
+  end
+
+  @impl true
+  def handle_event("validate_new_question", %{"question" => question}, socket) do
+    {:noreply, assign_question_form(socket, question)}
   end
 
   @impl true
@@ -128,19 +146,30 @@ defmodule MPGWeb.ThingsLive do
         on_cancel={JS.patch("/")}
       >
         <div class="font-bold mb-4">Things...</div>
-        <form id="new-question-form" phx-submit="set_new_question">
+        <.form
+          for={@new_question_form}
+          id="new-question-form"
+          phx-change="validate_new_question"
+          phx-submit="set_new_question"
+        >
           <div class="flex flex-col gap-4">
-            <input
+            <.input
               type="text"
-              name="question"
-              value=""
+              field={@new_question_form[:question]}
               class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
+            <a
+              id="generate-question-button"
+              phx-click="generate_question"
+              class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded text-center"
+            >
+              Generate ✨
+            </a>
             <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
               Submit
             </button>
           </div>
-        </form>
+        </.form>
       </.modal>
       <!-- ANSWERS LIST -->
       <div>
