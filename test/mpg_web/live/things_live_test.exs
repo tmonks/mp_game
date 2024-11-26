@@ -136,7 +136,9 @@ defmodule MPGWeb.ThingsLiveTest do
     |> element("#generate-question-button")
     |> render_click()
 
-    assert has_element?(view, "input#question[value='work like magic!']")
+    assert has_element?(view, "input#question")
+    # no longer empty
+    refute has_element?(view, "input#question[value='']")
   end
 
   test "shows check marks for players that have provided an answer", ctx do

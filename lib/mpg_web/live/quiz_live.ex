@@ -130,6 +130,7 @@ defmodule MPGWeb.QuizLive do
         :new -> "Waiting for the game to begin..."
         :generating -> "Generating quiz..."
         :joining -> "Waiting for players to join..."
+        _ -> nil
       end %>
     </div>
     """

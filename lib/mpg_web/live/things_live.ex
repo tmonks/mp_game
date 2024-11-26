@@ -1,6 +1,7 @@
 defmodule MPGWeb.ThingsLive do
   use MPGWeb, :live_view
 
+  alias MPG.Generator
   alias MPG.Things
   alias MPG.Things.Game
   alias Phoenix.PubSub
@@ -63,7 +64,7 @@ defmodule MPGWeb.ThingsLive do
 
   @impl true
   def handle_event("generate_question", _, socket) do
-    question = "work like magic!"
+    question = Generator.random_thing()
     {:noreply, assign_question_form(socket, question)}
   end
 
@@ -161,7 +162,7 @@ defmodule MPGWeb.ThingsLive do
             <a
               id="generate-question-button"
               phx-click="generate_question"
-              class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded text-center"
+              class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded text-center cursor-pointer"
             >
               Generate ✨
             </a>
