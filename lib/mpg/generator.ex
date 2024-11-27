@@ -231,7 +231,7 @@ defmodule MPG.Generator do
     "people like about you",
     "you shouldn't say to your doctor",
     "that confirm you are losing your mind",
-    "that dont last very long",
+    "that don't last very long",
     "you didn't realize until it was too late",
     "you keep hidden",
     "you would like to see in your horoscope",

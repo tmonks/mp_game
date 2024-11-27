@@ -164,7 +164,7 @@ defmodule MPGWeb.ThingsLive do
               phx-click="generate_question"
               class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded text-center cursor-pointer"
             >
-              Generate ✨
+              Generate <.icon name="hero-sparkles-solid" class="h-5 w-5" />
             </a>
             <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
               Submit
@@ -194,7 +194,7 @@ defmodule MPGWeb.ThingsLive do
         <%= if @player.current_answer do %>
           <div class="flex flex-col gap-6">
             <div class="p-2">
-              <div class="block text-gray-700 font-bold mb-2">
+              <div class="block text-xl font-bold text-gray-700 mb-2">
                 My answer
               </div>
               <div id="my-answer" class="text-gray-600 text-base">
@@ -278,7 +278,7 @@ defmodule MPGWeb.ThingsLive do
 
   defp player_answer(assigns) do
     ~H"""
-    <li id={"answer-#{@player.id}"} class="flex items-center py-4 px-6 gap-2">
+    <li id={"answer-#{@player.id}"} class="flex items-center py-2 px-6 gap-2">
       <p class="text-gray-600 text-base"><%= @player.current_answer %></p>
       <%= if @player.revealed do %>
         <.player_avatar player={@player} show_answer_status={false} />

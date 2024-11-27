@@ -301,4 +301,16 @@ defmodule MPGWeb.ThingsLiveTest do
     :timer.sleep(100)
     assert has_element?(view, "#current-question", "Things that are awesome")
   end
+
+  test "can handle at least 8 players", ctx do
+    player1_id = ctx.session_id
+    Game.add_player(:things_session, player1_id, "P1")
+
+    for i <- 2..8 do
+      Game.add_player(:things_session, UUID.uuid4(), "Pl#{i}")
+    end
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    # open_browser(view)
+  end
 end
