@@ -107,4 +107,12 @@ defmodule MPG.Things do
       true -> :complete
     end
   end
+
+  @doc """
+  Removes the player with the specified id
+  """
+  def remove_player(%State{players: players} = state, id) do
+    players = Enum.reject(players, &(&1.id == id))
+    %State{state | players: players}
+  end
 end

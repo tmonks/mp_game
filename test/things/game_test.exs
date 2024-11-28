@@ -117,4 +117,15 @@ defmodule MPG.Things.GameTest do
     assert_receive({:state_updated, state})
     assert [%Player{name: "Joe", revealed: true}] = state.players
   end
+
+  test "remove_player/2", %{server: server} do
+    Game.add_player(server, @player_id, "Host")
+    joe_id = UUID.uuid4()
+    Game.add_player(server, joe_id, "Player")
+    Game.remove_player(server, joe_id)
+
+    assert_receive({:state_updated, state})
+    assert %State{players: [player]} = state
+    assert %Player{name: "Host", is_host: true, id: @player_id} = player
+  end
 end

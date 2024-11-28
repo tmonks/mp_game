@@ -121,4 +121,18 @@ defmodule MPG.ThingsTest do
 
     assert Things.current_status(state) == :complete
   end
+
+  test "remove_player/2 removes the player with the given id" do
+    joe_id = UUID.uuid4()
+    jane_id = UUID.uuid4()
+
+    state =
+      Things.new("foo")
+      |> Things.add_player(joe_id, "Joe")
+      |> Things.add_player(jane_id, "Jane")
+
+    assert %State{players: players} = Things.remove_player(state, joe_id)
+    assert length(players) == 1
+    assert Enum.find(players, &(&1.id == joe_id)) == nil
+  end
 end

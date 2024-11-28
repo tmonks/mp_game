@@ -54,6 +54,13 @@ defmodule MPG.Things.Game do
     GenServer.cast(server, {:new_question, topic})
   end
 
+  @doc """
+  Removes player with the given id.
+  """
+  def remove_player(server, player_id) do
+    GenServer.cast(server, {:remove_player, player_id})
+  end
+
   @impl true
   def init(:ok) do
     {:ok, %State{players: []}}
@@ -98,6 +105,13 @@ defmodule MPG.Things.Game do
   @impl true
   def handle_cast({:set_player_to_revealed, player_id}, state) do
     state = Things.set_player_to_revealed(state, player_id)
+    broadcast_state_updated(state)
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_cast({:remove_player, player_id}, state) do
+    state = Things.remove_player(state, player_id)
     broadcast_state_updated(state)
     {:noreply, state}
   end
