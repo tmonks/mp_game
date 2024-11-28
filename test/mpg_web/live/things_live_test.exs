@@ -124,6 +124,25 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#current-question", "Things that are red")
   end
 
+  test "host gets an error if they try to submit an empty question", ctx do
+    Game.add_player(:things_session, ctx.session_id, "Host")
+    Game.new_question(:things_session, "Things that are red")
+    Game.set_player_answer(:things_session, ctx.session_id, "apple")
+    Game.set_player_to_revealed(:things_session, ctx.session_id)
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/")
+
+    view
+    |> element("#new-question-button")
+    |> render_click()
+
+    assert_patch(view, "/new_question")
+
+    assert view
+           |> form("#new-question-form", %{question: ""})
+           |> render_change() =~ "Question can&#39;t be blank"
+  end
+
   test "host can click a button on the modal to generate a new question", ctx do
     Game.add_player(:things_session, ctx.session_id, "Host")
 

@@ -27,8 +27,17 @@ defmodule MPGWeb.ThingsLive do
 
   defp assign_question_form(socket, question) do
     fields = %{"question" => question}
-    form = to_form(fields)
+    errors = get_errors(question)
+    form = to_form(fields, errors: errors)
     assign(socket, new_question_form: form)
+  end
+
+  defp get_errors(question) do
+    if question in ["", nil] do
+      [question: {"Question can't be blank", []}]
+    else
+      []
+    end
   end
 
   @impl true
