@@ -310,7 +310,7 @@ defmodule MPGWeb.ThingsLiveTest do
       Game.add_player(:things_session, UUID.uuid4(), "Pl#{i}")
     end
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    {:ok, _view, _html} = live(ctx.conn, ~p"/")
     # open_browser(view)
   end
 end

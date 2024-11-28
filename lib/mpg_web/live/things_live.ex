@@ -77,7 +77,10 @@ defmodule MPGWeb.ThingsLive do
   def handle_event("set_new_question", %{"question" => question}, socket) do
     Game.new_question(:things_session, question)
 
-    {:noreply, push_patch(socket, to: "/")}
+    {:noreply,
+     socket
+     |> assign_question_form("")
+     |> push_patch(to: "/")}
   end
 
   @impl true
