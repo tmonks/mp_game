@@ -178,7 +178,10 @@ defmodule MPGWeb.ThingsLive do
             >
               Generate <.icon name="hero-sparkles-solid" class="h-5 w-5" />
             </a>
-            <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
+            <button
+              disabled={length(@new_question_form.errors) > 0}
+              class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+            >
               Submit
             </button>
           </div>

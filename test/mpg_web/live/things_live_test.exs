@@ -223,6 +223,22 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#waiting-message")
   end
 
+  test "submit answer button is disabled until the player enters something", ctx do
+    Game.new_question(:things_session, "Things that are yummy")
+    Game.add_player(:things_session, ctx.session_id, "Peter")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/")
+
+    assert has_element?(view, "#answer-form button[disabled]")
+
+    view
+    |> form("#answer-form", %{answer: "bananas"})
+    |> render_change()
+
+    assert has_element?(view, "#answer-form button")
+    refute has_element?(view, "#answer-form button[disabled]")
+  end
+
   test "player can submit answer", %{conn: conn, session_id: session_id} do
     Game.new_question(:things_session, "Things that are yummy")
     Game.add_player(:things_session, session_id, "Peter")
