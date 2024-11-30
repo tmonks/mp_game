@@ -66,7 +66,7 @@ defmodule MPGWeb.QuizLiveTest do
     refute has_element?(view, "#new-quiz-modal")
   end
 
-  test "players see a status message with the current quiz status", ctx do
+  test "players see the quiz title and status", ctx do
     Session.add_player(:quiz_session, ctx.session_id, "Host")
 
     # player joined
@@ -74,7 +74,7 @@ defmodule MPGWeb.QuizLiveTest do
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
 
-    assert has_element?(view, "#current-status", "Waiting")
+    assert has_element?(view, "#current-status", "Waiting for the host to set the quiz topic")
 
     view
     |> form("#new-quiz-form", %{title: "Marvel characters"})
@@ -85,7 +85,7 @@ defmodule MPGWeb.QuizLiveTest do
     assert state.title == "Marvel characters"
 
     # TODO: figure out how to test this
-    # assert has_element?(view, "#current-status", "Generating")
+    # assert has_element?(view, "#current-status", "Generating quiz")
 
     # questions generated
     assert_receive({:state_updated, state})
@@ -93,6 +93,29 @@ defmodule MPGWeb.QuizLiveTest do
     assert has_element?(view, "#current-status", "Waiting for players to join")
   end
 
-  test "players can see the quiz title" do
+  test "host can click a 'Start Quiz' button to start the quiz after it's generated", ctx do
+    Session.add_player(:quiz_session, ctx.session_id, "Host")
+    assert_receive({:state_updated, _state})
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+
+    view
+    |> form("#new-quiz-form", %{title: "Marvel characters"})
+    |> render_submit()
+
+    # title set
+    assert_receive({:state_updated, state})
+    assert state.title == "Marvel characters"
+
+    # questions generated
+    assert_receive({:state_updated, state})
+    assert length(state.questions) == 10
+
+    view
+    |> element("#next-button")
+    |> render_click()
+
+    assert_receive({:state_updated, state})
+    assert state.current_question == 0
   end
 end

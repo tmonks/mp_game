@@ -204,7 +204,7 @@ defmodule MPGWeb.ThingsLive do
           </div>
         <% end %>
       </div>
-      <!-- player controls section -->
+      <!-- PLAYER CONTROLS -->
       <div class="flex flex-col mt-6 gap-4">
         <%= if @player.current_answer do %>
           <div class="flex flex-col gap-6">

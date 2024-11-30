@@ -48,7 +48,15 @@ defmodule MPGWeb.QuizLive do
   end
 
   @impl true
+  def handle_event("next_question", _params, socket) do
+    Session.start_quiz(:quiz_session)
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:state_updated, state}, socket) do
+    # IO.inspect(state)
+
     socket =
       socket
       |> assign(state: state)
@@ -119,7 +127,43 @@ defmodule MPGWeb.QuizLive do
           <% end %>
         </div>
       </div>
+      <!-- QUESTION -->
+      <%= if Quizzes.current_status(@state) == :answering do %>
+        <.question_component question={@state.questions |> Enum.at(@state.current_question)} />
+      <% end %>
+      <!-- HOST CONTROLS -->
+      <%= if @player.is_host and Quizzes.current_status(@state) == :joining do %>
+        <button
+          id="next-button"
+          phx-click="next_question"
+          class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Next Question
+        </button>
+      <% end %>
     <% end %>
+    """
+  end
+
+  defp question_component(assigns) do
+    ~H"""
+    <div id="question">
+      <div id="question-text" class="text-gray-700 text-xl mb-4">
+        <%= @question.text %>
+      </div>
+      <!-- ANSWERS -->
+      <div id="answers" class="flex flex-col gap-4">
+        <%= for {answer, i} <- Enum.with_index(@question.answers) do %>
+          <button
+            phx-click="answer_question"
+            phx-value-answer={i}
+            class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded text-left"
+          >
+            <%= answer %>
+          </button>
+        <% end %>
+      </div>
+    </div>
     """
   end
 
@@ -127,7 +171,7 @@ defmodule MPGWeb.QuizLive do
     ~H"""
     <div id="current-status" class="text-gray-600 text-xl mb-4">
       <%= case assigns.quiz_status do
-        :new -> "Waiting for the game to begin..."
+        :new -> "Waiting for the host to set the quiz topic..."
         :generating -> "Generating quiz..."
         :joining -> "Waiting for players to join..."
         _ -> nil
