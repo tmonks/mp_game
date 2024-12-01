@@ -118,4 +118,34 @@ defmodule MPGWeb.QuizLiveTest do
     assert_receive({:state_updated, state})
     assert state.current_question == 0
   end
+
+  test "players can answer questions and show they're ready", ctx do
+    start_quiz(ctx.session_id)
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+
+    view
+    |> element("#answer-0")
+    |> render_click()
+
+    assert_receive({:state_updated, state})
+    assert [%{current_answer: 0}] = state.players
+
+    assert has_element?(view, "#player-#{ctx.session_id} [data-role=ready-check-mark]")
+  end
+
+  defp start_quiz(player_id) do
+    # join player
+    Session.add_player(:quiz_session, player_id, "Host")
+    assert_receive({:state_updated, _state})
+
+    # set title and questions
+    Session.create_quiz(:quiz_session, "Marvel characters")
+    assert_receive({:state_updated, _state})
+    assert_receive({:state_updated, _state})
+
+    # start quiz
+    Session.start_quiz(:quiz_session)
+    assert_receive({:state_updated, _state})
+  end
 end

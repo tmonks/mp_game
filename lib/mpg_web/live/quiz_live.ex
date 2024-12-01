@@ -54,6 +54,13 @@ defmodule MPGWeb.QuizLive do
   end
 
   @impl true
+  def handle_event("answer_question", %{"answer" => answer}, socket) do
+    answer = String.to_integer(answer)
+    Session.answer_question(:quiz_session, socket.assigns.session_id, answer)
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:state_updated, state}, socket) do
     # IO.inspect(state)
 
@@ -123,12 +130,12 @@ defmodule MPGWeb.QuizLive do
       <div class="mb-8">
         <div id="player-list" class="flex gap-2">
           <%= for player <- @state.players do %>
-            <.player_avatar player={player} />
+            <.player_avatar player={player} show_answer_status={true} />
           <% end %>
         </div>
       </div>
       <!-- QUESTION -->
-      <%= if Quizzes.current_status(@state) == :answering do %>
+      <%= if Quizzes.current_status(@state) in [:answering, :reviewing] do %>
         <.question_component question={@state.questions |> Enum.at(@state.current_question)} />
       <% end %>
       <!-- HOST CONTROLS -->
@@ -155,6 +162,7 @@ defmodule MPGWeb.QuizLive do
       <div id="answers" class="flex flex-col gap-4">
         <%= for {answer, i} <- Enum.with_index(@question.answers) do %>
           <button
+            id={"answer-#{i}"}
             phx-click="answer_question"
             phx-value-answer={i}
             class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded text-left"
@@ -180,6 +188,7 @@ defmodule MPGWeb.QuizLive do
     """
   end
 
+  # TODO: default show_answer_status to false
   defp player_avatar(assigns) do
     ~H"""
     <div
