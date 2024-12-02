@@ -1,7 +1,10 @@
 defmodule MPGWeb.QuizLive do
   use MPGWeb, :live_view
+  use Phoenix.Component
 
   alias MPG.Quizzes
+  alias MPG.Quizzes.Player
+  alias MPG.Quizzes.Question
   alias MPG.Quizzes.Session
   alias Phoenix.PubSub
 
@@ -136,7 +139,10 @@ defmodule MPGWeb.QuizLive do
       </div>
       <!-- QUESTION -->
       <%= if Quizzes.current_status(@state) in [:answering, :reviewing] do %>
-        <.question_component question={@state.questions |> Enum.at(@state.current_question)} />
+        <.question_component
+          question={@state.questions |> Enum.at(@state.current_question)}
+          show_answer={Quizzes.current_status(@state) == :reviewing}
+        />
       <% end %>
       <!-- HOST CONTROLS -->
       <%= if @player.is_host and Quizzes.current_status(@state) == :joining do %>
@@ -149,6 +155,41 @@ defmodule MPGWeb.QuizLive do
         </button>
       <% end %>
     <% end %>
+    """
+  end
+
+  attr :question, Question, required: true
+  attr :show_answer, :boolean, default: false
+
+  defp question_component(%{show_answer: true} = assigns) do
+    ~H"""
+    <div id="question">
+      <div id="question-text" class="text-gray-700 text-xl mb-4">
+        <%= @question.text %>
+      </div>
+      <!-- ANSWERS -->
+      <div id="answers" class="flex flex-col gap-4">
+        <%= for {answer, i} <- Enum.with_index(@question.answers) do %>
+          <%= if i == @question.correct_answer do %>
+            <div
+              id={"answer-#{i}"}
+              class="bg-green-500 text-white py-2 px-4 rounded text-left"
+              data-role="correct"
+            >
+              <%= answer %>
+            </div>
+          <% else %>
+            <div
+              id={"answer-#{i}"}
+              class="bg-red-500 text-white py-2 px-4 rounded text-left"
+              data-role="incorrect"
+            >
+              <%= answer %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
     """
   end
 
@@ -188,11 +229,14 @@ defmodule MPGWeb.QuizLive do
     """
   end
 
-  # TODO: default show_answer_status to false
+  attr :player, Player, required: true
+  attr :size, :integer, default: 12
+  attr :show_answer_status, :boolean, default: false
+
   defp player_avatar(assigns) do
     ~H"""
     <div
-      class="relative flex items-center justify-center w-12 h-12 text-white font-bold rounded-full"
+      class={"relative flex items-center justify-center w-#{@size} h-#{@size} text-white font-bold rounded-full"}
       data-role="avatar"
       style={"background-color: #{@player.color}"}
       id={"player-" <> @player.id}

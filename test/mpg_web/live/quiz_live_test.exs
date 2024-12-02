@@ -134,6 +134,24 @@ defmodule MPGWeb.QuizLiveTest do
     assert has_element?(view, "#player-#{ctx.session_id} [data-role=ready-check-mark]")
   end
 
+  test "after all players have answered, the correct answer is revealed", ctx do
+    start_quiz(ctx.session_id)
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+
+    view
+    |> element("#answer-0")
+    |> render_click()
+
+    assert_receive({:state_updated, state})
+    assert [%{current_answer: 0}] = state.players
+
+    assert has_element?(view, "#answer-0[data-role=correct]")
+    assert has_element?(view, "#answer-1[data-role=incorrect]")
+    assert has_element?(view, "#answer-2[data-role=incorrect]")
+    assert has_element?(view, "#answer-2[data-role=incorrect]")
+  end
+
   defp start_quiz(player_id) do
     # join player
     Session.add_player(:quiz_session, player_id, "Host")
