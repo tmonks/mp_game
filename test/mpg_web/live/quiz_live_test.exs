@@ -152,6 +152,29 @@ defmodule MPGWeb.QuizLiveTest do
     assert has_element?(view, "#answer-2[data-role=incorrect]")
   end
 
+  test "after all players have answered, the host gets a button to move to the next question",
+       ctx do
+    start_quiz(ctx.session_id)
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+
+    view
+    |> element("#answer-0")
+    |> render_click()
+
+    assert_receive({:state_updated, state})
+    assert [%{current_answer: 0}] = state.players
+
+    assert has_element?(view, "#next-button")
+
+    view
+    |> element("#next-button")
+    |> render_click()
+
+    assert_receive({:state_updated, state})
+    assert state.current_question == 1
+  end
+
   defp start_quiz(player_id) do
     # join player
     Session.add_player(:quiz_session, player_id, "Host")

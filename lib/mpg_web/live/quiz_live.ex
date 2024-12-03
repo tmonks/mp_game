@@ -52,7 +52,7 @@ defmodule MPGWeb.QuizLive do
 
   @impl true
   def handle_event("next_question", _params, socket) do
-    Session.start_quiz(:quiz_session)
+    Session.next_question(:quiz_session)
     {:noreply, socket}
   end
 
@@ -133,7 +133,7 @@ defmodule MPGWeb.QuizLive do
       <div class="mb-8">
         <div id="player-list" class="flex gap-2">
           <%= for player <- @state.players do %>
-            <.player_avatar player={player} show_answer_status={true} />
+            <.player_avatar player={player} show_answer_status={@quiz_status == :answering} />
           <% end %>
         </div>
       </div>
@@ -145,7 +145,7 @@ defmodule MPGWeb.QuizLive do
         />
       <% end %>
       <!-- HOST CONTROLS -->
-      <%= if @player.is_host and Quizzes.current_status(@state) == :joining do %>
+      <%= if @player.is_host and Quizzes.current_status(@state) in [:joining, :reviewing] do %>
         <button
           id="next-button"
           phx-click="next_question"
@@ -163,7 +163,7 @@ defmodule MPGWeb.QuizLive do
 
   defp question_component(%{show_answer: true} = assigns) do
     ~H"""
-    <div id="question">
+    <div id="question" class="my-6">
       <div id="question-text" class="text-gray-700 text-xl mb-4">
         <%= @question.text %>
       </div>
@@ -173,7 +173,7 @@ defmodule MPGWeb.QuizLive do
           <%= if i == @question.correct_answer do %>
             <div
               id={"answer-#{i}"}
-              class="bg-green-500 text-white py-2 px-4 rounded text-left"
+              class="bg-teal-100 text-teal-900 font-bold py-2 px-4 rounded text-left"
               data-role="correct"
             >
               <%= answer %>
@@ -181,7 +181,7 @@ defmodule MPGWeb.QuizLive do
           <% else %>
             <div
               id={"answer-#{i}"}
-              class="bg-red-500 text-white py-2 px-4 rounded text-left"
+              class="bg-red-100 text-red-700 py-2 px-4 rounded text-left"
               data-role="incorrect"
             >
               <%= answer %>
