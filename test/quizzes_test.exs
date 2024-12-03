@@ -117,6 +117,24 @@ defmodule MPG.QuizzesTest do
       assert state.current_question == 1
     end
 
+    test "starts a new quiz by setting the current question from nil to 0" do
+      state = %State{
+        title: "Marvel characters",
+        questions: [
+          %{
+            text: "Who is the strongest Avenger?",
+            answers: ["Hulk", "Iron Man", "Thor", "Captain America"],
+            correct_answer: 0,
+            explanation: "Hulk is the strongest Avenger."
+          }
+        ],
+        current_question: nil
+      }
+
+      assert state.current_question == nil
+      assert %{current_question: 0} = Quizzes.next_question(state)
+    end
+
     test "updates each player's score and resets their current answer" do
       player1_id = UUID.uuid4()
       player2_id = UUID.uuid4()

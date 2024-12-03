@@ -85,7 +85,10 @@ defmodule MPG.Quizzes do
 
   @doc """
   Updates all players' scores based on the current question and moves to the next question
+  If quiz is new (current_question is nil), it sets the current_question to 0
   """
+  def next_question(%{current_question: nil} = state), do: %{state | current_question: 0}
+
   def next_question(state) do
     correct_answer = get_answer_for_current_question(state)
     players = Enum.map(state.players, &update_player_score(&1, correct_answer))
