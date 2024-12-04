@@ -142,6 +142,7 @@ defmodule MPGWeb.QuizLive do
         <.question_component
           question={@state.questions |> Enum.at(@state.current_question)}
           show_answer={Quizzes.current_status(@state) == :reviewing}
+          players={@state.players}
         />
       <% end %>
       <!-- HOST CONTROLS -->
@@ -160,6 +161,7 @@ defmodule MPGWeb.QuizLive do
 
   attr :question, Question, required: true
   attr :show_answer, :boolean, default: false
+  attr :players, :list, default: []
 
   defp question_component(%{show_answer: true} = assigns) do
     ~H"""
@@ -173,18 +175,26 @@ defmodule MPGWeb.QuizLive do
           <%= if i == @question.correct_answer do %>
             <div
               id={"answer-#{i}"}
-              class="bg-teal-100 text-teal-900 font-bold py-2 px-4 rounded text-left"
+              class="bg-teal-100 text-teal-900 font-bold py-2 px-4 rounded text-left flex gap-2"
               data-role="correct"
             >
-              <%= answer %>
+              <div><%= answer %></div>
+              <!-- player markers for players with this answer -->
+              <%= for player <- Enum.filter(@players, & &1.current_answer == i) do %>
+                <.player_marker player={player} />
+              <% end %>
             </div>
           <% else %>
             <div
               id={"answer-#{i}"}
-              class="bg-red-100 text-red-700 py-2 px-4 rounded text-left"
+              class="bg-red-100 text-red-700 py-2 px-4 rounded text-left flex gap-2"
               data-role="incorrect"
             >
-              <%= answer %>
+              <div><%= answer %></div>
+              <!-- player markers for players with this answer -->
+              <%= for player <- Enum.filter(@players, & &1.current_answer == i) do %>
+                <.player_marker player={player} />
+              <% end %>
             </div>
           <% end %>
         <% end %>
@@ -241,7 +251,7 @@ defmodule MPGWeb.QuizLive do
       style={"background-color: #{@player.color}"}
       id={"player-" <> @player.id}
     >
-      <%= String.slice(assigns.player.name, 0..2) %>
+      <%= String.slice(@player.name, 0..2) %>
       <%= if @player.current_answer != nil and @show_answer_status do %>
         <div
           data-role="ready-check-mark"
@@ -258,6 +268,21 @@ defmodule MPGWeb.QuizLive do
           </svg>
         </div>
       <% end %>
+    </div>
+    """
+  end
+
+  attr :player, Player, required: true
+
+  defp player_marker(assigns) do
+    ~H"""
+    <div
+      class="relative flex items-center justify-center w-8 h-8 text-xs text-white font-bold rounded-full"
+      data-role="avatar"
+      style={"background-color: #{@player.color}"}
+      id={"player-marker-" <> @player.id}
+    >
+      <%= String.slice(@player.name, 0..2) %>
     </div>
     """
   end
