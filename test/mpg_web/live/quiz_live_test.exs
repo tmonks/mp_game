@@ -134,8 +134,9 @@ defmodule MPGWeb.QuizLiveTest do
     assert has_element?(view, "#player-#{ctx.session_id} [data-role=ready-check-mark]")
   end
 
-  test "after all players have answered, the correct answer is revealed", ctx do
+  test "reveals the correct answer after player answers", ctx do
     start_quiz(ctx.session_id)
+    add_player("Player 2")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
 
@@ -144,16 +145,34 @@ defmodule MPGWeb.QuizLiveTest do
     |> render_click()
 
     assert_receive({:state_updated, state})
-    assert [%{current_answer: 0}] = state.players
+    assert [%{current_answer: 0}, _player2] = state.players
 
     assert has_element?(view, "#answer-0[data-role=correct]")
+  end
+
+  test "shows if the user's answer was incorrect", ctx do
+    start_quiz(ctx.session_id)
+    add_player("Player 2")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+
+    view
+    |> element("#answer-1")
+    |> render_click()
+
+    assert_receive({:state_updated, state})
+    assert [%{current_answer: 1}, _player2] = state.players
+
     assert has_element?(view, "#answer-1[data-role=incorrect]")
-    assert has_element?(view, "#answer-2[data-role=incorrect]")
-    assert has_element?(view, "#answer-2[data-role=incorrect]")
+    # other answers are NOT marked incorrect
+    refute has_element?(view, "#answer-0[data-role=incorrect]")
+    refute has_element?(view, "#answer-2[data-role=incorrect]")
+    refute has_element?(view, "#answer-3[data-role=incorrect]")
   end
 
   test "after player answers, they can see player markers next to the answers", ctx do
     start_quiz(ctx.session_id)
+    add_player("Player 2")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
 
@@ -162,7 +181,7 @@ defmodule MPGWeb.QuizLiveTest do
     |> render_click()
 
     assert_receive({:state_updated, state})
-    assert [%{current_answer: 0}] = state.players
+    assert [%{current_answer: 0}, _player2] = state.players
 
     assert has_element?(view, "#answer-0 #player-marker-#{ctx.session_id}")
   end
@@ -203,5 +222,12 @@ defmodule MPGWeb.QuizLiveTest do
     # start quiz
     Session.start_quiz(:quiz_session)
     assert_receive({:state_updated, _state})
+  end
+
+  defp add_player(name) do
+    id = UUID.uuid4()
+    Session.add_player(:quiz_session, id, name)
+    assert_receive({:state_updated, _state})
+    id
   end
 end

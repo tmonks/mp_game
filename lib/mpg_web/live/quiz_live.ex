@@ -141,7 +141,7 @@ defmodule MPGWeb.QuizLive do
       <%= if Quizzes.current_status(@state) in [:answering, :reviewing] do %>
         <.question_component
           question={@state.questions |> Enum.at(@state.current_question)}
-          show_answer={Quizzes.current_status(@state) == :reviewing}
+          show_answer={@player.current_answer != nil}
           players={@state.players}
         />
       <% end %>
