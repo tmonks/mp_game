@@ -121,6 +121,7 @@ defmodule MPGWeb.QuizLiveTest do
 
   test "players can answer questions and show they're ready", ctx do
     start_quiz(ctx.session_id)
+    add_player("Player 2")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
 
@@ -129,7 +130,7 @@ defmodule MPGWeb.QuizLiveTest do
     |> render_click()
 
     assert_receive({:state_updated, state})
-    assert [%{current_answer: 0}] = state.players
+    assert [%{current_answer: 0}, _player2] = state.players
 
     assert has_element?(view, "#player-#{ctx.session_id} [data-role=ready-check-mark]")
   end

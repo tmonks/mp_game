@@ -141,7 +141,7 @@ defmodule MPGWeb.QuizLive do
       <%= if Quizzes.current_status(@state) in [:answering, :reviewing] do %>
         <.question_component
           question={@state.questions |> Enum.at(@state.current_question)}
-          show_answer={@player.current_answer != nil}
+          current_answer={@player.current_answer}
           players={@state.players}
         />
       <% end %>
@@ -160,50 +160,10 @@ defmodule MPGWeb.QuizLive do
   end
 
   attr :question, Question, required: true
-  attr :show_answer, :boolean, default: false
+  attr :current_answer, :boolean, default: nil
   attr :players, :list, default: []
 
-  defp question_component(%{show_answer: true} = assigns) do
-    ~H"""
-    <div id="question" class="my-6">
-      <div id="question-text" class="text-gray-700 text-xl mb-4">
-        <%= @question.text %>
-      </div>
-      <!-- ANSWERS -->
-      <div id="answers" class="flex flex-col gap-4">
-        <%= for {answer, i} <- Enum.with_index(@question.answers) do %>
-          <%= if i == @question.correct_answer do %>
-            <div
-              id={"answer-#{i}"}
-              class="bg-teal-100 text-teal-900 font-bold py-2 px-4 rounded text-left flex gap-2"
-              data-role="correct"
-            >
-              <div><%= answer %></div>
-              <!-- player markers for players with this answer -->
-              <%= for player <- Enum.filter(@players, & &1.current_answer == i) do %>
-                <.player_marker player={player} />
-              <% end %>
-            </div>
-          <% else %>
-            <div
-              id={"answer-#{i}"}
-              class="bg-red-100 text-red-700 py-2 px-4 rounded text-left flex gap-2"
-              data-role="incorrect"
-            >
-              <div><%= answer %></div>
-              <!-- player markers for players with this answer -->
-              <%= for player <- Enum.filter(@players, & &1.current_answer == i) do %>
-                <.player_marker player={player} />
-              <% end %>
-            </div>
-          <% end %>
-        <% end %>
-      </div>
-    </div>
-    """
-  end
-
-  defp question_component(assigns) do
+  defp question_component(%{current_answer: nil} = assigns) do
     ~H"""
     <div id="question">
       <div id="question-text" class="text-gray-700 text-xl mb-4">
@@ -225,6 +185,60 @@ defmodule MPGWeb.QuizLive do
     </div>
     """
   end
+
+  defp question_component(assigns) do
+    ~H"""
+    <div id="question" class="my-6">
+      <div id="question-text" class="text-gray-700 text-xl mb-4">
+        <%= @question.text %>
+      </div>
+      <!-- ANSWERS -->
+      <div id="answers" class="flex flex-col gap-4">
+        <%= for {answer, i} <- Enum.with_index(@question.answers) do %>
+          <.answer_component
+            answer={answer}
+            index={i}
+            status={get_answer_status(i, @question.correct_answer, @current_answer)}
+            players={@players}
+          />
+        <% end %>
+      </div>
+    </div>
+    """
+  end
+
+  defp get_answer_status(index, correct_answer, players_answer) do
+    cond do
+      index == correct_answer -> :correct
+      index == players_answer -> :incorrect
+      true -> :not_selected
+    end
+  end
+
+  attr :answer, :string, required: true
+  attr :index, :integer, required: true
+  attr :status, :atom, default: :not_selected
+  attr :players, :list, default: []
+
+  defp answer_component(assigns) do
+    ~H"""
+    <div
+      id={"answer-#{@index}"}
+      class={"py-2 px-4 rounded text-left flex gap-2 #{classes_for_answer_status(@status)}"}
+      data-role={@status}
+    >
+      <div><%= @answer %></div>
+      <!-- player markers for players with this answer -->
+      <%= for player <- Enum.filter(@players, & &1.current_answer == @index) do %>
+        <.player_marker player={player} />
+      <% end %>
+    </div>
+    """
+  end
+
+  defp classes_for_answer_status(:correct), do: "bg-teal-100 text-teal-900 font-bold"
+  defp classes_for_answer_status(:incorrect), do: "bg-red-100 text-red-700"
+  defp classes_for_answer_status(_), do: "bg-gray-200 text-gray-800"
 
   defp status_message(assigns) do
     ~H"""
