@@ -203,6 +203,16 @@ defmodule MPGWeb.QuizLive do
           />
         <% end %>
       </div>
+      <!-- EXPLANATION -->
+      <%= if @current_answer == @question.correct_answer do %>
+        <div id="explanation" class="mt-6">
+          <span class="font-medium text-green-600">Correct!</span> <%= @question.explanation %>
+        </div>
+      <% else %>
+        <div id="explanation" class="mt-6">
+          <span class="font-medium text-red-600">Incorrect.</span> <%= @question.explanation %>
+        </div>
+      <% end %>
     </div>
     """
   end

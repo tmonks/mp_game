@@ -166,9 +166,45 @@ defmodule MPGWeb.QuizLiveTest do
 
     assert has_element?(view, "#answer-1[data-role=incorrect]")
     # other answers are NOT marked incorrect
-    refute has_element?(view, "#answer-0[data-role=incorrect]")
-    refute has_element?(view, "#answer-2[data-role=incorrect]")
-    refute has_element?(view, "#answer-3[data-role=incorrect]")
+    assert has_element?(view, "#answer-0[data-role=correct]")
+    assert has_element?(view, "#answer-2[data-role=not_selected]")
+    assert has_element?(view, "#answer-3[data-role=not_selected]")
+  end
+
+  test "shows 'Correct' with the explanation if the player's answer was correct", ctx do
+    start_quiz(ctx.session_id)
+    add_player("Player 2")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+
+    refute has_element?(view, "#explanation")
+
+    view
+    |> element("#answer-0")
+    |> render_click()
+
+    assert_receive({:state_updated, state})
+    assert [%{current_answer: 0}, _player2] = state.players
+
+    assert has_element?(view, "#explanation", "Correct! Iron Man (2008)")
+  end
+
+  test "shows 'Incorrect' with the explanation if the player's answer was correct", ctx do
+    start_quiz(ctx.session_id)
+    add_player("Player 2")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+
+    refute has_element?(view, "#explanation")
+
+    view
+    |> element("#answer-1")
+    |> render_click()
+
+    assert_receive({:state_updated, state})
+    assert [%{current_answer: 1}, _player2] = state.players
+
+    assert has_element?(view, "#explanation", "Incorrect. Iron Man (2008)")
   end
 
   test "after player answers, they can see player markers next to the answers", ctx do
