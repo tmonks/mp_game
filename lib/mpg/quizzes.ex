@@ -18,13 +18,6 @@ defmodule MPG.Quizzes do
   end
 
   @doc """
-  Starts the quiz by setting current_question to 0
-  """
-  def start_quiz(state) do
-    %State{state | current_question: 0}
-  end
-
-  @doc """
   Creates a new quiz state with the given attributes
   """
   def create_quiz(attrs) do

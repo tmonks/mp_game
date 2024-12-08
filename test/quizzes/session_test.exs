@@ -66,16 +66,6 @@ defmodule MPG.Quizzes.SessionTest do
     assert Enum.at(state.questions, 0).text == "What is the first movie in the MCU?"
   end
 
-  test "start_quiz/2 sets the current_question to 0", %{server: server} do
-    state = Session.get_state(server)
-    assert state.current_question == nil
-
-    Session.start_quiz(server)
-
-    assert_receive({:state_updated, state})
-    assert state.current_question == 0
-  end
-
   test "next_question/2 progresses state to the next question", %{server: server} do
     Session.add_player(server, @player_id, "Joe")
     assert_receive({:state_updated, _state})
@@ -88,7 +78,7 @@ defmodule MPG.Quizzes.SessionTest do
     assert state.current_question == nil
 
     # start the quiz
-    Session.start_quiz(server)
+    Session.next_question(server)
     assert_receive({:state_updated, _state})
 
     Session.next_question(server)
@@ -109,7 +99,7 @@ defmodule MPG.Quizzes.SessionTest do
     assert Enum.at(state.players, 0).score == 0
 
     # start the quiz
-    Session.start_quiz(server)
+    Session.next_question(server)
     assert_receive({:state_updated, _state})
 
     # correct answer to the first question is 0

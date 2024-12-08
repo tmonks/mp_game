@@ -36,15 +36,6 @@ defmodule MPG.QuizzesTest do
     end
   end
 
-  describe "start_quiz/2" do
-    test "sets the current_question to 0" do
-      state = %State{}
-
-      assert state.current_question == nil
-      assert %State{current_question: 0} = Quizzes.start_quiz(state)
-    end
-  end
-
   describe "create_quiz/1" do
     test "creates a new state with valid attributes" do
       attrs = %{
@@ -117,7 +108,7 @@ defmodule MPG.QuizzesTest do
       assert state.current_question == 1
     end
 
-    test "starts a new quiz by setting the current question from nil to 0" do
+    test "can move to the first question of a new quiz" do
       state = %State{
         title: "Marvel characters",
         questions: [

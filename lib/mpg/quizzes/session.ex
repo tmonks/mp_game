@@ -41,13 +41,6 @@ defmodule MPG.Quizzes.Session do
   end
 
   @doc """
-  Starts the quiz by setting current_question to 0
-  """
-  def start_quiz(server) do
-    GenServer.cast(server, :start_quiz)
-  end
-
-  @doc """
   Adds a player to the state.
   """
   def add_player(server, id, player_name) do
@@ -100,13 +93,6 @@ defmodule MPG.Quizzes.Session do
     questions = generate_questions()
     state = Quizzes.set_questions(state, questions)
 
-    broadcast_state_updated(state)
-    {:noreply, state}
-  end
-
-  @impl true
-  def handle_cast(:start_quiz, state) do
-    state = Quizzes.start_quiz(state)
     broadcast_state_updated(state)
     {:noreply, state}
   end

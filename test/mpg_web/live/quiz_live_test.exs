@@ -257,7 +257,7 @@ defmodule MPGWeb.QuizLiveTest do
     assert_receive({:state_updated, _state})
 
     # start quiz
-    Session.start_quiz(:quiz_session)
+    Session.next_question(:quiz_session)
     assert_receive({:state_updated, _state})
   end
 
