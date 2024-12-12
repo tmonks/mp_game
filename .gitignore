@@ -35,3 +35,5 @@ mpg-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Dev config
+/config/.env.exs

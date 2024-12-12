@@ -20,6 +20,21 @@ if System.get_env("PHX_SERVER") do
   config :mpg, MPGWeb.Endpoint, server: true
 end
 
+# OpenAI API configuration
+if config_env() == :test do
+  # test
+  config :openai,
+    api_key: "test_api_key",
+    organization_key: "test_org_key",
+    api_url: "http://localhost:4010"
+else
+  # dev and prod
+  config :openai,
+    api_key: System.get_env("OPENAI_API_KEY"),
+    organization_key: System.get_env("OPENAI_ORG_KEY"),
+    http_options: [recv_timeout: 120_000]
+end
+
 if config_env() == :prod do
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you

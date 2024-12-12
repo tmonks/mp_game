@@ -45,7 +45,9 @@ defmodule MPG.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:plug_cowboy, "~> 2.5"},
       {:uuid, "~> 1.1"},
-      {:ecto, "~> 3.12"}
+      {:ecto, "~> 3.12"},
+      {:openai, "~> 0.6.2"},
+      {:bypass, "~> 2.1", only: :test}
     ]
   end
 
