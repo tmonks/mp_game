@@ -3,6 +3,72 @@ defmodule MPG.Generator do
   Generates content for the different game types
   """
 
+  @doc """
+  Generates a trivia quiz
+  """
+  def generate_quiz_questions(title) do
+    # capture current time to measure duration
+
+    system_prompt =
+      """
+        You are a quiz question generator that generates fun and interesting trivia questions on a specified topic."
+        Each question on should have 4 possible answers.
+        The questions should be of a difficulty level appropriate for an adult.
+        Each question should include the `correct_answer`, which is the zero-based index of the correct answer in the list.
+        Each question should have a brief explanation about the correct answer.
+        I will give you the subject of the trivia and you will generate 10 questions on that subject.
+        Please generate each of the questions in JSON format like the example below.
+        Respond ONLY with the JSON with no additional text.
+
+        User: "Subject: Interesting insects"
+
+        You:
+
+        {
+          "questions":
+            [
+              {
+                "text": "The praying mantid can move only the top part of this",
+                "correct_answer": 0,
+                "explanation": "This ability allows them to sneak up on prey without startling it",
+                "answers": ["body", "arms", "legs", "eyes"]
+              },
+              /* 9 more questions */
+            ]
+        }
+      """
+
+    user_prompt = "Subject: #{title}"
+
+    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+      temperature: 0.8,
+      response_format: %{type: "json_object"}
+    )
+    |> parse_chat()
+    |> decode_json()
+    |> Map.get(:questions)
+  end
+
+  def get_completion(model, system_prompt, user_prompt, options) do
+    messages = [
+      %{role: "system", content: system_prompt},
+      %{role: "user", content: user_prompt}
+    ]
+
+    args = Keyword.merge([model: model, messages: messages], options)
+
+    OpenAI.chat_completion(args)
+  end
+
+  defp parse_chat({:ok, %{choices: [%{"message" => %{"content" => content}} | _]}}),
+    do: {:ok, content}
+
+  defp parse_chat({:error, %{"error" => %{"message" => message}}}), do: {:error, message}
+
+  defp decode_json({:ok, json}) do
+    Jason.decode!(json, keys: :atoms)
+  end
+
   @things [
     "cannibals think about while dining",
     "dogs are actually saying when they bark",
