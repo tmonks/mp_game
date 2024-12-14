@@ -12,7 +12,6 @@ defmodule MPG.Quizzes.SessionTest do
   setup do
     server = start_supervised!(Session)
     :ok = Phoenix.PubSub.subscribe(MPG.PubSub, "quiz_session")
-
     bypass = Bypass.open(port: 4010)
 
     %{server: server, bypass: bypass}

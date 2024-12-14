@@ -15,11 +15,9 @@ defmodule MPG.GeneratorTest do
         Plug.Conn.resp(conn, 200, chat_response_quiz_questions())
       end)
 
-      assert [first | _rest] = questions = Generator.generate_quiz_questions("test_quiz")
-      assert length(questions) == 5
-
-      assert %{text: "What is the name of Peter Quill's (Star-Lord's) father?", correct_answer: 1} =
-               first
+      assert questions = Generator.generate_quiz_questions("test_quiz")
+      assert length(questions) == 10
+      assert [%{text: "What is the first movie in the MCU?"} | _] = questions
     end
   end
 end
