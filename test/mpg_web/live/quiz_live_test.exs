@@ -2,6 +2,7 @@ defmodule MPGWeb.QuizLiveTest do
   use MPGWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import MPG.Fixtures.OpenAI
 
   alias MPG.Quizzes.Session
 
@@ -18,6 +19,13 @@ defmodule MPGWeb.QuizLiveTest do
 
     # subscribe to PubSub
     :ok = Phoenix.PubSub.subscribe(MPG.PubSub, "quiz_session")
+
+    # set up bypass with stub for OpenAI API call
+    bypass = Bypass.open(port: 4010)
+
+    Bypass.stub(bypass, "POST", "/v1/chat/completions", fn conn ->
+      Plug.Conn.resp(conn, 200, chat_response_quiz_questions())
+    end)
 
     {:ok, conn: conn, session_id: session_id}
   end
