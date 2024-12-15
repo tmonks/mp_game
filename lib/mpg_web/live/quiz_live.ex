@@ -234,7 +234,7 @@ defmodule MPGWeb.QuizLive do
     ~H"""
     <div
       id={"answer-#{@index}"}
-      class={"py-2 px-4 rounded text-left flex gap-2 #{classes_for_answer_status(@status)}"}
+      class={"py-2 px-4 rounded text-left flex items-center gap-2 #{classes_for_answer_status(@status)}"}
       data-role={@status}
     >
       <div><%= @answer %></div>
@@ -301,7 +301,7 @@ defmodule MPGWeb.QuizLive do
   defp player_marker(assigns) do
     ~H"""
     <div
-      class="relative flex items-center justify-center w-8 h-8 text-xs text-white font-bold rounded-full"
+      class="relative flex items-center justify-center w-7 h-7 text-xs text-white font-bold rounded-full"
       data-role="avatar"
       style={"background-color: #{@player.color}"}
       id={"player-marker-" <> @player.id}
