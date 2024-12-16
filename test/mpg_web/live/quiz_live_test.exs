@@ -254,6 +254,28 @@ defmodule MPGWeb.QuizLiveTest do
     assert state.current_question == 1
   end
 
+  test "shows a counter with the current question number", ctx do
+    start_quiz(ctx.session_id)
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+
+    assert has_element?(view, "#question-counter", "1 of 10")
+
+    view
+    |> element("#answer-0")
+    |> render_click()
+
+    assert_receive({:state_updated, state})
+    assert [%{current_answer: 0}] = state.players
+
+    view
+    |> element("#next-button")
+    |> render_click()
+
+    assert_receive({:state_updated, _state})
+    assert has_element?(view, "#question-counter", "2 of 10")
+  end
+
   defp start_quiz(player_id) do
     # join player
     Session.add_player(:quiz_session, player_id, "Host")

@@ -139,6 +139,10 @@ defmodule MPGWeb.QuizLive do
       </div>
       <!-- QUESTION -->
       <%= if Quizzes.current_status(@state) in [:answering, :reviewing] do %>
+        <!-- QUESTION COUNTER -->
+        <div id="question-counter" class="text-sm text-gray-600 mb-1">
+          Question <%= @state.current_question + 1 %> of <%= length(@state.questions) %>
+        </div>
         <.question_component
           question={@state.questions |> Enum.at(@state.current_question)}
           current_answer={@player.current_answer}
@@ -166,7 +170,7 @@ defmodule MPGWeb.QuizLive do
   defp question_component(%{current_answer: nil} = assigns) do
     ~H"""
     <div id="question">
-      <div id="question-text" class="text-gray-700 text-xl mb-4">
+      <div id="question-text" class="text-xl mb-6">
         <%= @question.text %>
       </div>
       <!-- ANSWERS -->
