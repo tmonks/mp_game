@@ -89,7 +89,7 @@ defmodule MPGWeb.ThingsLive do
     {:noreply,
      socket
      |> assign_question_form("")
-     |> push_patch(to: "/")}
+     |> push_patch(to: ~p"/things")}
   end
 
   @impl true
@@ -156,7 +156,7 @@ defmodule MPGWeb.ThingsLive do
         }
         id="new-question-modal"
         show={true}
-        on_cancel={JS.patch("/")}
+        on_cancel={JS.patch("/things")}
       >
         <div class="font-bold mb-4">Things...</div>
         <.form
@@ -252,7 +252,7 @@ defmodule MPGWeb.ThingsLive do
           <.link
             id="new-question-button"
             class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded text-center"
-            patch={~p"/new_question"}
+            patch={~p"/things/new_question"}
           >
             Next Question <.icon name="hero-arrow-path" class="h-5 w-5" />
           </.link>

@@ -18,8 +18,8 @@ defmodule MPGWeb.Router do
   scope "/", MPGWeb do
     pipe_through :browser
 
-    live "/", ThingsLive, :play
-    live "/new_question", ThingsLive, :new_question
+    live "/things", ThingsLive, :play
+    live "/things/new_question", ThingsLive, :new_question
 
     live "/quiz", QuizLive, :play
   end

@@ -22,13 +22,13 @@ defmodule MPGWeb.ThingsLiveTest do
   end
 
   test "if the player with the session_id does not exist, prompts for name", %{conn: conn} do
-    {:ok, view, _html} = live(conn, ~p"/")
+    {:ok, view, _html} = live(conn, ~p"/things")
 
     assert has_element?(view, "#join-form")
   end
 
   test "can join the game", %{conn: conn, session_id: session_id} do
-    {:ok, view, _html} = live(conn, ~p"/")
+    {:ok, view, _html} = live(conn, ~p"/things")
 
     view
     |> form("#join-form", %{player_name: "Peter"})
@@ -42,7 +42,7 @@ defmodule MPGWeb.ThingsLiveTest do
   test "loads user from session_id if it exists", %{conn: conn, session_id: session_id} do
     Game.add_player(:things_session, session_id, "Peter")
 
-    {:ok, view, _html} = live(conn, ~p"/")
+    {:ok, view, _html} = live(conn, ~p"/things")
 
     assert has_element?(view, "#player-#{session_id}[data-role=avatar]", "Pet")
     refute has_element?(view, "#join-form")
@@ -51,7 +51,7 @@ defmodule MPGWeb.ThingsLiveTest do
   test "host is prompted to enter a question right after joining", ctx do
     Game.add_player(:things_session, ctx.session_id, "Host")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
     assert has_element?(view, "#new-question-modal")
   end
@@ -62,7 +62,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.set_player_answer(:things_session, ctx.session_id, "apple")
     Game.set_player_to_revealed(:things_session, ctx.session_id)
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
     assert has_element?(view, "#new-question-button")
     refute has_element?(view, "#new-question-modal")
@@ -79,7 +79,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.new_question(:things_session, "Things that are red")
     Game.set_player_answer(:things_session, ctx.session_id, "apple")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
     refute has_element?(view, "#new-question-button")
 
@@ -95,7 +95,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.add_player(:things_session, UUID.uuid4(), "Host")
     Game.add_player(:things_session, ctx.session_id, "Player")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
     refute has_element?(view, "#new-question-button")
   end
@@ -106,19 +106,19 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.set_player_answer(:things_session, ctx.session_id, "apple")
     Game.set_player_to_revealed(:things_session, ctx.session_id)
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
     view
     |> element("#new-question-button")
     |> render_click()
 
-    assert_patch(view, "/new_question")
+    assert_patch(view, ~p"/things/new_question")
 
     view
     |> form("#new-question-form", %{question: "Things that are red"})
     |> render_submit()
 
-    assert_patch(view, "/")
+    assert_patch(view, ~p"/things")
 
     assert_receive({:state_updated, _state})
     assert has_element?(view, "#current-question", "Things that are red")
@@ -130,13 +130,13 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.set_player_answer(:things_session, ctx.session_id, "apple")
     Game.set_player_to_revealed(:things_session, ctx.session_id)
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
     view
     |> element("#new-question-button")
     |> render_click()
 
-    assert_patch(view, "/new_question")
+    assert_patch(view, ~p"/things/new_question")
 
     assert view
            |> form("#new-question-form", %{question: ""})
@@ -146,7 +146,7 @@ defmodule MPGWeb.ThingsLiveTest do
   test "host can click a button on the modal to generate a new question", ctx do
     Game.add_player(:things_session, ctx.session_id, "Host")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/new_question")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things/new_question")
 
     assert has_element?(view, "#new-question-form")
     assert has_element?(view, "input#question[value='']")
@@ -168,7 +168,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.new_question(:things_session, "Things that are red")
     Game.add_player(:things_session, player2_id, "Player 2")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things")
     refute has_element?(view, "#player-#{player2_id} [data-role=ready-check-mark]")
 
     # Set the player's answer
@@ -189,7 +189,7 @@ defmodule MPGWeb.ThingsLiveTest do
     # Set Player 1's answer
     Game.set_player_answer(:things_session, player1_id, "bananas")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
     # Player 1 has check mark
     assert has_element?(view, "#player-#{player1_id} [data-role=ready-check-mark]")
@@ -207,7 +207,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.new_question(:things_session, "Things that are red")
     Game.add_player(:things_session, session_id, "Peter")
 
-    {:ok, view, _html} = live(conn, ~p"/")
+    {:ok, view, _html} = live(conn, ~p"/things")
 
     assert has_element?(view, "#current-question", "Things that are red")
   end
@@ -218,7 +218,7 @@ defmodule MPGWeb.ThingsLiveTest do
   } do
     Game.add_player(:things_session, session_id, "Peter")
 
-    {:ok, view, _html} = live(conn, ~p"/")
+    {:ok, view, _html} = live(conn, ~p"/things")
 
     assert has_element?(view, "#waiting-message")
   end
@@ -229,7 +229,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.new_question(:things_session, "Things that are yummy")
     Game.add_player(:things_session, ctx.session_id, "Peter")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
     assert has_element?(view, "#answer-form button[disabled]")
 
@@ -245,7 +245,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.new_question(:things_session, "Things that are yummy")
     Game.add_player(:things_session, session_id, "Peter")
 
-    {:ok, view, _html} = live(conn, ~p"/")
+    {:ok, view, _html} = live(conn, ~p"/things")
 
     view
     |> form("#answer-form", %{answer: "bananas"})
@@ -265,13 +265,13 @@ defmodule MPGWeb.ThingsLiveTest do
 
     Game.set_player_answer(:things_session, session_id, "apple")
 
-    {:ok, view, _html} = live(conn, ~p"/")
+    {:ok, view, _html} = live(conn, ~p"/things")
 
     refute has_element?(view, "#answers")
 
     Game.set_player_answer(:things_session, id2, "banana")
 
-    {:ok, view, _html} = live(conn, ~p"/")
+    {:ok, view, _html} = live(conn, ~p"/things")
 
     assert has_element?(view, "#answers", "apple")
     assert has_element?(view, "#answers", "banana")
@@ -287,7 +287,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.add_player(:things_session, id2, "Player 2")
 
     Game.set_player_answer(:things_session, session_id, "apple")
-    {:ok, view, _html} = live(conn, ~p"/")
+    {:ok, view, _html} = live(conn, ~p"/things")
 
     refute has_element?(view, "#reveal-button")
 
@@ -307,7 +307,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.set_player_answer(:things_session, player1_id, "apple")
     Game.set_player_answer(:things_session, player2_id, "banana")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
     # player icon shown in player list
     assert has_element?(view, "#player-list #player-#{player2_id}")
@@ -329,7 +329,7 @@ defmodule MPGWeb.ThingsLiveTest do
     player1_id = ctx.session_id
     Game.add_player(:things_session, player1_id, "Player 1")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
     Game.new_question(:things_session, "Things that are awesome")
 
@@ -347,7 +347,7 @@ defmodule MPGWeb.ThingsLiveTest do
       Game.add_player(:things_session, UUID.uuid4(), "Pl#{i}")
     end
 
-    {:ok, _view, _html} = live(ctx.conn, ~p"/")
+    {:ok, _view, _html} = live(ctx.conn, ~p"/things")
     # open_browser(view)
   end
 end
