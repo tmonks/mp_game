@@ -21,6 +21,7 @@ defmodule MPGWeb.QuizLive do
       socket
       |> assign(session_id: session_id)
       |> assign(state: state)
+      |> assign(page_title: "Quiz")
       |> assign_current_status()
       |> assign_player()
 

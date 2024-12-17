@@ -19,6 +19,7 @@ defmodule MPGWeb.ThingsLive do
       socket
       |> assign(session_id: session_id)
       |> assign(state: state)
+      |> assign(page_title: "Things")
       |> assign_player()
       |> assign_question_form("")
 
