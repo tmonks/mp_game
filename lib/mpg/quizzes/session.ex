@@ -62,6 +62,13 @@ defmodule MPG.Quizzes.Session do
     GenServer.cast(server, :next_question)
   end
 
+  @doc """
+  Sets the state manually for testing purposes.
+  """
+  def set_state(server, state) do
+    GenServer.cast(server, {:set_state, state})
+  end
+
   @impl true
   def init(:ok) do
     {:ok, %State{players: []}}
@@ -117,6 +124,12 @@ defmodule MPG.Quizzes.Session do
   @impl true
   def handle_cast(:next_question, state) do
     state = Quizzes.next_question(state)
+    broadcast_state_updated(state)
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_cast({:set_state, state}, _old_state) do
     broadcast_state_updated(state)
     {:noreply, state}
   end
