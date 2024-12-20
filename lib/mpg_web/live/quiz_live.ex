@@ -150,6 +150,10 @@ defmodule MPGWeb.QuizLive do
           players={@state.players}
         />
       <% end %>
+      <!-- RESULTS -->
+      <%= if Quizzes.current_status(@state) == :complete do %>
+        <.results_component players={@state.players} question_quantity={length(@state.questions)} />
+      <% end %>
       <!-- HOST CONTROLS -->
       <%= if @player.is_host and Quizzes.current_status(@state) in [:joining, :reviewing] do %>
         <button
@@ -314,5 +318,41 @@ defmodule MPGWeb.QuizLive do
       <%= String.slice(@player.name, 0..2) %>
     </div>
     """
+  end
+
+  attr :players, :list, required: true
+  attr :question_quantity, :integer, required: true
+
+  defp results_component(assigns) do
+    ~H"""
+    <div id="results" class="bg-white shadow-md rounded-md overflow-hidden">
+      <div class="bg-gray-100 py-2 px-4">
+        <h2 class="text-xl font-semibold text-gray-800">Results</h2>
+      </div>
+      <ul class="divide-y divide-gray-200">
+        <div>
+          <%= for player <- Enum.sort(assigns.players, & &1.score > &2.score) do %>
+            <li class="flex justify-between items-center py-2 px-4">
+              <.player_avatar player={player} />
+              <div id={"score-#{player.id}"} class="text-xl">
+                <%= format_score(player.score, @question_quantity) %>
+              </div>
+            </li>
+          <% end %>
+        </div>
+      </ul>
+    </div>
+    """
+  end
+
+  # format score to a rounded percentage
+  defp format_score(score, question_quantity) do
+    score =
+      (score / question_quantity)
+      |> Kernel.*(100)
+      |> Float.round(0)
+      |> trunc
+
+    "#{score}%"
   end
 end
