@@ -6,8 +6,8 @@ defmodule MPG.Quizzes do
   @doc """
   Sets the title of the quiz
   """
-  def set_title(state, title) do
-    %State{state | title: title}
+  def initialize(state, title) do
+    %State{state | title: title, questions: [], current_question: nil}
   end
 
   @doc """

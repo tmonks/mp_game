@@ -86,7 +86,7 @@ defmodule MPG.Quizzes.Session do
 
   @impl true
   def handle_cast({:create_quiz, title}, state) do
-    state = Quizzes.set_title(state, title)
+    state = Quizzes.initialize(state, title)
     server = self()
 
     # start a background task to generate the quiz questions

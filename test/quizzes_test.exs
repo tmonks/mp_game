@@ -6,11 +6,18 @@ defmodule MPG.QuizzesTest do
   alias MPG.Quizzes.Question
   alias MPG.Quizzes.State
 
-  describe "set_title/2" do
+  describe "initialize/2" do
     test "sets the title of the quiz" do
       state = %State{}
 
-      assert %State{title: "Marvel characters"} = Quizzes.set_title(state, "Marvel characters")
+      assert %State{title: "Marvel characters"} = Quizzes.initialize(state, "Marvel characters")
+    end
+
+    test "resets the questions and current_question" do
+      state = state_fixture()
+
+      assert %State{questions: [], current_question: nil} =
+               Quizzes.initialize(state, "Harry Potter")
     end
   end
 
@@ -261,6 +268,7 @@ defmodule MPG.QuizzesTest do
   defp state_fixture do
     attrs = %{
       title: "Marvel characters",
+      current_question: 1,
       questions: [
         %{
           text: "Who is the strongest Avenger?",
