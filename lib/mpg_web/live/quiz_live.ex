@@ -28,6 +28,11 @@ defmodule MPGWeb.QuizLive do
     {:ok, socket}
   end
 
+  @impl true
+  def handle_params(_params, _url, socket) do
+    {:noreply, socket}
+  end
+
   defp assign_player(%{assigns: assigns} = socket) do
     player = Quizzes.get_player(assigns.state, assigns.session_id)
     assign(socket, player: player)
@@ -63,6 +68,9 @@ defmodule MPGWeb.QuizLive do
     Session.answer_question(:quiz_session, socket.assigns.session_id, answer)
     {:noreply, socket}
   end
+
+  # @impl true
+  # def handle_event("new_quiz", )
 
   @impl true
   def handle_info({:state_updated, state}, socket) do
@@ -107,7 +115,7 @@ defmodule MPGWeb.QuizLive do
         }
         id="new-quiz-modal"
         show={true}
-        on_cancel={JS.patch("/")}
+        on_cancel={JS.patch("/quiz")}
       >
         <div class="font-bold mb-4">Quiz Title</div>
         <form id="new-quiz-form" phx-submit="new_quiz">
@@ -154,7 +162,7 @@ defmodule MPGWeb.QuizLive do
       <%= if Quizzes.current_status(@state) == :complete do %>
         <.results_component players={@state.players} question_quantity={length(@state.questions)} />
       <% end %>
-      <!-- HOST CONTROLS -->
+      <!-- HOST NEXT QUESTION BUTTON -->
       <%= if @player.is_host and Quizzes.current_status(@state) in [:joining, :reviewing] do %>
         <button
           id="next-button"
@@ -163,6 +171,16 @@ defmodule MPGWeb.QuizLive do
         >
           Next Question
         </button>
+      <% end %>
+      <!-- HOST NEW QUIZ BUTTON -->
+      <%= if @player.is_host and Quizzes.current_status(@state) == :complete do %>
+        <.link
+          id="new-quiz-button"
+          class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+          patch={~p"/quiz/new_quiz"}
+        >
+          New Quiz
+        </.link>
       <% end %>
     <% end %>
     """
@@ -325,7 +343,7 @@ defmodule MPGWeb.QuizLive do
 
   defp results_component(assigns) do
     ~H"""
-    <div id="results" class="bg-white shadow-md rounded-md overflow-hidden">
+    <div id="results" class="bg-white shadow-md rounded-md overflow-hidden mb-8">
       <div class="bg-gray-100 py-2 px-4">
         <h2 class="text-xl font-semibold text-gray-800">Results</h2>
       </div>

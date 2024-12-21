@@ -300,10 +300,37 @@ defmodule MPGWeb.QuizLiveTest do
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
 
-    open_browser(view)
-
     assert has_element?(view, "#score-#{ctx.session_id}", "33%")
     assert has_element?(view, "#score-#{player2_id}", "67%")
+  end
+
+  test "host can start a new quiz after the quiz is complete", ctx do
+    player2_id = UUID.uuid4()
+
+    state = %State{
+      title: "Marvel characters",
+      questions: [
+        %Question{correct_answer: 0},
+        %Question{correct_answer: 1},
+        %Question{correct_answer: 2}
+      ],
+      current_question: 3,
+      players: [
+        %Player{id: ctx.session_id, name: "Host", score: 1, color: "Teal", is_host: true},
+        %Player{id: player2_id, name: "Player 2", score: 2, color: "Gold"}
+      ]
+    }
+
+    Session.set_state(:quiz_session, state)
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+
+    view
+    |> element("#new-quiz-button")
+    |> render_click()
+
+    assert_patch(view, ~p"/quiz/new_quiz")
+    assert has_element?(view, "#new-quiz-modal")
   end
 
   defp start_quiz(player_id) do
