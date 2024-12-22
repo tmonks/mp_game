@@ -283,7 +283,7 @@ defmodule MPGWeb.QuizLive do
       <%= case assigns.quiz_status do
         :new -> "Waiting for the host to set the quiz topic..."
         :generating -> "Generating quiz..."
-        :joining -> "Waiting for players to join..."
+        :joining -> "Ready to start!"
         _ -> nil
       end %>
     </div>
@@ -343,16 +343,18 @@ defmodule MPGWeb.QuizLive do
 
   defp results_component(assigns) do
     ~H"""
-    <div id="results" class="bg-white shadow-md rounded-md overflow-hidden mb-8">
+    <div id="results" class="bg-white shadow-md rounded-md overflow-hidden mb-8 max-w-20">
       <div class="bg-gray-100 py-2 px-4">
         <h2 class="text-xl font-semibold text-gray-800">Results</h2>
       </div>
       <ul class="divide-y divide-gray-200">
         <div>
           <%= for player <- Enum.sort(assigns.players, & &1.score > &2.score) do %>
-            <li class="flex justify-between items-center py-2 px-4">
-              <.player_avatar player={player} />
-              <div id={"score-#{player.id}"} class="text-xl">
+            <li class="flex items-center justify-between py-2 px-4 gap-4">
+              <div class="text-xl">
+                <%= player.name %>
+              </div>
+              <div id={"score-#{player.id}"} class="text-xl font-bold">
                 <%= format_score(player.score, @question_quantity) %>
               </div>
             </li>
