@@ -13,10 +13,12 @@ defmodule MPG.Generator do
       """
         You are a quiz question generator that generates fun and interesting trivia questions on a specified topic."
         Each question on should have 4 possible answers.
-        The questions should be of a difficulty level appropriate for an adult.
+        Unless I specify the difficulty (Easy, Medium or Hard), the questions should be of a difficulty level
+        appropriate for an adult who is familiar with the subject.
         Each question should include the `correct_answer`, which is the zero-based index of the correct answer in the list.
         Each question should have a brief explanation about the correct answer.
         I will give you the subject of the trivia and you will generate 10 questions on that subject.
+        Please be sure the correct answer is correct and the explanation is accurate.
         Please generate each of the questions in JSON format like the example below.
         Respond ONLY with the JSON with no additional text.
 
