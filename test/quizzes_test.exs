@@ -14,9 +14,25 @@ defmodule MPG.QuizzesTest do
     end
 
     test "resets the questions and current_question" do
-      state = state_fixture()
+      state = state_fixture() |> Map.put(:current_question, 1)
+      assert state.current_question == 1
+      assert length(state.questions) > 0
 
       assert %State{questions: [], current_question: nil} =
+               Quizzes.initialize(state, "Harry Potter")
+    end
+
+    test "resets all players' scores" do
+      state = state_fixture()
+
+      players = [
+        %Player{id: 1, name: "Joe", score: 1},
+        %Player{id: 2, name: "Jane", score: 2}
+      ]
+
+      state = %State{state | players: players}
+
+      assert %State{players: [%Player{score: 0}, %Player{score: 0}]} =
                Quizzes.initialize(state, "Harry Potter")
     end
   end
@@ -268,7 +284,6 @@ defmodule MPG.QuizzesTest do
   defp state_fixture do
     attrs = %{
       title: "Marvel characters",
-      current_question: 1,
       questions: [
         %{
           text: "Who is the strongest Avenger?",

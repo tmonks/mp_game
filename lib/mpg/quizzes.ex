@@ -7,7 +7,15 @@ defmodule MPG.Quizzes do
   Sets the title of the quiz
   """
   def initialize(state, title) do
-    %State{state | title: title, questions: [], current_question: nil}
+    state
+    |> Map.put(:title, title)
+    |> Map.put(:questions, [])
+    |> Map.put(:current_question, nil)
+    |> Map.put(:players, reset_player_scores(state.players))
+  end
+
+  defp reset_player_scores(players) do
+    Enum.map(players, &Map.put(&1, :score, 0))
   end
 
   @doc """
