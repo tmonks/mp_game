@@ -298,6 +298,30 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#reveal-button")
   end
 
+  test "players can select who guessed them and award a point", ctx do
+    Game.new_question(:things_session, "Things that are red")
+
+    # join players
+    Game.add_player(:things_session, ctx.session_id, "Player 1")
+    player2_id = UUID.uuid4()
+    Game.add_player(:things_session, player2_id, "Player 2")
+
+    # set answers
+    Game.set_player_answer(:things_session, ctx.session_id, "apple")
+    Game.set_player_answer(:things_session, player2_id, "banana")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+
+    assert has_element?(view, "#reveal-button")
+
+    # clicking the button shows a modal
+    view
+    |> element("#reveal-button")
+    |> render_click()
+
+    assert has_element?(view, "#reveal-modal")
+  end
+
   test "moves the player icon next to their answer once they've been revealed", ctx do
     player1_id = ctx.session_id
     player2_id = UUID.uuid4()

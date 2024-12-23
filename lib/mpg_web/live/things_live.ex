@@ -6,6 +6,8 @@ defmodule MPGWeb.ThingsLive do
   alias MPG.Things.Game
   alias Phoenix.PubSub
 
+  import Phoenix.HTML.Form, only: [options_for_select: 2]
+
   @impl true
   def mount(_params, session, socket) do
     if connected?(socket) do
@@ -67,9 +69,10 @@ defmodule MPGWeb.ThingsLive do
   end
 
   @impl true
-  def handle_event("reveal", _, socket) do
+  def handle_event("reveal", %{"player_id" => player_id}, socket) do
+    IO.inspect(player_id, label: "guesser")
     Game.set_player_to_revealed(:things_session, socket.assigns.session_id)
-    {:noreply, socket}
+    {:noreply, push_patch(socket, to: ~p"/things")}
   end
 
   @impl true
@@ -218,17 +221,17 @@ defmodule MPGWeb.ThingsLive do
               </div>
             </div>
             <%= if Things.all_players_answered?(@state) and !is_nil(@player) and !@player.revealed do %>
-              <button
+              <.link
                 id="reveal-button"
                 class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
-                phx-click="reveal"
+                patch={~p"/things/reveal"}
               >
                 Reveal my answer
-              </button>
+              </.link>
             <% end %>
           </div>
         <% end %>
-
+        <!-- ANSWER FORM -->
         <%= if is_nil(@player.current_answer) and !is_nil(@state.topic) do %>
           <form id="answer-form" phx-submit="submit_answer">
             <div class="flex flex-col gap-4">
@@ -248,7 +251,7 @@ defmodule MPGWeb.ThingsLive do
             </div>
           </form>
         <% end %>
-
+        <!-- HOST NEXT QUESTION BUTTON -->
         <%= if @player.is_host and Things.current_status(@state) == :complete do %>
           <.link
             id="new-question-button"
@@ -258,10 +261,33 @@ defmodule MPGWeb.ThingsLive do
             Next Question <.icon name="hero-arrow-path" class="h-5 w-5" />
           </.link>
         <% end %>
+        <!-- REVEALED MODAL -->
+        <.modal
+          :if={@live_action == :reveal}
+          id="reveal-modal"
+          show={true}
+          on_cancel={JS.patch("/things")}
+        >
+          <form id="reveal-form" phx-submit="reveal" class="flex flex-col gap-6">
+            <div class="font-bold">Who guessed your answer?</div>
+            <select
+              id="player-select"
+              name="player_id"
+              class="flex-auto block appearance-none bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+            >
+              <%= options_for_select(player_options(@state.players), []) %>
+            </select>
+            <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
+              Submit
+            </button>
+          </form>
+        </.modal>
       </div>
     <% end %>
     """
   end
+
+  defp player_options(players), do: Enum.map(players, &{&1.name, &1.id})
 
   defp player_avatar(assigns) do
     ~H"""
