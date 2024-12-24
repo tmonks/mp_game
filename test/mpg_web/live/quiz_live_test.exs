@@ -101,7 +101,7 @@ defmodule MPGWeb.QuizLiveTest do
     # questions generated
     assert_receive({:state_updated, state})
     assert length(state.questions) == 10
-    assert has_element?(view, "#current-status", "Waiting for players to join")
+    assert has_element?(view, "#current-status", "Ready to start!")
   end
 
   test "host can click a 'Start Quiz' button to start the quiz after it's generated", ctx do
@@ -197,7 +197,8 @@ defmodule MPGWeb.QuizLiveTest do
     assert_receive({:state_updated, state})
     assert [%{current_answer: 0}, _player2] = state.players
 
-    assert has_element?(view, "#explanation", "Correct! Iron Man (2008)")
+    assert has_element?(view, "#explanation", "Correct")
+    assert has_element?(view, "#explanation", "Iron Man (2008)")
   end
 
   test "shows 'Incorrect' with the explanation if the player's answer was correct", ctx do
@@ -215,7 +216,8 @@ defmodule MPGWeb.QuizLiveTest do
     assert_receive({:state_updated, state})
     assert [%{current_answer: 1}, _player2] = state.players
 
-    assert has_element?(view, "#explanation", "Incorrect. Iron Man (2008)")
+    assert has_element?(view, "#explanation", "Incorrect")
+    assert has_element?(view, "#explanation", "Iron Man (2008)")
   end
 
   test "after player answers, they can see player markers next to the answers", ctx do
