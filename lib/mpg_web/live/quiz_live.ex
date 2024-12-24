@@ -234,11 +234,17 @@ defmodule MPGWeb.QuizLive do
       <!-- EXPLANATION -->
       <%= if @current_answer == @question.correct_answer do %>
         <div id="explanation" class="mt-6">
-          <span class="font-medium text-green-600">Correct!</span> <%= @question.explanation %>
+          <span class="font-medium text-green-500 mr-2">
+            <.icon name="hero-check-circle-solid" class="h-5 w-5 mb-2" /> Correct!
+          </span>
+          <%= @question.explanation %>
         </div>
       <% else %>
         <div id="explanation" class="mt-6">
-          <span class="font-medium text-red-600">Incorrect.</span> <%= @question.explanation %>
+          <span class="font-medium text-red-500 mr-2">
+            <.icon name="hero-x-circle-solid" class="h-5 w-5 mb-1" /> Incorrect.
+          </span>
+          <%= @question.explanation %>
         </div>
       <% end %>
     </div>
