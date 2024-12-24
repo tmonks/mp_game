@@ -216,7 +216,7 @@ defmodule MPGWeb.QuizLive do
 
   defp question_component(assigns) do
     ~H"""
-    <div id="question" class="my-6">
+    <div id="question" class="mb-6">
       <div id="question-text" class="text-gray-700 text-xl mb-4">
         <%= @question.text %>
       </div>
