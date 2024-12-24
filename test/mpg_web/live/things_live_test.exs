@@ -60,7 +60,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.add_player(:things_session, ctx.session_id, "Host")
     Game.new_question(:things_session, "Things that are red")
     Game.set_player_answer(:things_session, ctx.session_id, "apple")
-    Game.set_player_to_revealed(:things_session, ctx.session_id)
+    Game.reveal_player(:things_session, ctx.session_id)
 
     {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
@@ -83,7 +83,7 @@ defmodule MPGWeb.ThingsLiveTest do
 
     refute has_element?(view, "#new-question-button")
 
-    Game.set_player_to_revealed(:things_session, ctx.session_id)
+    Game.reveal_player(:things_session, ctx.session_id)
 
     assert_receive({:state_updated, _state})
     :timer.sleep(100)
@@ -104,7 +104,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.add_player(:things_session, ctx.session_id, "Host")
     Game.new_question(:things_session, "Things that are red")
     Game.set_player_answer(:things_session, ctx.session_id, "apple")
-    Game.set_player_to_revealed(:things_session, ctx.session_id)
+    Game.reveal_player(:things_session, ctx.session_id)
 
     {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
@@ -128,7 +128,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.add_player(:things_session, ctx.session_id, "Host")
     Game.new_question(:things_session, "Things that are red")
     Game.set_player_answer(:things_session, ctx.session_id, "apple")
-    Game.set_player_to_revealed(:things_session, ctx.session_id)
+    Game.reveal_player(:things_session, ctx.session_id)
 
     {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
@@ -338,7 +338,7 @@ defmodule MPGWeb.ThingsLiveTest do
     # player icon not shown with answer
     refute has_element?(view, "#answer-#{player2_id} #player-#{player2_id}")
 
-    Game.set_player_to_revealed(:things_session, player2_id)
+    Game.reveal_player(:things_session, player2_id)
 
     assert_received({:state_updated, _state})
     :timer.sleep(100)

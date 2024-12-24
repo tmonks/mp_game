@@ -72,7 +72,7 @@ defmodule MPGWeb.ThingsLive do
   @impl true
   def handle_event("reveal", %{"player_id" => player_id}, socket) do
     IO.inspect(player_id, label: "guesser")
-    Game.set_player_to_revealed(:things_session, socket.assigns.session_id)
+    Game.reveal_player(:things_session, socket.assigns.session_id)
     {:noreply, push_patch(socket, to: ~p"/things")}
   end
 
