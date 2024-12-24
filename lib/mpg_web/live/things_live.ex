@@ -70,9 +70,8 @@ defmodule MPGWeb.ThingsLive do
   end
 
   @impl true
-  def handle_event("reveal", %{"player_id" => player_id}, socket) do
-    IO.inspect(player_id, label: "guesser")
-    Game.reveal_player(:things_session, socket.assigns.session_id)
+  def handle_event("reveal", %{"guesser_id" => guesser_id}, socket) do
+    Game.reveal_player(:things_session, socket.assigns.session_id, guesser_id)
     {:noreply, push_patch(socket, to: ~p"/things")}
   end
 
@@ -272,8 +271,8 @@ defmodule MPGWeb.ThingsLive do
           <form id="reveal-form" phx-submit="reveal" class="flex flex-col gap-6">
             <div class="font-bold">Who guessed your answer?</div>
             <select
-              id="player-select"
-              name="player_id"
+              id="guesser-select"
+              name="guesser_id"
               class="flex-auto block appearance-none bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
             >
               <%= options_for_select(player_options(@state.players), []) %>
@@ -315,6 +314,9 @@ defmodule MPGWeb.ThingsLive do
           </svg>
         </div>
       <% end %>
+      <div data-role="score" class="absolute top-7 right-3 w-4 h-4">
+        <%= @player.score || 0 %>
+      </div>
     </div>
     """
   end

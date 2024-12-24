@@ -72,13 +72,22 @@ defmodule MPG.Things do
   end
 
   @doc """
-  Sets the player with the specified id to revealed
+  Sets the player with player_id to revealed.
+  Adds 1 to the guesser's score.
   """
-  def reveal_player(state, id) do
+  def reveal_player(state, player_id, guesser_id) do
     players =
       Enum.map(state.players, fn
-        %Player{id: ^id} = player -> %Player{player | revealed: true}
-        player -> player
+        # set player to revealed
+        %Player{id: ^player_id} = player ->
+          %Player{player | revealed: true}
+
+        # increment guesser's score
+        %Player{id: ^guesser_id, score: score} = player ->
+          %Player{player | score: (score || 0) + 1}
+
+        player ->
+          player
       end)
 
     %State{state | players: players}

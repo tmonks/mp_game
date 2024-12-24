@@ -60,7 +60,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.add_player(:things_session, ctx.session_id, "Host")
     Game.new_question(:things_session, "Things that are red")
     Game.set_player_answer(:things_session, ctx.session_id, "apple")
-    Game.reveal_player(:things_session, ctx.session_id)
+    Game.reveal_player(:things_session, ctx.session_id, "12345")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
@@ -83,7 +83,7 @@ defmodule MPGWeb.ThingsLiveTest do
 
     refute has_element?(view, "#new-question-button")
 
-    Game.reveal_player(:things_session, ctx.session_id)
+    Game.reveal_player(:things_session, ctx.session_id, "12345")
 
     assert_receive({:state_updated, _state})
     :timer.sleep(100)
@@ -104,7 +104,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.add_player(:things_session, ctx.session_id, "Host")
     Game.new_question(:things_session, "Things that are red")
     Game.set_player_answer(:things_session, ctx.session_id, "apple")
-    Game.reveal_player(:things_session, ctx.session_id)
+    Game.reveal_player(:things_session, ctx.session_id, "12345")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
@@ -128,7 +128,7 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.add_player(:things_session, ctx.session_id, "Host")
     Game.new_question(:things_session, "Things that are red")
     Game.set_player_answer(:things_session, ctx.session_id, "apple")
-    Game.reveal_player(:things_session, ctx.session_id)
+    Game.reveal_player(:things_session, ctx.session_id, "12345")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
@@ -319,7 +319,16 @@ defmodule MPGWeb.ThingsLiveTest do
     |> element("#reveal-button")
     |> render_click()
 
+    assert_patch(view, ~p"/things/reveal")
     assert has_element?(view, "#reveal-modal")
+
+    # select player 2 as the guesser
+    view
+    |> form("#reveal-form", %{guesser_id: player2_id})
+    |> render_submit()
+
+    assert_patch(view, ~p"/things")
+    assert has_element?(view, "#player-#{player2_id} [data-role=score]", "1")
   end
 
   test "moves the player icon next to their answer once they've been revealed", ctx do
@@ -338,7 +347,7 @@ defmodule MPGWeb.ThingsLiveTest do
     # player icon not shown with answer
     refute has_element?(view, "#answer-#{player2_id} #player-#{player2_id}")
 
-    Game.reveal_player(:things_session, player2_id)
+    Game.reveal_player(:things_session, player2_id, ctx.session_id)
 
     assert_received({:state_updated, _state})
     :timer.sleep(100)

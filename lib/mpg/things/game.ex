@@ -43,8 +43,8 @@ defmodule MPG.Things.Game do
   @doc """
   Sets player to revealed.
   """
-  def reveal_player(server, player_id) do
-    GenServer.cast(server, {:reveal_player, player_id})
+  def reveal_player(server, player_id, guesser_id) do
+    GenServer.cast(server, {:reveal_player, player_id, guesser_id})
   end
 
   @doc """
@@ -103,8 +103,8 @@ defmodule MPG.Things.Game do
   end
 
   @impl true
-  def handle_cast({:reveal_player, player_id}, state) do
-    state = Things.reveal_player(state, player_id)
+  def handle_cast({:reveal_player, player_id, guesser_id}, state) do
+    state = Things.reveal_player(state, player_id, guesser_id)
     broadcast_state_updated(state)
     {:noreply, state}
   end

@@ -117,7 +117,7 @@ defmodule MPG.ThingsTest do
       Things.new("foo")
       |> Things.add_player(joe_id, "Joe")
       |> Things.set_player_answer(joe_id, "banana")
-      |> Things.reveal_player(joe_id)
+      |> Things.reveal_player(joe_id, "12345")
 
     assert Things.current_status(state) == :complete
   end

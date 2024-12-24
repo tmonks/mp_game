@@ -77,7 +77,7 @@ defmodule MPG.Things.GameTest do
   test "new_question/2 resets the topic and all player answers", %{server: server} do
     Game.add_player(server, @player_id, "Joe")
     Game.set_player_answer(server, @player_id, "42")
-    Game.reveal_player(server, @player_id)
+    Game.reveal_player(server, @player_id, "12345")
     Game.new_question(server, "Things that are awesome")
     state = :sys.get_state(server)
 
@@ -100,19 +100,26 @@ defmodule MPG.Things.GameTest do
            } = state
   end
 
-  test "reveal_player/2 sets a player to revealed", %{server: server} do
-    Game.add_player(server, @player_id, "Joe")
-    assert %{players: [%Player{name: "Joe", revealed: false}]} = :sys.get_state(server)
+  test "reveal_player/3 reveals the player and awards a point to the guesser", ctx do
+    Game.add_player(ctx.server, @player_id, "Joe")
+    player2_id = UUID.uuid4()
+    Game.add_player(ctx.server, player2_id, "Bill")
 
-    Game.reveal_player(server, @player_id)
-    assert %{players: [%Player{name: "Joe", revealed: true}]} = :sys.get_state(server)
+    assert %{players: [%Player{name: "Joe", revealed: false}, %Player{name: "Bill", score: nil}]} =
+             :sys.get_state(ctx.server)
+
+    Game.reveal_player(ctx.server, @player_id, player2_id)
+
+    %{players: [joe, bill]} = :sys.get_state(ctx.server)
+    assert %Player{name: "Joe", revealed: true, score: nil} = joe
+    assert %Player{name: "Bill", revealed: false, score: 1} = bill
   end
 
   test "reveal_player/2 broadcasts the new state", %{server: server} do
     Game.add_player(server, @player_id, "Joe")
     assert_receive({:state_updated, _state})
 
-    Game.reveal_player(server, @player_id)
+    Game.reveal_player(server, @player_id, "12345")
 
     assert_receive({:state_updated, state})
     assert [%Player{name: "Joe", revealed: true}] = state.players
