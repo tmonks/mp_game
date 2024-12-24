@@ -21,7 +21,8 @@ defmodule MPGWeb.QuizLive do
       socket
       |> assign(session_id: session_id)
       |> assign(state: state)
-      |> assign(page_title: "Quiz")
+      |> assign(page_title: "Quizoots!")
+      |> assign(primary_color: "bg-violet-500")
       |> assign_current_status()
       |> assign_player()
 
@@ -101,7 +102,7 @@ defmodule MPGWeb.QuizLive do
             />
           </div>
           <div>
-            <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
+            <button class="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded">
               Join
             </button>
           </div>
@@ -117,7 +118,7 @@ defmodule MPGWeb.QuizLive do
         show={true}
         on_cancel={JS.patch("/quiz")}
       >
-        <div class="font-bold mb-4">Quiz Title</div>
+        <div class="font-bold mb-4">Quiz Topic</div>
         <form id="new-quiz-form" phx-submit="new_quiz">
           <div class="flex flex-col gap-4">
             <input
@@ -126,7 +127,7 @@ defmodule MPGWeb.QuizLive do
               value=""
               class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
-            <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
+            <button class="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded">
               Submit
             </button>
           </div>
@@ -167,7 +168,7 @@ defmodule MPGWeb.QuizLive do
         <button
           id="next-button"
           phx-click="next_question"
-          class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+          class="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded"
         >
           Next Question
         </button>
@@ -176,7 +177,7 @@ defmodule MPGWeb.QuizLive do
       <%= if @player.is_host and Quizzes.current_status(@state) == :complete do %>
         <.link
           id="new-quiz-button"
-          class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+          class="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded"
           patch={~p"/quiz/new_quiz"}
         >
           New Quiz

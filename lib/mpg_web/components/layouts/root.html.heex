@@ -12,9 +12,9 @@
     </script>
   </head>
   <body class="bg-white antialiased">
-    <header class="bg-emerald-500 text-white p-4">
+    <header class={"#{assigns[:primary_color] || "bg-sky-500"} text-white p-4"}>
       <h1 class="text-xl font-bold">
-        <a href="/"><%= assigns[:page_title] || "MPG" %></a>
+        <a href="/"><%= assigns[:page_title] || "MP Games" %></a>
       </h1>
     </header>
     <%= @inner_content %>
