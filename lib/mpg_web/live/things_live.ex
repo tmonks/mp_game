@@ -292,12 +292,12 @@ defmodule MPGWeb.ThingsLive do
   defp player_avatar(assigns) do
     ~H"""
     <div
-      class="relative flex items-center justify-center w-12 h-12 text-white font-bold rounded-full"
+      class="relative flex flex-col items-center justify-center w-12 h-12 text-white font-bold rounded-full"
       data-role="avatar"
       style={"background-color: #{@player.color}"}
       id={"player-" <> @player.id}
     >
-      <%= String.slice(assigns.player.name, 0..2) %>
+      <span class="relative top-1"><%= String.slice(assigns.player.name, 0..2) %></span>
       <%= if @player.current_answer != nil and @show_answer_status do %>
         <div
           data-role="ready-check-mark"
@@ -314,7 +314,7 @@ defmodule MPGWeb.ThingsLive do
           </svg>
         </div>
       <% end %>
-      <div data-role="score" class="absolute top-7 right-3 w-4 h-4">
+      <div data-role="score" class="w-4 h-4 text-center text-sm">
         <%= @player.score || 0 %>
       </div>
     </div>
