@@ -135,4 +135,94 @@ defmodule MPG.ThingsTest do
     assert length(players) == 1
     assert Enum.find(players, &(&1.id == joe_id)) == nil
   end
+
+  test "reveal_player/3 reveals the last player automatically" do
+    joe_id = UUID.uuid4()
+    jane_id = UUID.uuid4()
+    bill_id = UUID.uuid4()
+
+    state =
+      Things.new("foo")
+      |> Things.add_player(joe_id, "Joe")
+      |> Things.add_player(jane_id, "Jane")
+      |> Things.add_player(bill_id, "Bill")
+      |> Things.set_player_answer(joe_id, "banana")
+      |> Things.set_player_answer(jane_id, "apple")
+      |> Things.set_player_answer(bill_id, "orange")
+
+    state = Things.reveal_player(state, joe_id, "12345")
+
+    assert [
+             %{name: "Joe", revealed: true},
+             %{name: "Jane", revealed: false},
+             %{name: "Bill", revealed: false}
+           ] = state.players
+
+    state = Things.reveal_player(state, jane_id, "12345")
+
+    assert [
+             %{name: "Joe", revealed: true},
+             %{name: "Jane", revealed: true},
+             # bill marked as revealed automatically
+             %{name: "Bill", revealed: true}
+           ] = state.players
+  end
+
+  test "reveal_player/3 awards a point to the guesser" do
+    joe_id = UUID.uuid4()
+    jane_id = UUID.uuid4()
+    bill_id = UUID.uuid4()
+
+    state =
+      Things.new("foo")
+      |> Things.add_player(joe_id, "Joe")
+      |> Things.add_player(jane_id, "Jane")
+      |> Things.add_player(bill_id, "Bill")
+      |> Things.set_player_answer(joe_id, "banana")
+      |> Things.set_player_answer(jane_id, "apple")
+      |> Things.set_player_answer(bill_id, "orange")
+
+    state = Things.reveal_player(state, joe_id, jane_id)
+
+    assert [
+             %{name: "Joe", revealed: true, score: nil},
+             %{name: "Jane", revealed: false, score: 1},
+             %{name: "Bill", revealed: false, score: nil}
+           ] = state.players
+  end
+
+  test "reveal_player/3 does not award a point if the guesser is one of the last 2 players" do
+    joe_id = UUID.uuid4()
+    jane_id = UUID.uuid4()
+    bill_id = UUID.uuid4()
+
+    state =
+      Things.new("foo")
+      |> Things.add_player(joe_id, "Joe")
+      |> Things.add_player(jane_id, "Jane")
+      |> Things.add_player(bill_id, "Bill")
+      |> Things.set_player_answer(joe_id, "banana")
+      |> Things.set_player_answer(jane_id, "apple")
+      |> Things.set_player_answer(bill_id, "orange")
+
+    state = Things.reveal_player(state, joe_id, jane_id)
+
+    assert [
+             # Joe is revealed
+             %{name: "Joe", revealed: true, score: nil},
+             # Jane gets a point
+             %{name: "Jane", revealed: false, score: 1},
+             %{name: "Bill", revealed: false, score: nil}
+           ] = state.players
+
+    state = Things.reveal_player(state, bill_id, jane_id)
+
+    assert [
+             %{name: "Joe", revealed: true, score: nil},
+             # Jane is revealed
+             %{name: "Jane", revealed: true, score: 1},
+             # Bill gets auto-revealed, but does NOT get a point
+             %{name: "Bill", revealed: true, score: nil}
+           ] = state.players
+  end
 end

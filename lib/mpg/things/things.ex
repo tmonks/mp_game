@@ -76,21 +76,53 @@ defmodule MPG.Things do
   Adds 1 to the guesser's score.
   """
   def reveal_player(state, player_id, guesser_id) do
+    unrevealed_ids = get_unrevealed_player_ids(state.players)
+
     players =
-      Enum.map(state.players, fn
-        # set player to revealed
-        %Player{id: ^player_id} = player ->
-          %Player{player | revealed: true}
-
-        # increment guesser's score
-        %Player{id: ^guesser_id, score: score} = player ->
-          %Player{player | score: (score || 0) + 1}
-
-        player ->
-          player
-      end)
+      state.players
+      |> reveal(player_id, unrevealed_ids)
+      |> maybe_award_point(guesser_id, unrevealed_ids)
 
     %State{state | players: players}
+  end
+
+  defp get_unrevealed_player_ids(players) do
+    Enum.filter(players, &(&1.revealed == false))
+    |> Enum.map(& &1.id)
+  end
+
+  # only 2 remaining players, reveal both
+  defp reveal(players, _player_id, [_, _]) do
+    Enum.map(players, fn
+      player -> %Player{player | revealed: true}
+    end)
+  end
+
+  # reveal the specified player
+  defp reveal(players, player_id, _unrevealed_ids) do
+    Enum.map(players, fn
+      %Player{id: ^player_id} = player -> %Player{player | revealed: true}
+      player -> player
+    end)
+  end
+
+  # award a point to the guesser if they had more than one other player to guess
+  defp maybe_award_point(players, guesser_id, unrevealed_ids) do
+    if length(unrevealed_ids) == 2 and guesser_id in unrevealed_ids do
+      players
+    else
+      award_point(players, guesser_id)
+    end
+  end
+
+  defp award_point(players, guesser_id) do
+    Enum.map(players, fn
+      %Player{id: ^guesser_id, score: score} = player ->
+        %Player{player | score: (score || 0) + 1}
+
+      player ->
+        player
+    end)
   end
 
   @doc """
