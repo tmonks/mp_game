@@ -305,10 +305,13 @@ defmodule MPGWeb.ThingsLiveTest do
     Game.add_player(:things_session, ctx.session_id, "Player 1")
     player2_id = UUID.uuid4()
     Game.add_player(:things_session, player2_id, "Player 2")
+    player3_id = UUID.uuid4()
+    Game.add_player(:things_session, player3_id, "Player 3")
 
     # set answers
     Game.set_player_answer(:things_session, ctx.session_id, "apple")
-    Game.set_player_answer(:things_session, player2_id, "banana")
+    Game.set_player_answer(:things_session, player2_id, "strawberry")
+    Game.set_player_answer(:things_session, player3_id, "roses")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/things")
 
@@ -329,6 +332,30 @@ defmodule MPGWeb.ThingsLiveTest do
 
     assert_patch(view, ~p"/things")
     assert has_element?(view, "#player-#{player2_id} [data-role=score]", "1")
+  end
+
+  test "players cannot award themselves a point when revealing", ctx do
+    Game.new_question(:things_session, "Things that are red")
+
+    # join players
+    Game.add_player(:things_session, ctx.session_id, "Player 1")
+    player2_id = UUID.uuid4()
+    Game.add_player(:things_session, player2_id, "Player 2")
+
+    # set answers
+    Game.set_player_answer(:things_session, ctx.session_id, "apple")
+    Game.set_player_answer(:things_session, player2_id, "banana")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+
+    view
+    |> element("#reveal-button")
+    |> render_click()
+
+    assert_patch(view, ~p"/things/reveal")
+
+    assert has_element?(view, "#guesser-select")
+    refute has_element?(view, "option", "Player 1")
   end
 
   test "moves the player icon next to their answer once they've been revealed", ctx do

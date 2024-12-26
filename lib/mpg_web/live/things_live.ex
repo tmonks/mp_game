@@ -275,7 +275,7 @@ defmodule MPGWeb.ThingsLive do
               name="guesser_id"
               class="flex-auto block appearance-none bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
             >
-              <%= options_for_select(player_options(@state.players), []) %>
+              <%= options_for_select(player_options(@state.players, @player), []) %>
             </select>
             <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
               Submit
@@ -287,7 +287,12 @@ defmodule MPGWeb.ThingsLive do
     """
   end
 
-  defp player_options(players), do: Enum.map(players, &{&1.name, &1.id})
+  defp player_options(all_players, current_player) do
+    all_players
+    |> Enum.reject(&(&1.id == current_player.id))
+    |> Enum.map(&{&1.name, &1.id})
+    |> Enum.sort_by(&elem(&1, 0))
+  end
 
   defp player_avatar(assigns) do
     ~H"""
