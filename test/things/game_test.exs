@@ -104,15 +104,21 @@ defmodule MPG.Things.GameTest do
     Game.add_player(ctx.server, @player_id, "Joe")
     player2_id = UUID.uuid4()
     Game.add_player(ctx.server, player2_id, "Bill")
+    player3_id = UUID.uuid4()
+    Game.add_player(ctx.server, player3_id, "Sue")
 
-    assert %{players: [%Player{name: "Joe", revealed: false}, %Player{name: "Bill", score: nil}]} =
-             :sys.get_state(ctx.server)
+    assert %{players: [joe, bill, sue]} = :sys.get_state(ctx.server)
+    # %{players: [joe, bill]} = :sys.get_state(ctx.server)
+    assert %Player{name: "Joe", revealed: false, score: nil} = joe
+    assert %Player{name: "Bill", revealed: false, score: nil} = bill
+    assert %Player{name: "Sue", revealed: false, score: nil} = sue
 
     Game.reveal_player(ctx.server, @player_id, player2_id)
 
-    %{players: [joe, bill]} = :sys.get_state(ctx.server)
+    %{players: [joe, bill, sue]} = :sys.get_state(ctx.server)
     assert %Player{name: "Joe", revealed: true, score: nil} = joe
     assert %Player{name: "Bill", revealed: false, score: 1} = bill
+    assert %Player{name: "Sue", revealed: false, score: nil} = sue
   end
 
   test "reveal_player/2 broadcasts the new state", %{server: server} do
