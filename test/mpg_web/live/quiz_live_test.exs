@@ -87,6 +87,23 @@ defmodule MPGWeb.QuizLiveTest do
            |> render_change() =~ "Topic can&#39;t be blank"
   end
 
+  test "host can click a button on the modal to generate a new question", ctx do
+    Session.add_player(:quiz_session, ctx.session_id, "Host")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/new_quiz")
+
+    assert has_element?(view, "#quiz-topic-form")
+    assert has_element?(view, "input#topic[value='']")
+
+    view
+    |> element("#generate-topic-button")
+    |> render_click()
+
+    assert has_element?(view, "input#topic")
+    # no longer empty
+    refute has_element?(view, "input#topic[value='']")
+  end
+
   test "players see the quiz title and status", ctx do
     Session.add_player(:quiz_session, ctx.session_id, "Host")
 

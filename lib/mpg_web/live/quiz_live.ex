@@ -2,6 +2,7 @@ defmodule MPGWeb.QuizLive do
   use MPGWeb, :live_view
   use Phoenix.Component
 
+  alias MPG.Generator
   alias MPG.Quizzes
   alias MPG.Quizzes.Player
   alias MPG.Quizzes.Question
@@ -67,6 +68,11 @@ defmodule MPGWeb.QuizLive do
   end
 
   def handle_event("validate_quiz_topic", %{"topic" => topic}, socket) do
+    {:noreply, assign_quiz_topic_form(socket, topic)}
+  end
+
+  def handle_event("generate_quiz_topic", _params, socket) do
+    topic = Generator.random_quiz_topic()
     {:noreply, assign_quiz_topic_form(socket, topic)}
   end
 
@@ -147,6 +153,13 @@ defmodule MPGWeb.QuizLive do
               field={@quiz_topic_form[:topic]}
               class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
+            <a
+              id="generate-topic-button"
+              phx-click="generate_quiz_topic"
+              class="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded text-center cursor-pointer"
+            >
+              Generate <.icon name="hero-sparkles-solid" class="h-5 w-5" />
+            </a>
             <button class="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded">
               Submit
             </button>
