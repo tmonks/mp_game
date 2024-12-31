@@ -51,6 +51,52 @@ defmodule MPG.Generator do
     |> Map.get(:questions)
   end
 
+  @doc """
+  Takes a list of quiz topics and generates 10 more new topics.
+  Returns a combined list of the original topics and the new topics.
+  """
+  def generate_quiz_topics(topics) do
+    system_prompt = """
+      You are a quiz topic generator that generates fun and interesting trivia topics.
+      I will give you a list of topics.
+      Please generate 10 more similar topics, but not the same as the ones I provide.
+      Respond ONLY with the JSON with no additional text.
+
+      User: "Traditions around the world, Famous song lyrics, Unusual animals, Mythical creatures, Greek mythology"
+
+      You:
+
+      {
+        "topics": [
+          "Inventions that changed the world",
+          "Unsolved mysteries in history",
+          "Famous landmarks and their stories",
+          "Incredible survival stories",
+          "The evolution of fashion through the decades",
+          "Culinary dishes from different cultures",
+          "The history of board games",
+          "Record-breaking feats and accomplishments",
+          "Famous art movements and their impact",
+          "Legends and folklore from around the globe"
+        ]
+      }
+    """
+
+    user_prompt = topics |> Enum.join(", ")
+
+    new_topics =
+      get_completion("gpt-4o-mini", system_prompt, user_prompt,
+        temperature: 0.8,
+        response_format: %{type: "json_object"}
+      )
+      |> parse_chat()
+      |> decode_json()
+      |> Map.get(:topics)
+
+    # Combine the original topics with the new topics
+    topics ++ new_topics
+  end
+
   def get_completion(model, system_prompt, user_prompt, options) do
     messages = [
       %{role: "system", content: system_prompt},
@@ -409,5 +455,52 @@ defmodule MPG.Generator do
   """
   def random_thing do
     Enum.random(@things)
+  end
+
+  @quiz_topics [
+    "Traditions from around the world",
+    "Famous song lyrics",
+    "Unusual animals",
+    "Mythical creatures",
+    "Greek mythology",
+    "Inventions that changed the world",
+    "Unsolved mysteries in history",
+    "Famous landmarks and their stories",
+    "Incredible survival stories",
+    "The evolution of fashion through the decades",
+    "Culinary dishes from different cultures",
+    "The history of board games",
+    "Record-breaking feats and accomplishments",
+    "Famous art movements and their impact",
+    "Legends and folklore from around the globe",
+    "Unique festivals celebrated worldwide",
+    "Influential musicians and their contributions",
+    "Bizarre natural phenomena",
+    "Fictional worlds in literature",
+    "Ancient civilizations and their achievements",
+    "Iconic movie quotes and their origins",
+    "The science behind popular myths",
+    "Historical figures who changed society",
+    "Traditional crafts and their significance",
+    "Architectural wonders and their histories",
+    "Famous historical speeches and their impact",
+    "The role of animals in various cultures",
+    "Innovative technologies of the future",
+    "Cultural significance of music genres",
+    "The art of storytelling through the ages",
+    "Notable explorers and their journeys",
+    "The symbolism of colors in different cultures",
+    "Remarkable archaeological discoveries",
+    "The influence of social media on modern society",
+    "Fascinating superstitions from around the world",
+    "The history of space exploration",
+    "The history of video games"
+  ]
+
+  @doc """
+  Gets a random quiz topic
+  """
+  def random_quiz_topic do
+    Enum.random(@quiz_topics)
   end
 end
