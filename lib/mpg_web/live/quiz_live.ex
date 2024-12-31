@@ -25,8 +25,23 @@ defmodule MPGWeb.QuizLive do
       |> assign(primary_color: "bg-violet-500")
       |> assign_current_status()
       |> assign_player()
+      |> assign_quiz_topic_form("")
 
     {:ok, socket}
+  end
+
+  defp assign_quiz_topic_form(socket, topic) do
+    errors = verify_not_empty(topic)
+    form = to_form(%{"topic" => topic}, errors: errors)
+    assign(socket, quiz_topic_form: form)
+  end
+
+  defp verify_not_empty(topic) do
+    if topic in ["", nil] do
+      [topic: {"Topic can't be blank", []}]
+    else
+      []
+    end
   end
 
   @impl true
@@ -51,9 +66,13 @@ defmodule MPGWeb.QuizLive do
     {:noreply, socket}
   end
 
+  def handle_event("validate_quiz_topic", %{"topic" => topic}, socket) do
+    {:noreply, assign_quiz_topic_form(socket, topic)}
+  end
+
   @impl true
-  def handle_event("new_quiz", %{"title" => title}, socket) do
-    Session.create_quiz(:quiz_session, title)
+  def handle_event("new_quiz_topic", %{"topic" => topic}, socket) do
+    Session.create_quiz(:quiz_session, topic)
     {:noreply, socket}
   end
 
@@ -69,9 +88,6 @@ defmodule MPGWeb.QuizLive do
     Session.answer_question(:quiz_session, socket.assigns.session_id, answer)
     {:noreply, socket}
   end
-
-  # @impl true
-  # def handle_event("new_quiz", )
 
   @impl true
   def handle_info({:state_updated, state}, socket) do
@@ -109,7 +125,7 @@ defmodule MPGWeb.QuizLive do
         </div>
       </form>
     <% else %>
-      <!-- NEW QUIZ MODAL -->
+      <!-- NEW QUIZ TOPIC MODAL -->
       <.modal
         :if={
           @live_action == :new_quiz or (@player.is_host and Quizzes.current_status(@state) == :new)
@@ -119,19 +135,23 @@ defmodule MPGWeb.QuizLive do
         on_cancel={JS.patch("/quiz")}
       >
         <div class="font-bold mb-4">Quiz Topic</div>
-        <form id="new-quiz-form" phx-submit="new_quiz">
+        <.form
+          for={@quiz_topic_form}
+          id="quiz-topic-form"
+          phx-submit="new_quiz_topic"
+          phx-change="validate_quiz_topic"
+        >
           <div class="flex flex-col gap-4">
-            <input
+            <.input
               type="text"
-              name="title"
-              value=""
+              field={@quiz_topic_form[:topic]}
               class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
             <button class="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded">
               Submit
             </button>
           </div>
-        </form>
+        </.form>
       </.modal>
       <!-- QUIZ TITLE -->
       <div id="quiz-title" class="text-gray-600 text-2xl font-bold mb-4">

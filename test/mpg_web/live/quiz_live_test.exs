@@ -68,13 +68,23 @@ defmodule MPGWeb.QuizLiveTest do
     assert has_element?(view, "#new-quiz-modal")
 
     view
-    |> form("#new-quiz-form", %{title: "Marvel characters"})
+    |> form("#quiz-topic-form", %{topic: "Marvel characters"})
     |> render_submit()
 
     assert_receive({:state_updated, _state})
     Process.sleep(100)
 
     refute has_element?(view, "#new-quiz-modal")
+  end
+
+  test "host gets an error if they try to submit an empty quiz topic", ctx do
+    Session.add_player(:quiz_session, ctx.session_id, "Host")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+
+    assert view
+           |> form("#quiz-topic-form", %{topic: ""})
+           |> render_change() =~ "Topic can&#39;t be blank"
   end
 
   test "players see the quiz title and status", ctx do
@@ -88,7 +98,7 @@ defmodule MPGWeb.QuizLiveTest do
     assert has_element?(view, "#current-status", "Waiting for the host to set the quiz topic")
 
     view
-    |> form("#new-quiz-form", %{title: "Marvel characters"})
+    |> form("#quiz-topic-form", %{topic: "Marvel characters"})
     |> render_submit()
 
     # title set
@@ -111,7 +121,7 @@ defmodule MPGWeb.QuizLiveTest do
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
 
     view
-    |> form("#new-quiz-form", %{title: "Marvel characters"})
+    |> form("#quiz-topic-form", %{topic: "Marvel characters"})
     |> render_submit()
 
     # title set
