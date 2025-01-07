@@ -3,7 +3,7 @@ defmodule MPGWeb.ThingsLive do
 
   alias MPG.Generator
   alias MPG.Things
-  alias MPG.Things.Game
+  alias MPG.Things.Session
   alias Phoenix.PubSub
 
   import Phoenix.HTML.Form, only: [options_for_select: 2]
@@ -14,7 +14,7 @@ defmodule MPGWeb.ThingsLive do
       :ok = PubSub.subscribe(MPG.PubSub, "things_session")
     end
 
-    state = Game.get_state(:things_session)
+    state = Session.get_state(:things_session)
     %{"session_id" => session_id} = session
 
     socket =
@@ -59,19 +59,19 @@ defmodule MPGWeb.ThingsLive do
   @impl true
   def handle_event("join", %{"player_name" => player_name}, socket) do
     session_id = socket.assigns.session_id
-    Game.add_player(:things_session, session_id, player_name)
+    Session.add_player(:things_session, session_id, player_name)
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("submit_answer", %{"answer" => answer}, socket) do
-    Game.set_player_answer(:things_session, socket.assigns.session_id, answer)
+    Session.set_player_answer(:things_session, socket.assigns.session_id, answer)
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("reveal", %{"guesser_id" => guesser_id}, socket) do
-    Game.reveal_player(:things_session, socket.assigns.session_id, guesser_id)
+    Session.reveal_player(:things_session, socket.assigns.session_id, guesser_id)
     {:noreply, push_patch(socket, to: ~p"/things")}
   end
 
@@ -88,7 +88,7 @@ defmodule MPGWeb.ThingsLive do
 
   @impl true
   def handle_event("set_new_question", %{"question" => question}, socket) do
-    Game.new_question(:things_session, question)
+    Session.new_question(:things_session, question)
 
     {:noreply,
      socket
