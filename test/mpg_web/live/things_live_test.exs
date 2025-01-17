@@ -4,6 +4,8 @@ defmodule MPGWeb.ThingsLiveTest do
 
   alias MPG.Things.Session
 
+  @server_name "things_test"
+
   setup %{conn: conn} do
     conn = init_test_session(conn, %{})
 
@@ -11,9 +13,7 @@ defmodule MPGWeb.ThingsLiveTest do
     session_id = UUID.uuid4()
     conn = put_session(conn, :session_id, session_id)
 
-    # Restart the session to clear out any state
-    Supervisor.terminate_child(MPG.Supervisor, MPG.Things.Session)
-    Supervisor.restart_child(MPG.Supervisor, MPG.Things.Session)
+    start_supervised!({Session, [name: @server_name]})
 
     # subscribe to PubSub
     :ok = Phoenix.PubSub.subscribe(MPG.PubSub, "things_session")
@@ -22,13 +22,13 @@ defmodule MPGWeb.ThingsLiveTest do
   end
 
   test "if the player with the session_id does not exist, prompts for name", %{conn: conn} do
-    {:ok, view, _html} = live(conn, ~p"/things")
+    {:ok, view, _html} = live(conn, ~p"/things?name=things_test")
 
     assert has_element?(view, "#join-form")
   end
 
   test "can join the game", %{conn: conn, session_id: session_id} do
-    {:ok, view, _html} = live(conn, ~p"/things")
+    {:ok, view, _html} = live(conn, ~p"/things?name=things_test")
 
     view
     |> form("#join-form", %{player_name: "Peter"})
@@ -40,29 +40,29 @@ defmodule MPGWeb.ThingsLiveTest do
   end
 
   test "loads user from session_id if it exists", %{conn: conn, session_id: session_id} do
-    Session.add_player(:things_session, session_id, "Peter")
+    Session.add_player(@server_name, session_id, "Peter")
 
-    {:ok, view, _html} = live(conn, ~p"/things")
+    {:ok, view, _html} = live(conn, ~p"/things?name=things_test")
 
     assert has_element?(view, "#player-#{session_id}[data-role=avatar]", "Pet")
     refute has_element?(view, "#join-form")
   end
 
   test "host is prompted to enter a question right after joining", ctx do
-    Session.add_player(:things_session, ctx.session_id, "Host")
+    Session.add_player(@server_name, ctx.session_id, "Host")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things?name=things_test")
 
     assert has_element?(view, "#new-question-modal")
   end
 
   test "host gets a 'New Question' button which opens a modal", ctx do
-    Session.add_player(:things_session, ctx.session_id, "Host")
-    Session.new_question(:things_session, "Things that are red")
-    Session.set_player_answer(:things_session, ctx.session_id, "apple")
-    Session.reveal_player(:things_session, ctx.session_id, "12345")
+    Session.add_player(@server_name, ctx.session_id, "Host")
+    Session.new_question(@server_name, "Things that are red")
+    Session.set_player_answer(@server_name, ctx.session_id, "apple")
+    Session.reveal_player(@server_name, ctx.session_id, "12345")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things?name=things_test")
 
     assert has_element?(view, "#new-question-button")
     refute has_element?(view, "#new-question-modal")
@@ -75,15 +75,15 @@ defmodule MPGWeb.ThingsLiveTest do
   end
 
   test "host's 'New Question' button only shows when all players have been revealed", ctx do
-    Session.add_player(:things_session, ctx.session_id, "Host")
-    Session.new_question(:things_session, "Things that are red")
-    Session.set_player_answer(:things_session, ctx.session_id, "apple")
+    Session.add_player(@server_name, ctx.session_id, "Host")
+    Session.new_question(@server_name, "Things that are red")
+    Session.set_player_answer(@server_name, ctx.session_id, "apple")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things?name=things_test")
 
     refute has_element?(view, "#new-question-button")
 
-    Session.reveal_player(:things_session, ctx.session_id, "12345")
+    Session.reveal_player(@server_name, ctx.session_id, "12345")
 
     assert_receive({:state_updated, _state})
     :timer.sleep(100)
@@ -92,51 +92,51 @@ defmodule MPGWeb.ThingsLiveTest do
   end
 
   test "other players cannot see the 'New Question' button", ctx do
-    Session.add_player(:things_session, UUID.uuid4(), "Host")
-    Session.add_player(:things_session, ctx.session_id, "Player")
+    Session.add_player(@server_name, UUID.uuid4(), "Host")
+    Session.add_player(@server_name, ctx.session_id, "Player")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things?name=things_test")
 
     refute has_element?(view, "#new-question-button")
   end
 
   test "host can set a new question", ctx do
-    Session.add_player(:things_session, ctx.session_id, "Host")
-    Session.new_question(:things_session, "Things that are red")
-    Session.set_player_answer(:things_session, ctx.session_id, "apple")
-    Session.reveal_player(:things_session, ctx.session_id, "12345")
+    Session.add_player(@server_name, ctx.session_id, "Host")
+    Session.new_question(@server_name, "Things that are red")
+    Session.set_player_answer(@server_name, ctx.session_id, "apple")
+    Session.reveal_player(@server_name, ctx.session_id, "12345")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things?name=things_test")
 
     view
     |> element("#new-question-button")
     |> render_click()
 
-    assert_patch(view, ~p"/things/new_question")
+    assert_patch(view, ~p"/things/new_question?name=things_test")
 
     view
     |> form("#new-question-form", %{question: "Things that are red"})
     |> render_submit()
 
-    assert_patch(view, ~p"/things")
+    assert_patch(view, ~p"/things?name=things_test")
 
     assert_receive({:state_updated, _state})
     assert has_element?(view, "#current-question", "Things that are red")
   end
 
   test "host gets an error if they try to submit an empty question", ctx do
-    Session.add_player(:things_session, ctx.session_id, "Host")
-    Session.new_question(:things_session, "Things that are red")
-    Session.set_player_answer(:things_session, ctx.session_id, "apple")
-    Session.reveal_player(:things_session, ctx.session_id, "12345")
+    Session.add_player(@server_name, ctx.session_id, "Host")
+    Session.new_question(@server_name, "Things that are red")
+    Session.set_player_answer(@server_name, ctx.session_id, "apple")
+    Session.reveal_player(@server_name, ctx.session_id, "12345")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things?name=things_test")
 
     view
     |> element("#new-question-button")
     |> render_click()
 
-    assert_patch(view, ~p"/things/new_question")
+    assert_patch(view, ~p"/things/new_question?name=things_test")
 
     assert view
            |> form("#new-question-form", %{question: ""})
@@ -144,9 +144,9 @@ defmodule MPGWeb.ThingsLiveTest do
   end
 
   test "host can click a button on the modal to generate a new question", ctx do
-    Session.add_player(:things_session, ctx.session_id, "Host")
+    Session.add_player(@server_name, ctx.session_id, "Host")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things/new_question")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things/new_question?name=things_test")
 
     assert has_element?(view, "#new-question-form")
     assert has_element?(view, "input#question[value='']")
@@ -164,15 +164,15 @@ defmodule MPGWeb.ThingsLiveTest do
     player1_id = ctx.session_id
     player2_id = UUID.uuid4()
 
-    Session.add_player(:things_session, player1_id, "Player 1")
-    Session.new_question(:things_session, "Things that are red")
-    Session.add_player(:things_session, player2_id, "Player 2")
+    Session.add_player(@server_name, player1_id, "Player 1")
+    Session.new_question(@server_name, "Things that are red")
+    Session.add_player(@server_name, player2_id, "Player 2")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things?name=things_test")
     refute has_element?(view, "#player-#{player2_id} [data-role=ready-check-mark]")
 
     # Set the player's answer
-    Session.set_player_answer(:things_session, player2_id, "bananas")
+    Session.set_player_answer(@server_name, player2_id, "bananas")
     assert_receive({:state_updated, _state})
     :timer.sleep(100)
 
@@ -183,19 +183,19 @@ defmodule MPGWeb.ThingsLiveTest do
     player1_id = ctx.session_id
     player2_id = UUID.uuid4()
 
-    Session.add_player(:things_session, player1_id, "Player 1")
-    Session.new_question(:things_session, "Things that are yellow")
-    Session.add_player(:things_session, player2_id, "Player 2")
+    Session.add_player(@server_name, player1_id, "Player 1")
+    Session.new_question(@server_name, "Things that are yellow")
+    Session.add_player(@server_name, player2_id, "Player 2")
     # Set Player 1's answer
-    Session.set_player_answer(:things_session, player1_id, "bananas")
+    Session.set_player_answer(@server_name, player1_id, "bananas")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things?name=things_test")
 
     # Player 1 has check mark
     assert has_element?(view, "#player-#{player1_id} [data-role=ready-check-mark]")
 
     # Set Player 2's answer
-    Session.set_player_answer(:things_session, player2_id, "peeps")
+    Session.set_player_answer(@server_name, player2_id, "peeps")
     assert_receive({:state_updated, _state})
     :timer.sleep(100)
 
@@ -204,10 +204,10 @@ defmodule MPGWeb.ThingsLiveTest do
   end
 
   test "shows the current question", %{conn: conn, session_id: session_id} do
-    Session.new_question(:things_session, "Things that are red")
-    Session.add_player(:things_session, session_id, "Peter")
+    Session.new_question(@server_name, "Things that are red")
+    Session.add_player(@server_name, session_id, "Peter")
 
-    {:ok, view, _html} = live(conn, ~p"/things")
+    {:ok, view, _html} = live(conn, ~p"/things?name=things_test")
 
     assert has_element?(view, "#current-question", "Things that are red")
   end
@@ -216,9 +216,9 @@ defmodule MPGWeb.ThingsLiveTest do
     conn: conn,
     session_id: session_id
   } do
-    Session.add_player(:things_session, session_id, "Peter")
+    Session.add_player(@server_name, session_id, "Peter")
 
-    {:ok, view, _html} = live(conn, ~p"/things")
+    {:ok, view, _html} = live(conn, ~p"/things?name=things_test")
 
     assert has_element?(view, "#waiting-message")
   end
@@ -226,10 +226,10 @@ defmodule MPGWeb.ThingsLiveTest do
   # TODO: fix this test
   @tag :skip
   test "submit answer button is disabled until the player enters something", ctx do
-    Session.new_question(:things_session, "Things that are yummy")
-    Session.add_player(:things_session, ctx.session_id, "Peter")
+    Session.new_question(@server_name, "Things that are yummy")
+    Session.add_player(@server_name, ctx.session_id, "Peter")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things?name=things_test")
 
     assert has_element?(view, "#answer-form button[disabled]")
 
@@ -242,10 +242,10 @@ defmodule MPGWeb.ThingsLiveTest do
   end
 
   test "player can submit answer", %{conn: conn, session_id: session_id} do
-    Session.new_question(:things_session, "Things that are yummy")
-    Session.add_player(:things_session, session_id, "Peter")
+    Session.new_question(@server_name, "Things that are yummy")
+    Session.add_player(@server_name, session_id, "Peter")
 
-    {:ok, view, _html} = live(conn, ~p"/things")
+    {:ok, view, _html} = live(conn, ~p"/things?name=things_test")
 
     view
     |> form("#answer-form", %{answer: "bananas"})
@@ -260,18 +260,18 @@ defmodule MPGWeb.ThingsLiveTest do
     session_id: session_id
   } do
     id2 = UUID.uuid4()
-    Session.add_player(:things_session, session_id, "Player 1")
-    Session.add_player(:things_session, id2, "Player 2")
+    Session.add_player(@server_name, session_id, "Player 1")
+    Session.add_player(@server_name, id2, "Player 2")
 
-    Session.set_player_answer(:things_session, session_id, "apple")
+    Session.set_player_answer(@server_name, session_id, "apple")
 
-    {:ok, view, _html} = live(conn, ~p"/things")
+    {:ok, view, _html} = live(conn, ~p"/things?name=things_test")
 
     refute has_element?(view, "#answers")
 
-    Session.set_player_answer(:things_session, id2, "banana")
+    Session.set_player_answer(@server_name, id2, "banana")
 
-    {:ok, view, _html} = live(conn, ~p"/things")
+    {:ok, view, _html} = live(conn, ~p"/things?name=things_test")
 
     assert has_element?(view, "#answers", "apple")
     assert has_element?(view, "#answers", "banana")
@@ -281,17 +281,17 @@ defmodule MPGWeb.ThingsLiveTest do
     conn: conn,
     session_id: session_id
   } do
-    Session.new_question(:things_session, "Things that are red")
-    Session.add_player(:things_session, session_id, "Player 1")
+    Session.new_question(@server_name, "Things that are red")
+    Session.add_player(@server_name, session_id, "Player 1")
     id2 = UUID.uuid4()
-    Session.add_player(:things_session, id2, "Player 2")
+    Session.add_player(@server_name, id2, "Player 2")
 
-    Session.set_player_answer(:things_session, session_id, "apple")
-    {:ok, view, _html} = live(conn, ~p"/things")
+    Session.set_player_answer(@server_name, session_id, "apple")
+    {:ok, view, _html} = live(conn, ~p"/things?name=things_test")
 
     refute has_element?(view, "#reveal-button")
 
-    Session.set_player_answer(:things_session, id2, "banana")
+    Session.set_player_answer(@server_name, id2, "banana")
     assert_receive({:state_updated, _state})
     :timer.sleep(100)
 
@@ -299,21 +299,21 @@ defmodule MPGWeb.ThingsLiveTest do
   end
 
   test "players can select who guessed them and award a point", ctx do
-    Session.new_question(:things_session, "Things that are red")
+    Session.new_question(@server_name, "Things that are red")
 
     # join players
-    Session.add_player(:things_session, ctx.session_id, "Player 1")
+    Session.add_player(@server_name, ctx.session_id, "Player 1")
     player2_id = UUID.uuid4()
-    Session.add_player(:things_session, player2_id, "Player 2")
+    Session.add_player(@server_name, player2_id, "Player 2")
     player3_id = UUID.uuid4()
-    Session.add_player(:things_session, player3_id, "Player 3")
+    Session.add_player(@server_name, player3_id, "Player 3")
 
     # set answers
-    Session.set_player_answer(:things_session, ctx.session_id, "apple")
-    Session.set_player_answer(:things_session, player2_id, "strawberry")
-    Session.set_player_answer(:things_session, player3_id, "roses")
+    Session.set_player_answer(@server_name, ctx.session_id, "apple")
+    Session.set_player_answer(@server_name, player2_id, "strawberry")
+    Session.set_player_answer(@server_name, player3_id, "roses")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things?name=things_test")
 
     assert has_element?(view, "#reveal-button")
 
@@ -322,7 +322,7 @@ defmodule MPGWeb.ThingsLiveTest do
     |> element("#reveal-button")
     |> render_click()
 
-    assert_patch(view, ~p"/things/reveal")
+    assert_patch(view, ~p"/things/reveal?name=things_test")
     assert has_element?(view, "#reveal-modal")
 
     # select player 2 as the guesser
@@ -330,29 +330,29 @@ defmodule MPGWeb.ThingsLiveTest do
     |> form("#reveal-form", %{guesser_id: player2_id})
     |> render_submit()
 
-    assert_patch(view, ~p"/things")
+    assert_patch(view, ~p"/things?name=things_test")
     assert has_element?(view, "#player-#{player2_id} [data-role=score]", "1")
   end
 
   test "players cannot award themselves a point when revealing", ctx do
-    Session.new_question(:things_session, "Things that are red")
+    Session.new_question(@server_name, "Things that are red")
 
     # join players
-    Session.add_player(:things_session, ctx.session_id, "Player 1")
+    Session.add_player(@server_name, ctx.session_id, "Player 1")
     player2_id = UUID.uuid4()
-    Session.add_player(:things_session, player2_id, "Player 2")
+    Session.add_player(@server_name, player2_id, "Player 2")
 
     # set answers
-    Session.set_player_answer(:things_session, ctx.session_id, "apple")
-    Session.set_player_answer(:things_session, player2_id, "banana")
+    Session.set_player_answer(@server_name, ctx.session_id, "apple")
+    Session.set_player_answer(@server_name, player2_id, "banana")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things?name=things_test")
 
     view
     |> element("#reveal-button")
     |> render_click()
 
-    assert_patch(view, ~p"/things/reveal")
+    assert_patch(view, ~p"/things/reveal?name=things_test")
 
     assert has_element?(view, "#guesser-select")
     refute has_element?(view, "option", "Player 1")
@@ -361,20 +361,20 @@ defmodule MPGWeb.ThingsLiveTest do
   test "moves the player icon next to their answer once they've been revealed", ctx do
     player1_id = ctx.session_id
     player2_id = UUID.uuid4()
-    Session.add_player(:things_session, player1_id, "Bart")
-    Session.add_player(:things_session, player2_id, "Homer")
+    Session.add_player(@server_name, player1_id, "Bart")
+    Session.add_player(@server_name, player2_id, "Homer")
 
-    Session.set_player_answer(:things_session, player1_id, "apple")
-    Session.set_player_answer(:things_session, player2_id, "banana")
+    Session.set_player_answer(@server_name, player1_id, "apple")
+    Session.set_player_answer(@server_name, player2_id, "banana")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things?name=things_test")
 
     # player icon shown in player list
     assert has_element?(view, "#player-list #player-#{player2_id}")
     # player icon not shown with answer
     refute has_element?(view, "#answer-#{player2_id} #player-#{player2_id}")
 
-    Session.reveal_player(:things_session, player2_id, ctx.session_id)
+    Session.reveal_player(@server_name, player2_id, ctx.session_id)
 
     assert_received({:state_updated, _state})
     :timer.sleep(100)
@@ -387,11 +387,11 @@ defmodule MPGWeb.ThingsLiveTest do
 
   test "receives and renders state updates", ctx do
     player1_id = ctx.session_id
-    Session.add_player(:things_session, player1_id, "Player 1")
+    Session.add_player(@server_name, player1_id, "Player 1")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things?name=things_test")
 
-    Session.new_question(:things_session, "Things that are awesome")
+    Session.new_question(@server_name, "Things that are awesome")
 
     assert_receive({:state_updated, _state})
     # TODO: is there a way to do this without needing a sleep?
@@ -401,13 +401,13 @@ defmodule MPGWeb.ThingsLiveTest do
 
   test "can handle at least 8 players", ctx do
     player1_id = ctx.session_id
-    Session.add_player(:things_session, player1_id, "P1")
+    Session.add_player(@server_name, player1_id, "P1")
 
     for i <- 2..8 do
-      Session.add_player(:things_session, UUID.uuid4(), "Pl#{i}")
+      Session.add_player(@server_name, UUID.uuid4(), "Pl#{i}")
     end
 
-    {:ok, _view, _html} = live(ctx.conn, ~p"/things")
+    {:ok, _view, _html} = live(ctx.conn, ~p"/things?name=things_test")
     # open_browser(view)
   end
 end

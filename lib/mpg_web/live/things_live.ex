@@ -10,21 +10,13 @@ defmodule MPGWeb.ThingsLive do
 
   @impl true
   def mount(_params, session, socket) do
-    if connected?(socket) do
-      :ok = PubSub.subscribe(MPG.PubSub, "things_session")
-    end
-
-    state = Session.get_state(:things_session)
     %{"session_id" => session_id} = session
 
     socket =
       socket
-      |> assign(session_id: session_id)
-      |> assign(state: state)
       |> assign(page_title: "The Things Game")
       |> assign(primary_color: "bg-emerald-500")
-      |> assign_player()
-      |> assign_question_form("")
+      |> assign(session_id: session_id)
 
     {:ok, socket}
   end
@@ -45,7 +37,19 @@ defmodule MPGWeb.ThingsLive do
   end
 
   @impl true
-  def handle_params(_params, _url, socket) do
+  def handle_params(params, _url, socket) do
+    :ok = PubSub.subscribe(MPG.PubSub, "things_session")
+
+    server_id = params["name"] || "things1"
+    state = Session.get_state(server_id)
+
+    socket =
+      socket
+      |> assign(server_id: server_id)
+      |> assign(state: state)
+      |> assign_player()
+      |> assign_question_form("")
+
     {:noreply, socket}
   end
 
@@ -59,20 +63,23 @@ defmodule MPGWeb.ThingsLive do
   @impl true
   def handle_event("join", %{"player_name" => player_name}, socket) do
     session_id = socket.assigns.session_id
-    Session.add_player(:things_session, session_id, player_name)
+    server_id = socket.assigns.server_id
+    Session.add_player(server_id, session_id, player_name)
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("submit_answer", %{"answer" => answer}, socket) do
-    Session.set_player_answer(:things_session, socket.assigns.session_id, answer)
+    server_id = socket.assigns.server_id
+    Session.set_player_answer(server_id, socket.assigns.session_id, answer)
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("reveal", %{"guesser_id" => guesser_id}, socket) do
-    Session.reveal_player(:things_session, socket.assigns.session_id, guesser_id)
-    {:noreply, push_patch(socket, to: ~p"/things")}
+    server_id = socket.assigns.server_id
+    Session.reveal_player(server_id, socket.assigns.session_id, guesser_id)
+    {:noreply, push_patch(socket, to: ~p"/things?name=#{server_id}")}
   end
 
   @impl true
@@ -88,12 +95,13 @@ defmodule MPGWeb.ThingsLive do
 
   @impl true
   def handle_event("set_new_question", %{"question" => question}, socket) do
-    Session.new_question(:things_session, question)
+    server_id = socket.assigns.server_id
+    Session.new_question(server_id, question)
 
     {:noreply,
      socket
      |> assign_question_form("")
-     |> push_patch(to: ~p"/things")}
+     |> push_patch(to: ~p"/things?name=#{server_id}")}
   end
 
   @impl true
@@ -160,7 +168,7 @@ defmodule MPGWeb.ThingsLive do
         }
         id="new-question-modal"
         show={true}
-        on_cancel={JS.patch("/things")}
+        on_cancel={JS.patch("/things?name=#{@server_id}")}
       >
         <div class="font-bold mb-4">Things...</div>
         <.form
@@ -224,7 +232,7 @@ defmodule MPGWeb.ThingsLive do
               <.link
                 id="reveal-button"
                 class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
-                patch={~p"/things/reveal"}
+                patch={~p"/things/reveal?name=#{@server_id}"}
               >
                 Reveal my answer
               </.link>
@@ -256,7 +264,7 @@ defmodule MPGWeb.ThingsLive do
           <.link
             id="new-question-button"
             class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded text-center"
-            patch={~p"/things/new_question"}
+            patch={~p"/things/new_question?name=#{@server_id}"}
           >
             Next Question <.icon name="hero-arrow-path" class="h-5 w-5" />
           </.link>
@@ -266,7 +274,7 @@ defmodule MPGWeb.ThingsLive do
           :if={@live_action == :reveal}
           id="reveal-modal"
           show={true}
-          on_cancel={JS.patch("/things")}
+          on_cancel={JS.patch("/things?name=#{@server_id}")}
         >
           <form id="reveal-form" phx-submit="reveal" class="flex flex-col gap-6">
             <div class="font-bold">Who guessed your answer?</div>

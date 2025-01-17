@@ -5,60 +5,83 @@ defmodule MPG.Things.Session do
   alias MPG.Things.State
   alias Phoenix.PubSub
 
+  def child_spec(opts) do
+    name = Keyword.get(opts, :name, "things")
+
+    %{
+      id: "#{__MODULE__}_#{name}",
+      start: {__MODULE__, :start_link, [name]}
+    }
+  end
+
   @doc """
   Starts the server.
   """
-  def start_link(opts) do
-    GenServer.start_link(__MODULE__, :ok, opts)
+  def start_link(name) do
+    GenServer.start_link(__MODULE__, :ok, name: registered_name(name))
   end
 
   @doc """
   Pings the server.
   """
-  def ping(server) do
-    GenServer.call(server, :ping)
+  def ping(server_id) do
+    registered_name(server_id)
+    |> GenServer.call(:ping)
   end
 
   @doc """
   Retrieves the state.
   """
-  def get_state(server) do
-    GenServer.call(server, :get_state)
+  def get_state(server_id) do
+    registered_name(server_id)
+    |> GenServer.call(:get_state)
   end
 
   @doc """
   Adds a player to the state.
   """
-  def add_player(server, id, player_name) do
-    GenServer.cast(server, {:add_player, id, player_name})
+  def add_player(server_id, player_id, player_name) do
+    registered_name(server_id)
+    |> GenServer.cast({:add_player, player_id, player_name})
   end
 
   @doc """
   Sets a player's answer.
   """
-  def set_player_answer(server, player_id, answer) do
-    GenServer.cast(server, {:set_player_answer, player_id, answer})
+  def set_player_answer(server_id, player_id, answer) do
+    registered_name(server_id)
+    |> GenServer.cast({:set_player_answer, player_id, answer})
   end
 
   @doc """
   Sets player to revealed.
   """
-  def reveal_player(server, player_id, guesser_id) do
-    GenServer.cast(server, {:reveal_player, player_id, guesser_id})
+  def reveal_player(server_id, player_id, guesser_id) do
+    registered_name(server_id)
+    |> GenServer.cast({:reveal_player, player_id, guesser_id})
   end
 
   @doc """
   Sets a new question and resets all player answers.
   """
-  def new_question(server, topic) do
-    GenServer.cast(server, {:new_question, topic})
+  def new_question(server_id, topic) do
+    registered_name(server_id)
+    |> GenServer.cast({:new_question, topic})
   end
 
   @doc """
   Removes player with the given id.
   """
-  def remove_player(server, player_id) do
-    GenServer.cast(server, {:remove_player, player_id})
+  def remove_player(server_id, player_id) do
+    registered_name(server_id)
+    |> GenServer.cast({:remove_player, player_id})
+  end
+
+  @doc """
+  Determines the Registry name ("via tuple") from a string id
+  """
+  def registered_name(id) do
+    {:via, Registry, {MPG.GameRegistry, id}}
   end
 
   @impl true

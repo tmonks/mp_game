@@ -15,7 +15,8 @@ defmodule MPG.Application do
       # {MPG.Worker, arg},
       # Start to serve requests, typically the last entry
       MPGWeb.Endpoint,
-      {MPG.Things.Session, name: :things_session},
+      {Registry, keys: :unique, name: MPG.GameRegistry},
+      {MPG.Things.Session, name: "things1"},
       {MPG.Quizzes.Session, name: :quiz_session}
     ]
 
