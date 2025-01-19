@@ -12,7 +12,7 @@ defmodule MPG.Things.SessionTest do
     # start_supervised will call Session.child_spec with the given opts
     # https://hexdocs.pm/elixir/1.12/Supervisor.html#module-child_spec-1
     server_pid = start_supervised!({Session, [name: @server_id]})
-    :ok = Phoenix.PubSub.subscribe(MPG.PubSub, "things_session")
+    :ok = Phoenix.PubSub.subscribe(MPG.PubSub, @server_id)
     %{server: server_pid}
   end
 

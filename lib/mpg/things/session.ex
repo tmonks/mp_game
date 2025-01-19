@@ -18,7 +18,7 @@ defmodule MPG.Things.Session do
   Starts the server.
   """
   def start_link(name) do
-    GenServer.start_link(__MODULE__, :ok, name: registered_name(name))
+    GenServer.start_link(__MODULE__, name, name: registered_name(name))
   end
 
   @doc """
@@ -85,8 +85,8 @@ defmodule MPG.Things.Session do
   end
 
   @impl true
-  def init(:ok) do
-    {:ok, %State{players: []}}
+  def init(server_id) do
+    {:ok, %State{server_id: server_id, players: []}}
   end
 
   @impl true
@@ -140,6 +140,6 @@ defmodule MPG.Things.Session do
   end
 
   defp broadcast_state_updated(state) do
-    PubSub.broadcast(MPG.PubSub, "things_session", {:state_updated, state})
+    PubSub.broadcast(MPG.PubSub, state.server_id, {:state_updated, state})
   end
 end

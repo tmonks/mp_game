@@ -38,9 +38,8 @@ defmodule MPGWeb.ThingsLive do
 
   @impl true
   def handle_params(params, _url, socket) do
-    :ok = PubSub.subscribe(MPG.PubSub, "things_session")
-
     server_id = params["name"] || "things1"
+    :ok = PubSub.subscribe(MPG.PubSub, server_id)
     state = Session.get_state(server_id)
 
     socket =

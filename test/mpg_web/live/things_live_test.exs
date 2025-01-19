@@ -16,7 +16,7 @@ defmodule MPGWeb.ThingsLiveTest do
     start_supervised!({Session, [name: @server_name]})
 
     # subscribe to PubSub
-    :ok = Phoenix.PubSub.subscribe(MPG.PubSub, "things_session")
+    :ok = Phoenix.PubSub.subscribe(MPG.PubSub, @server_name)
 
     {:ok, conn: conn, session_id: session_id}
   end

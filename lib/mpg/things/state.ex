@@ -1,3 +1,3 @@
 defmodule MPG.Things.State do
-  defstruct [:topic, :players]
+  defstruct [:server_id, :topic, :players]
 end
