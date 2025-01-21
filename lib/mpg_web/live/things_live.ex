@@ -37,8 +37,7 @@ defmodule MPGWeb.ThingsLive do
   end
 
   @impl true
-  def handle_params(params, _url, socket) do
-    server_id = params["name"] || "things1"
+  def handle_params(%{"id" => server_id}, _url, socket) do
     :ok = PubSub.subscribe(MPG.PubSub, server_id)
     state = Session.get_state(server_id)
 
@@ -50,6 +49,17 @@ defmodule MPGWeb.ThingsLive do
       |> assign_question_form("")
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_params(_params, _url, socket) do
+    # generate a random 5 digit server ID
+    server_id = Enum.random(10000..99999) |> Integer.to_string()
+
+    {:ok, _pid} =
+      DynamicSupervisor.start_child(MPG.GameSupervisor, {MPG.Things.Session, name: server_id})
+
+    {:noreply, push_patch(socket, to: ~p"/things?id=#{server_id}")}
   end
 
   defp assign_player(%{assigns: assigns} = socket) do
@@ -78,7 +88,7 @@ defmodule MPGWeb.ThingsLive do
   def handle_event("reveal", %{"guesser_id" => guesser_id}, socket) do
     server_id = socket.assigns.server_id
     Session.reveal_player(server_id, socket.assigns.session_id, guesser_id)
-    {:noreply, push_patch(socket, to: ~p"/things?name=#{server_id}")}
+    {:noreply, push_patch(socket, to: ~p"/things?id=#{server_id}")}
   end
 
   @impl true
@@ -100,7 +110,7 @@ defmodule MPGWeb.ThingsLive do
     {:noreply,
      socket
      |> assign_question_form("")
-     |> push_patch(to: ~p"/things?name=#{server_id}")}
+     |> push_patch(to: ~p"/things?id=#{server_id}")}
   end
 
   @impl true
@@ -167,7 +177,7 @@ defmodule MPGWeb.ThingsLive do
         }
         id="new-question-modal"
         show={true}
-        on_cancel={JS.patch("/things?name=#{@server_id}")}
+        on_cancel={JS.patch("/things?id=#{@server_id}")}
       >
         <div class="font-bold mb-4">Things...</div>
         <.form
@@ -231,7 +241,7 @@ defmodule MPGWeb.ThingsLive do
               <.link
                 id="reveal-button"
                 class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
-                patch={~p"/things/reveal?name=#{@server_id}"}
+                patch={~p"/things/reveal?id=#{@server_id}"}
               >
                 Reveal my answer
               </.link>
@@ -263,7 +273,7 @@ defmodule MPGWeb.ThingsLive do
           <.link
             id="new-question-button"
             class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded text-center"
-            patch={~p"/things/new_question?name=#{@server_id}"}
+            patch={~p"/things/new_question?id=#{@server_id}"}
           >
             Next Question <.icon name="hero-arrow-path" class="h-5 w-5" />
           </.link>
@@ -273,7 +283,7 @@ defmodule MPGWeb.ThingsLive do
           :if={@live_action == :reveal}
           id="reveal-modal"
           show={true}
-          on_cancel={JS.patch("/things?name=#{@server_id}")}
+          on_cancel={JS.patch("/things?id=#{@server_id}")}
         >
           <form id="reveal-form" phx-submit="reveal" class="flex flex-col gap-6">
             <div class="font-bold">Who guessed your answer?</div>

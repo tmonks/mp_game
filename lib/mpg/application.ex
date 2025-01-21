@@ -16,7 +16,7 @@ defmodule MPG.Application do
       # Start to serve requests, typically the last entry
       MPGWeb.Endpoint,
       {Registry, keys: :unique, name: MPG.GameRegistry},
-      {MPG.Things.Session, name: "things1"},
+      {DynamicSupervisor, strategy: :one_for_one, name: MPG.GameSupervisor},
       {MPG.Quizzes.Session, name: :quiz_session}
     ]
 
