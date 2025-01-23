@@ -25,13 +25,13 @@ defmodule MPGWeb.ThingsLiveTest do
   test "visiting /things redirects to a random server ID", %{conn: conn} do
     {:error, {:live_redirect, %{to: new_path}}} = live(conn, ~p"/things")
 
-    assert new_path =~ "/things?id="
+    assert new_path =~ ~r"/things/[a-z0-9]+"
 
     # retrieve the server name from the `name` URL param
-    server_name = new_path |> String.split("id=") |> List.last()
+    server_id = new_path |> String.split("/") |> List.last()
 
     # Session GenServer started with that name
-    assert %State{server_id: ^server_name} = Session.get_state(server_name)
+    assert %State{server_id: ^server_id} = Session.get_state(server_id)
   end
 
   test "if the player with the session_id does not exist, prompts for name", %{conn: conn} do
@@ -125,13 +125,13 @@ defmodule MPGWeb.ThingsLiveTest do
     |> element("#new-question-button")
     |> render_click()
 
-    assert_patch(view, ~p"/things/new_question?id=things_test")
+    assert_patch(view, ~p"/things/things_test/new_question")
 
     view
     |> form("#new-question-form", %{question: "Things that are red"})
     |> render_submit()
 
-    assert_patch(view, ~p"/things?id=things_test")
+    assert_patch(view, ~p"/things/things_test")
 
     assert_receive({:state_updated, _state})
     assert has_element?(view, "#current-question", "Things that are red")
@@ -149,7 +149,7 @@ defmodule MPGWeb.ThingsLiveTest do
     |> element("#new-question-button")
     |> render_click()
 
-    assert_patch(view, ~p"/things/new_question?id=things_test")
+    assert_patch(view, ~p"/things/things_test/new_question")
 
     assert view
            |> form("#new-question-form", %{question: ""})
@@ -159,7 +159,7 @@ defmodule MPGWeb.ThingsLiveTest do
   test "host can click a button on the modal to generate a new question", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/things/new_question?id=things_test")
+    {:ok, view, _html} = live(ctx.conn, ~p"/things/things_test/new_question")
 
     assert has_element?(view, "#new-question-form")
     assert has_element?(view, "input#question[value='']")
@@ -335,7 +335,7 @@ defmodule MPGWeb.ThingsLiveTest do
     |> element("#reveal-button")
     |> render_click()
 
-    assert_patch(view, ~p"/things/reveal?id=things_test")
+    assert_patch(view, ~p"/things/things_test/reveal")
     assert has_element?(view, "#reveal-modal")
 
     # select player 2 as the guesser
@@ -343,7 +343,7 @@ defmodule MPGWeb.ThingsLiveTest do
     |> form("#reveal-form", %{guesser_id: player2_id})
     |> render_submit()
 
-    assert_patch(view, ~p"/things?id=things_test")
+    assert_patch(view, ~p"/things/things_test")
     assert has_element?(view, "#player-#{player2_id} [data-role=score]", "1")
   end
 
@@ -365,7 +365,7 @@ defmodule MPGWeb.ThingsLiveTest do
     |> element("#reveal-button")
     |> render_click()
 
-    assert_patch(view, ~p"/things/reveal?id=things_test")
+    assert_patch(view, ~p"/things/things_test/reveal")
 
     assert has_element?(view, "#guesser-select")
     refute has_element?(view, "option", "Player 1")

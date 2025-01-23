@@ -20,9 +20,10 @@ defmodule MPGWeb.Router do
 
     live "/", HomeLive, :index
 
-    live "/things", ThingsLive, :play
-    live "/things/new_question", ThingsLive, :new_question
-    live "/things/reveal", ThingsLive, :reveal
+    live "/things", ThingsLive, :new
+    live "/things/:id", ThingsLive, :play
+    live "/things/:id/new_question", ThingsLive, :new_question
+    live "/things/:id/reveal", ThingsLive, :reveal
 
     live "/quiz", QuizLive, :play
     live "/quiz/new_quiz", QuizLive, :new_quiz

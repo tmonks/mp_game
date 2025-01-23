@@ -59,7 +59,7 @@ defmodule MPGWeb.ThingsLive do
     {:ok, _pid} =
       DynamicSupervisor.start_child(MPG.GameSupervisor, {MPG.Things.Session, name: server_id})
 
-    {:noreply, push_patch(socket, to: ~p"/things?id=#{server_id}")}
+    {:noreply, push_patch(socket, to: ~p"/things/#{server_id}")}
   end
 
   defp assign_player(%{assigns: assigns} = socket) do
@@ -88,7 +88,7 @@ defmodule MPGWeb.ThingsLive do
   def handle_event("reveal", %{"guesser_id" => guesser_id}, socket) do
     server_id = socket.assigns.server_id
     Session.reveal_player(server_id, socket.assigns.session_id, guesser_id)
-    {:noreply, push_patch(socket, to: ~p"/things?id=#{server_id}")}
+    {:noreply, push_patch(socket, to: ~p"/things/#{server_id}")}
   end
 
   @impl true
@@ -110,7 +110,7 @@ defmodule MPGWeb.ThingsLive do
     {:noreply,
      socket
      |> assign_question_form("")
-     |> push_patch(to: ~p"/things?id=#{server_id}")}
+     |> push_patch(to: ~p"/things/#{server_id}")}
   end
 
   @impl true
@@ -177,7 +177,7 @@ defmodule MPGWeb.ThingsLive do
         }
         id="new-question-modal"
         show={true}
-        on_cancel={JS.patch("/things?id=#{@server_id}")}
+        on_cancel={JS.patch("/things/#{@server_id}")}
       >
         <div class="font-bold mb-4">Things...</div>
         <.form
@@ -241,7 +241,7 @@ defmodule MPGWeb.ThingsLive do
               <.link
                 id="reveal-button"
                 class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
-                patch={~p"/things/reveal?id=#{@server_id}"}
+                patch={~p"/things/#{@server_id}/reveal"}
               >
                 Reveal my answer
               </.link>
@@ -273,7 +273,7 @@ defmodule MPGWeb.ThingsLive do
           <.link
             id="new-question-button"
             class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded text-center"
-            patch={~p"/things/new_question?id=#{@server_id}"}
+            patch={~p"/things/#{@server_id}/new_question"}
           >
             Next Question <.icon name="hero-arrow-path" class="h-5 w-5" />
           </.link>
