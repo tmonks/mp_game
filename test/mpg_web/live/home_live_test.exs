@@ -7,4 +7,14 @@ defmodule MPGWeb.HomeLiveTest do
     assert has_element?(view, "a#things-link")
     assert has_element?(view, "a#quiz-link")
   end
+
+  test "can join an existing Things game", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    view
+    |> form("#join-form", %{game_id: "1234"})
+    |> render_submit()
+
+    assert_redirect(view, ~p"/things/1234")
+  end
 end
