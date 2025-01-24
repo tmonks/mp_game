@@ -5,6 +5,7 @@ defmodule MPG.Quizzes.State do
   alias MPG.Quizzes.Question
 
   embedded_schema do
+    field :server_id, :string
     field :title, :string
     field :current_question, :integer
     embeds_many :players, Player
