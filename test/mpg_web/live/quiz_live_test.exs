@@ -9,6 +9,8 @@ defmodule MPGWeb.QuizLiveTest do
   alias MPG.Quizzes.Session
   alias MPG.Quizzes.State
 
+  @server_id "quiz_session"
+
   setup %{conn: conn} do
     conn = init_test_session(conn, %{})
 
@@ -16,9 +18,7 @@ defmodule MPGWeb.QuizLiveTest do
     session_id = UUID.uuid4()
     conn = put_session(conn, :session_id, session_id)
 
-    # Restart the session to clear out any state
-    Supervisor.terminate_child(MPG.Supervisor, MPG.Quizzes.Session)
-    Supervisor.restart_child(MPG.Supervisor, MPG.Quizzes.Session)
+    start_supervised!({Session, name: @server_id})
 
     # subscribe to PubSub
     :ok = Phoenix.PubSub.subscribe(MPG.PubSub, "quiz_session")
@@ -52,7 +52,7 @@ defmodule MPGWeb.QuizLiveTest do
   end
 
   test "loads user from session_id if it exists", %{conn: conn, session_id: session_id} do
-    Session.add_player(:quiz_session, session_id, "Peter")
+    Session.add_player("quiz_session", session_id, "Peter")
 
     {:ok, view, _html} = live(conn, ~p"/quiz")
 
@@ -61,7 +61,7 @@ defmodule MPGWeb.QuizLiveTest do
   end
 
   test "host is prompted to enter a question right after joining", ctx do
-    Session.add_player(:quiz_session, ctx.session_id, "Host")
+    Session.add_player("quiz_session", ctx.session_id, "Host")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
 
@@ -78,7 +78,7 @@ defmodule MPGWeb.QuizLiveTest do
   end
 
   test "host gets an error if they try to submit an empty quiz topic", ctx do
-    Session.add_player(:quiz_session, ctx.session_id, "Host")
+    Session.add_player("quiz_session", ctx.session_id, "Host")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
 
@@ -88,7 +88,7 @@ defmodule MPGWeb.QuizLiveTest do
   end
 
   test "host can click a button on the modal to generate a new question", ctx do
-    Session.add_player(:quiz_session, ctx.session_id, "Host")
+    Session.add_player("quiz_session", ctx.session_id, "Host")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz/new_quiz")
 
@@ -105,7 +105,7 @@ defmodule MPGWeb.QuizLiveTest do
   end
 
   test "players see the quiz title and status", ctx do
-    Session.add_player(:quiz_session, ctx.session_id, "Host")
+    Session.add_player("quiz_session", ctx.session_id, "Host")
 
     # player joined
     assert_receive({:state_updated, _state})
@@ -132,7 +132,7 @@ defmodule MPGWeb.QuizLiveTest do
   end
 
   test "host can click a 'Start Quiz' button to start the quiz after it's generated", ctx do
-    Session.add_player(:quiz_session, ctx.session_id, "Host")
+    Session.add_player("quiz_session", ctx.session_id, "Host")
     assert_receive({:state_updated, _state})
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
@@ -325,7 +325,7 @@ defmodule MPGWeb.QuizLiveTest do
       ]
     }
 
-    Session.set_state(:quiz_session, state)
+    Session.set_state("quiz_session", state)
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
 
@@ -350,7 +350,7 @@ defmodule MPGWeb.QuizLiveTest do
       ]
     }
 
-    Session.set_state(:quiz_session, state)
+    Session.set_state("quiz_session", state)
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
 
@@ -364,22 +364,22 @@ defmodule MPGWeb.QuizLiveTest do
 
   defp start_quiz(player_id) do
     # join player
-    Session.add_player(:quiz_session, player_id, "Host")
+    Session.add_player("quiz_session", player_id, "Host")
     assert_receive({:state_updated, _state})
 
     # set title and questions
-    Session.create_quiz(:quiz_session, "Marvel characters")
+    Session.create_quiz("quiz_session", "Marvel characters")
     assert_receive({:state_updated, _state})
     assert_receive({:state_updated, _state})
 
     # start quiz
-    Session.next_question(:quiz_session)
+    Session.next_question("quiz_session")
     assert_receive({:state_updated, _state})
   end
 
   defp add_player(name) do
     id = UUID.uuid4()
-    Session.add_player(:quiz_session, id, name)
+    Session.add_player("quiz_session", id, name)
     assert_receive({:state_updated, _state})
     id
   end

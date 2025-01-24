@@ -15,7 +15,7 @@ defmodule MPGWeb.QuizLive do
       :ok = PubSub.subscribe(MPG.PubSub, "quiz_session")
     end
 
-    state = Session.get_state(:quiz_session)
+    state = Session.get_state("quiz_session")
     %{"session_id" => session_id} = session
 
     socket =
@@ -63,7 +63,7 @@ defmodule MPGWeb.QuizLive do
   @impl true
   def handle_event("join", %{"player_name" => player_name}, socket) do
     session_id = socket.assigns.session_id
-    Session.add_player(:quiz_session, session_id, player_name)
+    Session.add_player("quiz_session", session_id, player_name)
     {:noreply, socket}
   end
 
@@ -78,20 +78,20 @@ defmodule MPGWeb.QuizLive do
 
   @impl true
   def handle_event("new_quiz_topic", %{"topic" => topic}, socket) do
-    Session.create_quiz(:quiz_session, topic)
+    Session.create_quiz("quiz_session", topic)
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("next_question", _params, socket) do
-    Session.next_question(:quiz_session)
+    Session.next_question("quiz_session")
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("answer_question", %{"answer" => answer}, socket) do
     answer = String.to_integer(answer)
-    Session.answer_question(:quiz_session, socket.assigns.session_id, answer)
+    Session.answer_question("quiz_session", socket.assigns.session_id, answer)
     {:noreply, socket}
   end
 
