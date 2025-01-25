@@ -21,21 +21,6 @@ defmodule MPGWeb.ThingsLive do
     {:ok, socket}
   end
 
-  defp assign_question_form(socket, question) do
-    fields = %{"question" => question}
-    errors = get_errors(question)
-    form = to_form(fields, errors: errors)
-    assign(socket, new_question_form: form)
-  end
-
-  defp get_errors(question) do
-    if question in ["", nil] do
-      [question: {"Question can't be blank", []}]
-    else
-      []
-    end
-  end
-
   @impl true
   def handle_params(%{"id" => server_id}, _url, socket) do
     :ok = PubSub.subscribe(MPG.PubSub, server_id)
@@ -60,6 +45,21 @@ defmodule MPGWeb.ThingsLive do
       DynamicSupervisor.start_child(MPG.GameSupervisor, {MPG.Things.Session, name: server_id})
 
     {:noreply, push_patch(socket, to: ~p"/things/#{server_id}")}
+  end
+
+  defp assign_question_form(socket, question) do
+    fields = %{"question" => question}
+    errors = get_errors(question)
+    form = to_form(fields, errors: errors)
+    assign(socket, new_question_form: form)
+  end
+
+  defp get_errors(question) do
+    if question in ["", nil] do
+      [question: {"Question can't be blank", []}]
+    else
+      []
+    end
   end
 
   defp assign_player(%{assigns: assigns} = socket) do

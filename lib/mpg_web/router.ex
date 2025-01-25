@@ -19,14 +19,17 @@ defmodule MPGWeb.Router do
     pipe_through :browser
 
     live "/", HomeLive, :index
+    live "/join", JoinLive, :index
 
     live "/things", ThingsLive, :new
     live "/things/:id", ThingsLive, :play
     live "/things/:id/new_question", ThingsLive, :new_question
     live "/things/:id/reveal", ThingsLive, :reveal
 
-    live "/quiz", QuizLive, :play
-    live "/quiz/new_quiz", QuizLive, :new_quiz
+    live "/quiz", QuizLive, :new
+    live "/quiz/:id", QuizLive, :play
+    live "/quiz/:id/new_quiz", QuizLive, :new_quiz
+    live "/quiz/:id/new", QuizLive.New, :new
   end
 
   defp assign_session_id(conn, _opts) do

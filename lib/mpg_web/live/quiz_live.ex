@@ -11,24 +11,43 @@ defmodule MPGWeb.QuizLive do
 
   @impl true
   def mount(_params, session, socket) do
-    if connected?(socket) do
-      :ok = PubSub.subscribe(MPG.PubSub, "quiz_session")
-    end
-
-    state = Session.get_state("quiz_session")
     %{"session_id" => session_id} = session
 
     socket =
       socket
-      |> assign(session_id: session_id)
-      |> assign(state: state)
       |> assign(page_title: "Quizoots!")
       |> assign(primary_color: "bg-violet-500")
+      |> assign(session_id: session_id)
+
+    {:ok, socket}
+  end
+
+  @impl true
+  def handle_params(%{"id" => server_id}, _url, socket) do
+    :ok = PubSub.subscribe(MPG.PubSub, server_id)
+
+    state = Session.get_state(server_id)
+
+    socket =
+      socket
+      |> assign(server_id: server_id)
+      |> assign(state: state)
       |> assign_current_status()
       |> assign_player()
       |> assign_quiz_topic_form("")
 
-    {:ok, socket}
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_params(_params, _url, socket) do
+    # generate a random 5 digit server ID
+    server_id = Enum.random(10000..99999) |> Integer.to_string()
+
+    {:ok, _pid} =
+      DynamicSupervisor.start_child(MPG.GameSupervisor, {Session, name: server_id})
+
+    {:noreply, push_patch(socket, to: ~p"/quiz/#{server_id}")}
   end
 
   defp assign_quiz_topic_form(socket, topic) do
@@ -45,11 +64,6 @@ defmodule MPGWeb.QuizLive do
     end
   end
 
-  @impl true
-  def handle_params(_params, _url, socket) do
-    {:noreply, socket}
-  end
-
   defp assign_player(%{assigns: assigns} = socket) do
     player = Quizzes.get_player(assigns.state, assigns.session_id)
     assign(socket, player: player)
@@ -62,8 +76,8 @@ defmodule MPGWeb.QuizLive do
 
   @impl true
   def handle_event("join", %{"player_name" => player_name}, socket) do
-    session_id = socket.assigns.session_id
-    Session.add_player("quiz_session", session_id, player_name)
+    %{session_id: session_id, server_id: server_id} = socket.assigns
+    Session.add_player(server_id, session_id, player_name)
     {:noreply, socket}
   end
 
@@ -78,20 +92,23 @@ defmodule MPGWeb.QuizLive do
 
   @impl true
   def handle_event("new_quiz_topic", %{"topic" => topic}, socket) do
-    Session.create_quiz("quiz_session", topic)
+    server_id = socket.assigns.server_id
+    Session.create_quiz(server_id, topic)
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("next_question", _params, socket) do
-    Session.next_question("quiz_session")
+    server_id = socket.assigns.server_id
+    Session.next_question(server_id)
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("answer_question", %{"answer" => answer}, socket) do
     answer = String.to_integer(answer)
-    Session.answer_question("quiz_session", socket.assigns.session_id, answer)
+    server_id = socket.assigns.server_id
+    Session.answer_question(server_id, socket.assigns.session_id, answer)
     {:noreply, socket}
   end
 
