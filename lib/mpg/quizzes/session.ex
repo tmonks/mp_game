@@ -159,6 +159,6 @@ defmodule MPG.Quizzes.Session do
   end
 
   defp broadcast_state_updated(state) do
-    PubSub.broadcast(MPG.PubSub, "quiz_session", {:state_updated, state})
+    PubSub.broadcast(MPG.PubSub, state.server_id, {:state_updated, state})
   end
 end
