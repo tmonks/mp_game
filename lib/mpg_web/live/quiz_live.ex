@@ -170,6 +170,9 @@ defmodule MPGWeb.QuizLive do
               field={@quiz_topic_form[:topic]}
               class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
+            <button class="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded">
+              Submit
+            </button>
             <a
               id="generate-topic-button"
               phx-click="generate_quiz_topic"
@@ -177,9 +180,6 @@ defmodule MPGWeb.QuizLive do
             >
               Generate <.icon name="hero-sparkles-solid" class="h-5 w-5" />
             </a>
-            <button class="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded">
-              Submit
-            </button>
           </div>
         </.form>
       </.modal>
