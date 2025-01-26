@@ -16,8 +16,7 @@ defmodule MPG.Application do
       # Start to serve requests, typically the last entry
       MPGWeb.Endpoint,
       {Registry, keys: :unique, name: MPG.GameRegistry},
-      {DynamicSupervisor, strategy: :one_for_one, name: MPG.GameSupervisor},
-      {MPG.Quizzes.Session, name: :quiz_session}
+      {DynamicSupervisor, strategy: :one_for_one, name: MPG.GameSupervisor}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
