@@ -4,7 +4,7 @@ defmodule MPG.Quizzes do
   alias MPG.Quizzes.State
 
   @doc """
-  Sets the title of the quiz
+  Sets the title of the quiz and resets the state
   """
   def initialize(state, title) do
     state

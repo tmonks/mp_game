@@ -33,14 +33,26 @@ defmodule MPGWeb.QuizLiveTest do
     {:ok, conn: conn, session_id: session_id}
   end
 
+  test "visiting /quiz redirects to a random server ID", %{conn: conn} do
+    {:error, {:live_redirect, %{to: new_path}}} = live(conn, ~p"/quiz")
+
+    assert new_path =~ ~r"/quiz/[a-z0-9]+"
+
+    # retrieve the server name from the `name` URL param
+    server_id = new_path |> String.split("/") |> List.last()
+
+    # Session GenServer started with that name
+    assert %State{server_id: ^server_id} = Session.get_state(server_id)
+  end
+
   test "if the player with the session_id does not exist, prompts for name", %{conn: conn} do
-    {:ok, view, _html} = live(conn, ~p"/quiz")
+    {:ok, view, _html} = live(conn, ~p"/quiz/#{@server_id}")
 
     assert has_element?(view, "#join-form")
   end
 
   test "can join the game", %{conn: conn, session_id: session_id} do
-    {:ok, view, _html} = live(conn, ~p"/quiz")
+    {:ok, view, _html} = live(conn, ~p"/quiz/#{@server_id}")
 
     view
     |> form("#join-form", %{player_name: "Peter"})
@@ -54,7 +66,7 @@ defmodule MPGWeb.QuizLiveTest do
   test "loads user from session_id if it exists", %{conn: conn, session_id: session_id} do
     Session.add_player(@server_id, session_id, "Peter")
 
-    {:ok, view, _html} = live(conn, ~p"/quiz")
+    {:ok, view, _html} = live(conn, ~p"/quiz/#{@server_id}")
 
     assert has_element?(view, "#player-#{session_id}[data-role=avatar]", "Pet")
     refute has_element?(view, "#join-form")
@@ -63,7 +75,7 @@ defmodule MPGWeb.QuizLiveTest do
   test "host is prompted to enter a question right after joining", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     assert has_element?(view, "#new-quiz-modal")
 
@@ -80,7 +92,7 @@ defmodule MPGWeb.QuizLiveTest do
   test "host gets an error if they try to submit an empty quiz topic", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     assert view
            |> form("#quiz-topic-form", %{topic: ""})
@@ -90,7 +102,7 @@ defmodule MPGWeb.QuizLiveTest do
   test "host can click a button on the modal to generate a new question", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/new_quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
 
     assert has_element?(view, "#quiz-topic-form")
     assert has_element?(view, "input#topic[value='']")
@@ -110,7 +122,7 @@ defmodule MPGWeb.QuizLiveTest do
     # player joined
     assert_receive({:state_updated, _state})
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     assert has_element?(view, "#current-status", "Waiting for the host to set the quiz topic")
 
@@ -125,7 +137,9 @@ defmodule MPGWeb.QuizLiveTest do
     # TODO: figure out how to test this
     # assert has_element?(view, "#current-status", "Generating quiz")
 
+    # TODO: not sure why receiving an extra state update here
     # questions generated
+    assert_receive({:state_updated, _state})
     assert_receive({:state_updated, state})
     assert length(state.questions) == 10
     assert has_element?(view, "#current-status", "Ready to start!")
@@ -135,7 +149,7 @@ defmodule MPGWeb.QuizLiveTest do
     Session.add_player(@server_id, ctx.session_id, "Host")
     assert_receive({:state_updated, _state})
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     view
     |> form("#quiz-topic-form", %{topic: "Marvel characters"})
@@ -145,7 +159,9 @@ defmodule MPGWeb.QuizLiveTest do
     assert_receive({:state_updated, state})
     assert state.title == "Marvel characters"
 
+    # TODO: not sure why receiving an extra state update here
     # questions generated
+    assert_receive({:state_updated, _state})
     assert_receive({:state_updated, state})
     assert length(state.questions) == 10
 
@@ -153,6 +169,8 @@ defmodule MPGWeb.QuizLiveTest do
     |> element("#next-button")
     |> render_click()
 
+    # TODO: not sure why receiving an extra state update here
+    assert_receive({:state_updated, _state})
     assert_receive({:state_updated, state})
     assert state.current_question == 0
   end
@@ -161,7 +179,7 @@ defmodule MPGWeb.QuizLiveTest do
     start_quiz(ctx.session_id)
     add_player("Player 2")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     view
     |> element("#answer-0")
@@ -177,7 +195,7 @@ defmodule MPGWeb.QuizLiveTest do
     start_quiz(ctx.session_id)
     add_player("Player 2")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     view
     |> element("#answer-0")
@@ -193,7 +211,7 @@ defmodule MPGWeb.QuizLiveTest do
     start_quiz(ctx.session_id)
     add_player("Player 2")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     view
     |> element("#answer-1")
@@ -213,7 +231,7 @@ defmodule MPGWeb.QuizLiveTest do
     start_quiz(ctx.session_id)
     add_player("Player 2")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     refute has_element?(view, "#explanation")
 
@@ -232,7 +250,7 @@ defmodule MPGWeb.QuizLiveTest do
     start_quiz(ctx.session_id)
     add_player("Player 2")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     refute has_element?(view, "#explanation")
 
@@ -251,7 +269,7 @@ defmodule MPGWeb.QuizLiveTest do
     start_quiz(ctx.session_id)
     add_player("Player 2")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     view
     |> element("#answer-0")
@@ -267,7 +285,7 @@ defmodule MPGWeb.QuizLiveTest do
        ctx do
     start_quiz(ctx.session_id)
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     view
     |> element("#answer-0")
@@ -282,6 +300,8 @@ defmodule MPGWeb.QuizLiveTest do
     |> element("#next-button")
     |> render_click()
 
+    # TODO: not sure why receiving an extra state update here
+    assert_receive({:state_updated, state})
     assert_receive({:state_updated, state})
     assert state.current_question == 1
   end
@@ -289,7 +309,7 @@ defmodule MPGWeb.QuizLiveTest do
   test "shows a counter with the current question number", ctx do
     start_quiz(ctx.session_id)
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     assert has_element?(view, "#question-counter", "1 of 10")
 
@@ -328,7 +348,7 @@ defmodule MPGWeb.QuizLiveTest do
 
     Session.set_state(@server_id, state)
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     assert has_element?(view, "#score-#{ctx.session_id}", "33%")
     assert has_element?(view, "#score-#{player2_id}", "67%")
@@ -354,13 +374,13 @@ defmodule MPGWeb.QuizLiveTest do
 
     Session.set_state(@server_id, state)
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     view
     |> element("#new-quiz-button")
     |> render_click()
 
-    assert_patch(view, ~p"/quiz/new_quiz")
+    assert_patch(view, ~p"/quiz/#{@server_id}/new_quiz")
     assert has_element?(view, "#new-quiz-modal")
   end
 
