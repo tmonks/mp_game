@@ -155,7 +155,7 @@ defmodule MPGWeb.QuizLive do
         }
         id="new-quiz-modal"
         show={true}
-        on_cancel={JS.patch("/quiz")}
+        on_cancel={JS.patch("/quiz/#{@server_id}")}
       >
         <div class="font-bold mb-4">Quiz Topic</div>
         <.form

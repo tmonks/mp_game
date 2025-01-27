@@ -301,7 +301,7 @@ defmodule MPGWeb.QuizLiveTest do
     |> render_click()
 
     # TODO: not sure why receiving an extra state update here
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, _state})
     assert_receive({:state_updated, state})
     assert state.current_question == 1
   end
