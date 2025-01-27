@@ -26,7 +26,7 @@ defmodule MPG.Quizzes.Session do
   Determines the Registry name ("via tuple") from a string id
   """
   def registered_name(id) do
-    {:via, Registry, {MPG.GameRegistry, id}}
+    {:via, Registry, {MPG.GameRegistry, id, :quiz}}
   end
 
   @doc """

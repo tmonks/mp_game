@@ -8,13 +8,27 @@ defmodule MPGWeb.HomeLiveTest do
     assert has_element?(view, "a#quiz-link")
   end
 
-  test "can join an existing Things game", %{conn: conn} do
+  test "redirects to Things if a Things server ID is provided", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/")
 
+    start_supervised!({MPG.Things.Session, [name: "12345"]})
+
     view
-    |> form("#join-form", %{game_id: "1234"})
+    |> form("#join-form", %{game_id: "12345"})
     |> render_submit()
 
-    assert_redirect(view, ~p"/things/1234")
+    assert_redirect(view, ~p"/things/12345")
+  end
+
+  test "redirects to Quiz if a Quiz server ID is provided", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    start_supervised!({MPG.Quizzes.Session, [name: "12345"]})
+
+    view
+    |> form("#join-form", %{game_id: "12345"})
+    |> render_submit()
+
+    assert_redirect(view, ~p"/quiz/12345")
   end
 end
