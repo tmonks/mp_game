@@ -31,4 +31,16 @@ defmodule MPGWeb.HomeLiveTest do
 
     assert_redirect(view, ~p"/quiz/12345")
   end
+
+  test "shows a flash error message if the server ID is invalid", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    view
+    |> form("#join-form", %{game_id: "12345"})
+    |> render_submit()
+
+    open_browser(view)
+
+    assert has_element?(view, "#flash-error", "Invalid game code")
+  end
 end

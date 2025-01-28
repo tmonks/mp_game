@@ -3,11 +3,10 @@ defmodule MPGWeb.HomeLive do
 
   @impl true
   def handle_event("join", %{"game_id" => game_id}, socket) do
-    [{_pid, type}] = Registry.lookup(MPG.GameRegistry, game_id)
-
-    case type do
-      :quiz -> {:noreply, redirect(socket, to: "/quiz/#{game_id}")}
-      :things -> {:noreply, redirect(socket, to: "/things/#{game_id}")}
+    case Registry.lookup(MPG.GameRegistry, game_id) do
+      [{_pid, :quiz}] -> {:noreply, redirect(socket, to: "/quiz/#{game_id}")}
+      [{_pid, :things}] -> {:noreply, redirect(socket, to: "/things/#{game_id}")}
+      _ -> {:noreply, put_flash(socket, :error, "Invalid game code")}
     end
   end
 
