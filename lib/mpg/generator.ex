@@ -18,9 +18,9 @@ defmodule MPG.Generator do
         Each question should include the `correct_answer`, which is the zero-based index of the correct answer in the list.
         Each question should have a brief explanation about the correct answer.
         I will give you the subject of the trivia and you will generate 10 questions on that subject.
-        Please be sure the correct answer is correct and the explanation is accurate.
-        Please generate each of the questions in JSON format like the example below.
+        IMPORTANT: Please be sure the correct answer is correct and it matches the explanation!
         Respond ONLY with the JSON with no additional text.
+        Please generate each of the questions in JSON format like the example below:
 
         User: "Subject: Interesting insects"
 
@@ -30,10 +30,10 @@ defmodule MPG.Generator do
           "questions":
             [
               {
-                "text": "The praying mantid can move only the top part of this",
+                "text": "What is the first movie in the MCU?",
+                "answers": ["Iron Man", "Captain America: The First Avenger", "The Incredible Hulk", "Thor"],
                 "correct_answer": 0,
-                "explanation": "This ability allows them to sneak up on prey without startling it",
-                "answers": ["body", "arms", "legs", "eyes"]
+                "explanation": "Iron Man (2008) kicked off the Marvel Cinematic Universe."
               },
               /* 9 more questions */
             ]
