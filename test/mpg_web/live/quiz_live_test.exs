@@ -73,10 +73,14 @@ defmodule MPGWeb.QuizLiveTest do
   end
 
   test "host is prompted to enter a question right after joining", ctx do
-    Session.add_player(@server_id, ctx.session_id, "Host")
-
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
+    view
+    |> form("#join-form", %{player_name: "Host"})
+    |> render_submit()
+
+    assert_receive({:state_updated, _state})
+    assert_patch(view, ~p"/quiz/#{@server_id}/new_quiz")
     assert has_element?(view, "#new-quiz-modal")
 
     view
@@ -86,6 +90,7 @@ defmodule MPGWeb.QuizLiveTest do
     assert_receive({:state_updated, _state})
     Process.sleep(100)
 
+    assert_patch(view, ~p"/quiz/#{@server_id}")
     refute has_element?(view, "#new-quiz-modal")
   end
 

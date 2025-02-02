@@ -56,6 +56,20 @@ defmodule MPGWeb.QuizLive do
     assign(socket, quiz_topic_form: form)
   end
 
+  defp maybe_show_new_quiz_modal(%{assigns: %{live_action: :new_quiz}} = socket), do: socket
+
+  defp maybe_show_new_quiz_modal(socket) do
+    %{player: player, quiz_status: quiz_status} = socket.assigns
+
+    if !is_nil(player) and player.is_host and quiz_status == :new do
+      socket
+      |> assign_quiz_topic_form("")
+      |> push_patch(to: ~p"/quiz/#{socket.assigns.server_id}/new_quiz")
+    else
+      socket
+    end
+  end
+
   defp verify_not_empty(topic) do
     if topic in ["", nil] do
       [topic: {"Topic can't be blank", []}]
@@ -94,7 +108,7 @@ defmodule MPGWeb.QuizLive do
   def handle_event("new_quiz_topic", %{"topic" => topic}, socket) do
     server_id = socket.assigns.server_id
     Session.create_quiz(server_id, topic)
-    {:noreply, socket}
+    {:noreply, push_patch(socket, to: ~p"/quiz/#{server_id}")}
   end
 
   @impl true
@@ -114,13 +128,12 @@ defmodule MPGWeb.QuizLive do
 
   @impl true
   def handle_info({:state_updated, state}, socket) do
-    # IO.inspect(state)
-
     socket =
       socket
       |> assign(state: state)
       |> assign_current_status()
       |> assign_player()
+      |> maybe_show_new_quiz_modal()
 
     {:noreply, socket}
   end
