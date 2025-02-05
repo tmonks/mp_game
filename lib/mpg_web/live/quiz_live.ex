@@ -62,9 +62,7 @@ defmodule MPGWeb.QuizLive do
     %{player: player, quiz_status: quiz_status} = socket.assigns
 
     if !is_nil(player) and player.is_host and quiz_status == :new do
-      socket
-      |> assign_quiz_topic_form("")
-      |> push_patch(to: ~p"/quiz/#{socket.assigns.server_id}/new_quiz")
+      push_patch(socket, to: ~p"/quiz/#{socket.assigns.server_id}/new_quiz")
     else
       socket
     end
