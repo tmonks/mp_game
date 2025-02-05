@@ -111,6 +111,8 @@ defmodule MPG.Quizzes.Session do
   @impl true
   def handle_cast({:create_quiz, title}, state) do
     state = Quizzes.initialize(state, title)
+    broadcast_state_updated(state, :create_quiz)
+
     server = registered_name(state.server_id)
 
     # start a background task to generate the quiz questions
@@ -119,46 +121,44 @@ defmodule MPG.Quizzes.Session do
       GenServer.cast(server, {:set_questions, questions})
     end)
 
-    broadcast_state_updated(state)
-
     {:noreply, state}
   end
 
   @impl true
   def handle_cast({:set_questions, questions}, state) do
     state = Quizzes.set_questions(state, questions)
-    broadcast_state_updated(state)
+    broadcast_state_updated(state, :set_questions)
     {:noreply, state}
   end
 
   @impl true
   def handle_cast({:add_player, id, player_name}, state) do
     state = Quizzes.add_player(state, id, player_name)
-    broadcast_state_updated(state)
+    broadcast_state_updated(state, :add_player)
     {:noreply, state}
   end
 
   @impl true
   def handle_cast({:answer_question, player_id, answer}, state) do
     state = Quizzes.answer_question(state, player_id, answer)
-    broadcast_state_updated(state)
+    broadcast_state_updated(state, :answer_question)
     {:noreply, state}
   end
 
   @impl true
   def handle_cast(:next_question, state) do
     state = Quizzes.next_question(state)
-    broadcast_state_updated(state)
+    broadcast_state_updated(state, :next_question)
     {:noreply, state}
   end
 
   @impl true
   def handle_cast({:set_state, state}, _old_state) do
-    broadcast_state_updated(state)
+    broadcast_state_updated(state, :set_state)
     {:noreply, state}
   end
 
-  defp broadcast_state_updated(state) do
-    PubSub.broadcast(MPG.PubSub, state.server_id, {:state_updated, state})
+  defp broadcast_state_updated(state, action) do
+    PubSub.broadcast(MPG.PubSub, state.server_id, {:state_updated, action, state})
   end
 end

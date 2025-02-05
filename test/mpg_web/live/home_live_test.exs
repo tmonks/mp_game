@@ -39,8 +39,6 @@ defmodule MPGWeb.HomeLiveTest do
     |> form("#join-form", %{game_id: "12345"})
     |> render_submit()
 
-    open_browser(view)
-
     assert has_element?(view, "#flash-error", "Invalid game code")
   end
 end

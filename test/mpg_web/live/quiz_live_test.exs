@@ -1,5 +1,5 @@
 defmodule MPGWeb.QuizLiveTest do
-  use MPGWeb.ConnCase
+  use MPGWeb.ConnCase, async: false
 
   import Phoenix.LiveViewTest
   import MPG.Fixtures.OpenAI
@@ -58,7 +58,7 @@ defmodule MPGWeb.QuizLiveTest do
     |> form("#join-form", %{player_name: "Peter"})
     |> render_submit()
 
-    assert_receive({:state_updated, _state})
+    assert_receive({:state_updated, _action, _state})
     assert has_element?(view, "#player-#{session_id}[data-role=avatar]", "Pet")
     refute has_element?(view, "#join-form")
   end
@@ -79,7 +79,7 @@ defmodule MPGWeb.QuizLiveTest do
     |> form("#join-form", %{player_name: "Host"})
     |> render_submit()
 
-    assert_receive({:state_updated, _state})
+    assert_receive({:state_updated, _action, _state})
     assert_patch(view, ~p"/quiz/#{@server_id}/new_quiz")
     assert has_element?(view, "#new-quiz-modal")
 
@@ -87,7 +87,7 @@ defmodule MPGWeb.QuizLiveTest do
     |> form("#quiz-topic-form", %{topic: "Marvel characters"})
     |> render_submit()
 
-    assert_receive({:state_updated, _state})
+    assert_receive({:state_updated, _action, _state})
     Process.sleep(100)
 
     assert_patch(view, ~p"/quiz/#{@server_id}")
@@ -97,7 +97,7 @@ defmodule MPGWeb.QuizLiveTest do
   test "host gets an error if they try to submit an empty quiz topic", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
 
     assert view
            |> form("#quiz-topic-form", %{topic: ""})
@@ -125,49 +125,50 @@ defmodule MPGWeb.QuizLiveTest do
     Session.add_player(@server_id, ctx.session_id, "Host")
 
     # player joined
-    assert_receive({:state_updated, _state})
+    assert_receive({:state_updated, :add_player, _state})
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
     assert has_element?(view, "#current-status", "Waiting for the host to set the quiz topic")
 
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
+
     view
     |> form("#quiz-topic-form", %{topic: "Marvel characters"})
     |> render_submit()
 
+    # TODO: not sure why receiving two extra state updates here
     # title set
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, :create_quiz, _state})
+    assert_receive({:state_updated, :create_quiz, _state})
+    assert_receive({:state_updated, :create_quiz, state})
     assert state.title == "Marvel characters"
 
-    # TODO: figure out how to test this
-    # assert has_element?(view, "#current-status", "Generating quiz")
+    assert has_element?(view, "#current-status", "Generating quiz")
 
-    # TODO: not sure why receiving an extra state update here
-    # questions generated
-    assert_receive({:state_updated, _state})
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, :set_questions, state})
     assert length(state.questions) == 10
     assert has_element?(view, "#current-status", "Ready to start!")
   end
 
   test "host can click a 'Start Quiz' button to start the quiz after it's generated", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
-    assert_receive({:state_updated, _state})
+    assert_receive({:state_updated, :add_player, _state})
 
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
 
     view
     |> form("#quiz-topic-form", %{topic: "Marvel characters"})
     |> render_submit()
 
     # title set
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, _action, state})
     assert state.title == "Marvel characters"
 
     # TODO: not sure why receiving an extra state update here
     # questions generated
-    assert_receive({:state_updated, _state})
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, _action, _state})
+    assert_receive({:state_updated, _action, state})
     assert length(state.questions) == 10
 
     view
@@ -175,8 +176,8 @@ defmodule MPGWeb.QuizLiveTest do
     |> render_click()
 
     # TODO: not sure why receiving an extra state update here
-    assert_receive({:state_updated, _state})
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, _action, _state})
+    assert_receive({:state_updated, _action, state})
     assert state.current_question == 0
   end
 
@@ -190,7 +191,7 @@ defmodule MPGWeb.QuizLiveTest do
     |> element("#answer-0")
     |> render_click()
 
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, _action, state})
     assert [%{current_answer: 0}, _player2] = state.players
 
     assert has_element?(view, "#player-#{ctx.session_id} [data-role=ready-check-mark]")
@@ -206,7 +207,7 @@ defmodule MPGWeb.QuizLiveTest do
     |> element("#answer-0")
     |> render_click()
 
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, _action, state})
     assert [%{current_answer: 0}, _player2] = state.players
 
     assert has_element?(view, "#answer-0[data-role=correct]")
@@ -222,7 +223,7 @@ defmodule MPGWeb.QuizLiveTest do
     |> element("#answer-1")
     |> render_click()
 
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, _action, state})
     assert [%{current_answer: 1}, _player2] = state.players
 
     assert has_element?(view, "#answer-1[data-role=incorrect]")
@@ -244,7 +245,7 @@ defmodule MPGWeb.QuizLiveTest do
     |> element("#answer-0")
     |> render_click()
 
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, _action, state})
     assert [%{current_answer: 0}, _player2] = state.players
 
     assert has_element?(view, "#explanation", "Correct")
@@ -263,7 +264,7 @@ defmodule MPGWeb.QuizLiveTest do
     |> element("#answer-1")
     |> render_click()
 
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, _action, state})
     assert [%{current_answer: 1}, _player2] = state.players
 
     assert has_element?(view, "#explanation", "Incorrect")
@@ -280,7 +281,7 @@ defmodule MPGWeb.QuizLiveTest do
     |> element("#answer-0")
     |> render_click()
 
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, _action, state})
     assert [%{current_answer: 0}, _player2] = state.players
 
     assert has_element?(view, "#answer-0 #player-marker-#{ctx.session_id}")
@@ -296,7 +297,7 @@ defmodule MPGWeb.QuizLiveTest do
     |> element("#answer-0")
     |> render_click()
 
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, _action, state})
     assert [%{current_answer: 0}] = state.players
 
     assert has_element?(view, "#next-button")
@@ -306,8 +307,8 @@ defmodule MPGWeb.QuizLiveTest do
     |> render_click()
 
     # TODO: not sure why receiving an extra state update here
-    assert_receive({:state_updated, _state})
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, _action, _state})
+    assert_receive({:state_updated, _action, state})
     assert state.current_question == 1
   end
 
@@ -322,14 +323,14 @@ defmodule MPGWeb.QuizLiveTest do
     |> element("#answer-0")
     |> render_click()
 
-    assert_receive({:state_updated, state})
+    assert_receive({:state_updated, _action, state})
     assert [%{current_answer: 0}] = state.players
 
     view
     |> element("#next-button")
     |> render_click()
 
-    assert_receive({:state_updated, _state})
+    assert_receive({:state_updated, _action, _state})
     assert has_element?(view, "#question-counter", "2 of 10")
   end
 
@@ -392,22 +393,22 @@ defmodule MPGWeb.QuizLiveTest do
   defp start_quiz(player_id) do
     # join player
     Session.add_player(@server_id, player_id, "Host")
-    assert_receive({:state_updated, _state})
+    assert_receive({:state_updated, _action, _state})
 
     # set title and questions
     Session.create_quiz(@server_id, "Marvel characters")
-    assert_receive({:state_updated, _state})
-    assert_receive({:state_updated, _state})
+    assert_receive({:state_updated, _action, _state})
+    assert_receive({:state_updated, _action, _state})
 
     # start quiz
     Session.next_question(@server_id)
-    assert_receive({:state_updated, _state})
+    assert_receive({:state_updated, _action, _state})
   end
 
   defp add_player(name) do
     id = UUID.uuid4()
     Session.add_player(@server_id, id, name)
-    assert_receive({:state_updated, _state})
+    assert_receive({:state_updated, _action, _state})
     id
   end
 end

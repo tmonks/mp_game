@@ -127,7 +127,7 @@ defmodule MPGWeb.QuizLive do
   end
 
   @impl true
-  def handle_info({:state_updated, state}, socket) do
+  def handle_info({:state_updated, _action, state}, socket) do
     socket =
       socket
       |> assign(state: state)
@@ -163,9 +163,7 @@ defmodule MPGWeb.QuizLive do
     <% else %>
       <!-- NEW QUIZ TOPIC MODAL -->
       <.modal
-        :if={
-          @live_action == :new_quiz or (@player.is_host and Quizzes.current_status(@state) == :new)
-        }
+        :if={@live_action == :new_quiz}
         id="new-quiz-modal"
         show={true}
         on_cancel={JS.patch("/quiz/#{@server_id}")}
