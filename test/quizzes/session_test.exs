@@ -22,8 +22,12 @@ defmodule MPG.Quizzes.SessionTest do
     assert Session.ping(@server_id) == :pong
   end
 
-  test "can retrieve the state" do
-    assert %State{} = Session.get_state(@server_id)
+  test "get_state/1 retrieves the state" do
+    assert {:ok, %State{}} = Session.get_state(@server_id)
+  end
+
+  test "get_state/1 returns an error tuple if server doesn't exist" do
+    assert {:error, :not_found} = Session.get_state("non_existent_server")
   end
 
   test "add_player/3 adds a new player" do

@@ -26,15 +26,21 @@ defmodule MPGWeb.QuizLive do
   def handle_params(%{"id" => server_id}, _url, socket) do
     :ok = PubSub.subscribe(MPG.PubSub, server_id)
 
-    state = Session.get_state(server_id)
-
     socket =
-      socket
-      |> assign(server_id: server_id)
-      |> assign(state: state)
-      |> assign_current_status()
-      |> assign_player()
-      |> assign_quiz_topic_form("")
+      case Session.get_state(server_id) do
+        {:error, :not_found} ->
+          socket
+          |> put_flash(:error, "Game not found")
+          |> push_navigate(to: ~p"/")
+
+        {:ok, state} ->
+          socket
+          |> assign(server_id: server_id)
+          |> assign(state: state)
+          |> assign_current_status()
+          |> assign_player()
+          |> assign_quiz_topic_form("")
+      end
 
     {:noreply, socket}
   end

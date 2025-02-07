@@ -42,7 +42,15 @@ defmodule MPGWeb.QuizLiveTest do
     server_id = new_path |> String.split("/") |> List.last()
 
     # Session GenServer started with that name
-    assert %State{server_id: ^server_id} = Session.get_state(server_id)
+    assert {:ok, %State{server_id: ^server_id}} = Session.get_state(server_id)
+  end
+
+  test "redirects to home page if the server ID is invalid", %{conn: conn} do
+    {:error, {:live_redirect, %{to: new_path, flash: flash}}} =
+      live(conn, ~p"/quiz/invalid_server_id")
+
+    assert new_path == "/"
+    assert flash["error"] == "Game not found"
   end
 
   test "if the player with the session_id does not exist, prompts for name", %{conn: conn} do
