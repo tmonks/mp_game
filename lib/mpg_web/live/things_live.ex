@@ -133,13 +133,13 @@ defmodule MPGWeb.ThingsLive do
             <input
               type="text"
               name="player_name"
-              placeholder="Name"
+              placeholder="Enter your name"
               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
           </div>
           <div>
             <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
-              Join
+              Submit
             </button>
           </div>
         </div>

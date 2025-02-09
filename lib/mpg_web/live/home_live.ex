@@ -14,56 +14,55 @@ defmodule MPGWeb.HomeLive do
   def render(assigns) do
     # two cards with links to /things and /quiz
     ~H"""
-    <div class="grid gap-4 mt-12">
+    <div class="flex flex-col gap-4 mt-12 w-96 mx-auto">
+      <!-- JOIN FORM -->
+      <h5 class="text-slate-800 text-2xl font-semibold">
+        Join a Game
+      </h5>
+      <form id="join-form" phx-submit="join" phx-page-loading>
+        <div class="relative flex gap-4 bg-white shadow-sm border border-slate-200 rounded-lg p-4">
+          <input
+            id="game_id"
+            name="game_id"
+            type="text"
+            class="w-full border border-slate-200 rounded-lg p-2"
+            placeholder="12345"
+          />
+          <button type="submit" class="bg-blue-500 text-white font-semibold rounded-lg p-2 w-24">
+            Join
+          </button>
+        </div>
+      </form>
+      <!-- HOST A GAME HEADING -->
+      <h5 class="mb-2 text-slate-800 text-2xl font-semibold mt-4">
+        Host a Game
+      </h5>
       <!-- THINGS LINK -->
       <a id="things-link" href="/things">
-        <div class="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg w-80">
+        <div class="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg">
           <div class="p-4">
-            <h5 class="mb-2 text-slate-800 text-xl font-semibold">
+            <h5 class="mb-2 text-blue-400 text-xl font-semibold">
               The Things Game
             </h5>
             <p class="text-slate-600 leading-normal font-light">
-              Guess who said what in this party game where players write funny responses to prompts.
+              Guess who said what in a party game where players write funny responses to prompts.
             </p>
           </div>
         </div>
       </a>
       <!-- QUIZ LINK -->
       <a id="quiz-link" href="/quiz">
-        <div class="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg w-80">
+        <div class="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg">
           <div class="p-4">
-            <h5 class="mb-2 text-slate-800 text-xl font-semibold">
+            <h5 class="mb-2 text-blue-400 text-xl font-semibold">
               Quizoots
             </h5>
             <p class="text-slate-600 leading-normal font-light">
-              Try to outsmart your friends in a competitive quiz game in whatever topic you choose.
+              Try to outsmart your friends in an AI-generated quiz on whatever topic you choose.
             </p>
           </div>
         </div>
       </a>
-      <!-- JOIN FORM -->
-      <form id="join-form" phx-submit="join" phx-page-loading>
-        <div class="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg w-80">
-          <div class="p-4">
-            <h5 class="mb-2 text-slate-800 text-xl font-semibold">
-              Join a Game
-            </h5>
-            <input
-              id="game_id"
-              name="game_id"
-              type="text"
-              class="w-full border border-slate-200 rounded-lg p-2"
-              placeholder="Enter a game code"
-            />
-            <button
-              type="submit"
-              class="mt-4 bg-blue-500 text-white font-semibold rounded-lg p-2 w-full"
-            >
-              Join
-            </button>
-          </div>
-        </div>
-      </form>
     </div>
     """
   end
