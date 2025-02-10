@@ -14,9 +14,9 @@ defmodule MPGWeb.HomeLive do
   def render(assigns) do
     # two cards with links to /things and /quiz
     ~H"""
-    <div class="flex flex-col gap-4 mt-12 w-96 mx-auto">
+    <div class="flex flex-col mt-4 gap-4 w-96 mx-auto">
       <!-- JOIN FORM -->
-      <h5 class="text-slate-800 text-2xl font-semibold">
+      <h5 class="text-slate-700 text-2xl font-semibold">
         Join a Game
       </h5>
       <form id="join-form" phx-submit="join" phx-page-loading>
@@ -34,7 +34,7 @@ defmodule MPGWeb.HomeLive do
         </div>
       </form>
       <!-- HOST A GAME HEADING -->
-      <h5 class="mb-2 text-slate-800 text-2xl font-semibold mt-4">
+      <h5 class="mb-2 text-slate-700 text-2xl font-semibold mt-6">
         Host a Game
       </h5>
       <!-- THINGS LINK -->
