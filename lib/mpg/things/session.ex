@@ -31,10 +31,13 @@ defmodule MPG.Things.Session do
 
   @doc """
   Retrieves the state.
+  Returns {:ok, state} if the server is found, otherwise {:error, :not_found}.
   """
   def get_state(server_id) do
-    registered_name(server_id)
-    |> GenServer.call(:get_state)
+    case Registry.lookup(MPG.GameRegistry, server_id) do
+      [{_, _pid}] -> {:ok, registered_name(server_id) |> GenServer.call(:get_state)}
+      _ -> {:error, :not_found}
+    end
   end
 
   @doc """

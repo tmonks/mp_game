@@ -23,15 +23,22 @@ defmodule MPGWeb.ThingsLive do
 
   @impl true
   def handle_params(%{"id" => server_id}, _url, socket) do
-    :ok = PubSub.subscribe(MPG.PubSub, server_id)
-    state = Session.get_state(server_id)
-
     socket =
-      socket
-      |> assign(server_id: server_id)
-      |> assign(state: state)
-      |> assign_player()
-      |> assign_question_form("")
+      case Session.get_state(server_id) do
+        {:error, :not_found} ->
+          socket
+          |> put_flash(:error, "Game not found")
+          |> push_navigate(to: ~p"/")
+
+        {:ok, state} ->
+          :ok = PubSub.subscribe(MPG.PubSub, server_id)
+
+          socket
+          |> assign(server_id: server_id)
+          |> assign(state: state)
+          |> assign_player()
+          |> assign_question_form("")
+      end
 
     {:noreply, socket}
   end

@@ -24,8 +24,6 @@ defmodule MPGWeb.QuizLive do
 
   @impl true
   def handle_params(%{"id" => server_id}, _url, socket) do
-    :ok = PubSub.subscribe(MPG.PubSub, server_id)
-
     socket =
       case Session.get_state(server_id) do
         {:error, :not_found} ->
@@ -34,6 +32,8 @@ defmodule MPGWeb.QuizLive do
           |> push_navigate(to: ~p"/")
 
         {:ok, state} ->
+          :ok = PubSub.subscribe(MPG.PubSub, server_id)
+
           socket
           |> assign(server_id: server_id)
           |> assign(state: state)

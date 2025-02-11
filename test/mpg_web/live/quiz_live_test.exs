@@ -47,7 +47,7 @@ defmodule MPGWeb.QuizLiveTest do
 
   test "redirects to home page if the server ID is invalid", %{conn: conn} do
     {:error, {:live_redirect, %{to: new_path, flash: flash}}} =
-      live(conn, ~p"/quiz/invalid_server_id")
+      live(conn, ~p"/quiz/invalidid")
 
     assert new_path == "/"
     assert flash["error"] == "Game not found"
