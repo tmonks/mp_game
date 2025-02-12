@@ -258,8 +258,8 @@ defmodule MPGWeb.ThingsLive do
         <!-- ANSWER FORM -->
         <%= if is_nil(@player.current_answer) and !is_nil(@state.topic) do %>
           <form id="answer-form" phx-submit="submit_answer">
-            <div class="flex flex-col gap-4">
-              <div>
+            <div class="flex flex-row items-end gap-4">
+              <div class="flex-1">
                 <label class="block text-gray-700 text-xl font-bold mb-2" for="answer">
                   My answer
                 </label>
