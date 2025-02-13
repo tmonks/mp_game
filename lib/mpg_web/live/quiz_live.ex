@@ -202,6 +202,12 @@ defmodule MPGWeb.QuizLive do
       <div id="quiz-title" class="text-gray-600 text-2xl font-bold mb-4">
         <%= @state.title %>
       </div>
+      <!-- GAME CODE -->
+      <%= if @quiz_status in [:new, :generating, :joining] do %>
+        <div id="game-code" class="text-gray-600 text-lg mb-2">
+          Game Code: <%= @server_id %>
+        </div>
+      <% end %>
       <!-- STATUS MESSAGE -->
       <.status_message quiz_status={@quiz_status} />
       <!-- PLAYER LIST -->

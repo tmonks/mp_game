@@ -159,6 +159,15 @@ defmodule MPGWeb.QuizLiveTest do
     assert has_element?(view, "#current-status", "Ready to start!")
   end
 
+  test "players can see the code to give others to join while waiting", ctx do
+    Session.add_player(@server_id, ctx.session_id, "Peter")
+    assert_receive({:state_updated, :add_player, _state})
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
+
+    assert has_element?(view, "#game-code", @server_id)
+  end
+
   test "host can click a 'Start Quiz' button to start the quiz after it's generated", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
     assert_receive({:state_updated, :add_player, _state})

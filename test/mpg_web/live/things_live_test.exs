@@ -239,9 +239,17 @@ defmodule MPGWeb.ThingsLiveTest do
   } do
     Session.add_player(@server_id, session_id, "Peter")
 
-    {:ok, view, _html} = live(conn, ~p"/things?id=things_test")
+    {:ok, view, _html} = live(conn, ~p"/things/things_test")
 
     assert has_element?(view, "#waiting-message")
+  end
+
+  test "players can see the code to give others to join while waiting", ctx do
+    Session.add_player(@server_id, ctx.session_id, "Peter")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/things/things_test")
+
+    assert has_element?(view, "#game-code", "things_test")
   end
 
   # TODO: fix this test

@@ -155,6 +155,9 @@ defmodule MPGWeb.ThingsLive do
       <!-- CURRENT TOPIC -->
       <div class="mt-2 mb-8">
         <%= if is_nil(@state.topic) do %>
+          <div id="game-code" class="text-gray-600 text-xl mb-2">
+            Game Code: <%= @server_id %>
+          </div>
           <div id="waiting-message" class="text-gray-600 text-2xl">
             Waiting for the game to begin...
           </div>
