@@ -89,7 +89,7 @@ defmodule MPGWeb.QuizLiveTest do
 
     assert_receive({:state_updated, _action, _state})
     assert_patch(view, ~p"/quiz/#{@server_id}/new_quiz")
-    assert has_element?(view, "#new-quiz-modal")
+    assert has_element?(view, "#quiz-topic-form")
 
     view
     |> form("#quiz-topic-form", %{topic: "Marvel characters"})
@@ -99,7 +99,7 @@ defmodule MPGWeb.QuizLiveTest do
     Process.sleep(100)
 
     assert_patch(view, ~p"/quiz/#{@server_id}")
-    refute has_element?(view, "#new-quiz-modal")
+    refute has_element?(view, "#quiz-topic-form")
   end
 
   test "host gets an error if they try to submit an empty quiz topic", ctx do
@@ -112,7 +112,7 @@ defmodule MPGWeb.QuizLiveTest do
            |> render_change() =~ "Topic can&#39;t be blank"
   end
 
-  test "host can click a button on the modal to generate a new question", ctx do
+  test "host can click a button on the quiz topic form to generate a new question", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
@@ -404,7 +404,7 @@ defmodule MPGWeb.QuizLiveTest do
     |> render_click()
 
     assert_patch(view, ~p"/quiz/#{@server_id}/new_quiz")
-    assert has_element?(view, "#new-quiz-modal")
+    assert has_element?(view, "#quiz-topic-form")
   end
 
   defp start_quiz(player_id) do

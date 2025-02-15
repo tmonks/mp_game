@@ -62,9 +62,9 @@ defmodule MPGWeb.QuizLive do
     assign(socket, quiz_topic_form: form)
   end
 
-  defp maybe_show_new_quiz_modal(%{assigns: %{live_action: :new_quiz}} = socket), do: socket
+  defp maybe_show_new_quiz_form(%{assigns: %{live_action: :new_quiz}} = socket), do: socket
 
-  defp maybe_show_new_quiz_modal(socket) do
+  defp maybe_show_new_quiz_form(socket) do
     %{player: player, quiz_status: quiz_status} = socket.assigns
 
     if !is_nil(player) and player.is_host and quiz_status == :new do
@@ -137,7 +137,7 @@ defmodule MPGWeb.QuizLive do
       |> assign(state: state)
       |> assign_current_status()
       |> assign_player()
-      |> maybe_show_new_quiz_modal()
+      |> maybe_show_new_quiz_form()
 
     {:noreply, socket}
   end
@@ -165,39 +165,6 @@ defmodule MPGWeb.QuizLive do
         </div>
       </form>
     <% else %>
-      <!-- NEW QUIZ TOPIC MODAL -->
-      <.modal
-        :if={@live_action == :new_quiz}
-        id="new-quiz-modal"
-        show={true}
-        on_cancel={JS.patch("/quiz/#{@server_id}")}
-      >
-        <div class="font-bold mb-4">Quiz Topic</div>
-        <.form
-          for={@quiz_topic_form}
-          id="quiz-topic-form"
-          phx-submit="new_quiz_topic"
-          phx-change="validate_quiz_topic"
-        >
-          <div class="flex flex-col gap-4">
-            <.input
-              type="text"
-              field={@quiz_topic_form[:topic]}
-              class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-            <button class="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded">
-              Submit
-            </button>
-            <a
-              id="generate-topic-button"
-              phx-click="generate_quiz_topic"
-              class="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded text-center cursor-pointer"
-            >
-              Generate <.icon name="hero-sparkles-solid" class="h-5 w-5" />
-            </a>
-          </div>
-        </.form>
-      </.modal>
       <!-- QUIZ TITLE -->
       <div id="quiz-title" class="text-gray-600 text-2xl font-bold mb-4">
         <%= @state.title %>
@@ -218,6 +185,10 @@ defmodule MPGWeb.QuizLive do
           <% end %>
         </div>
       </div>
+      <!-- NEW QUIZ TOPIC FORM -->
+      <%= if @live_action == :new_quiz do %>
+        <.quiz_topic_form form={@quiz_topic_form} />
+      <% end %>
       <!-- QUESTION -->
       <%= if Quizzes.current_status(@state) in [:answering, :reviewing] do %>
         <!-- QUESTION COUNTER -->
@@ -255,6 +226,36 @@ defmodule MPGWeb.QuizLive do
         </.link>
       <% end %>
     <% end %>
+    """
+  end
+
+  defp quiz_topic_form(assigns) do
+    ~H"""
+    <.form
+      for={@form}
+      id="quiz-topic-form"
+      phx-submit="new_quiz_topic"
+      phx-change="validate_quiz_topic"
+    >
+      <div class="font-bold mb-4">Quiz Topic</div>
+      <div class="flex flex-col gap-4">
+        <.input
+          type="text"
+          field={@form[:topic]}
+          class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+        <button class="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded">
+          Submit
+        </button>
+        <a
+          id="generate-topic-button"
+          phx-click="generate_quiz_topic"
+          class="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded text-center cursor-pointer"
+        >
+          Generate <.icon name="hero-sparkles-solid" class="h-5 w-5" />
+        </a>
+      </div>
+    </.form>
     """
   end
 
