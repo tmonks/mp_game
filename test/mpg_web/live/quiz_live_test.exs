@@ -137,7 +137,7 @@ defmodule MPGWeb.QuizLiveTest do
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}")
 
-    assert has_element?(view, "#current-status", "Waiting for the host to set the quiz topic")
+    assert has_element?(view, "#current-status", "Host is setting a quiz topic")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
 

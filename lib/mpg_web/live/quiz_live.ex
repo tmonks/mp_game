@@ -362,7 +362,7 @@ defmodule MPGWeb.QuizLive do
     ~H"""
     <div id="current-status" class="text-gray-600 text-xl mb-4">
       <%= case assigns.quiz_status do
-        :new -> "Waiting for the host to set the quiz topic..."
+        :new -> "Host is setting a quiz topic..."
         :generating -> "Generating quiz..."
         :joining -> "Ready to start!"
         _ -> nil
