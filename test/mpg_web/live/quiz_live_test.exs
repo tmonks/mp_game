@@ -405,6 +405,7 @@ defmodule MPGWeb.QuizLiveTest do
 
     assert_patch(view, ~p"/quiz/#{@server_id}/new_quiz")
     assert has_element?(view, "#quiz-topic-form")
+    refute has_element?(view, "#new-quiz-button")
   end
 
   defp start_quiz(player_id) do

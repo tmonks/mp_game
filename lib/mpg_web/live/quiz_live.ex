@@ -185,10 +185,6 @@ defmodule MPGWeb.QuizLive do
           <% end %>
         </div>
       </div>
-      <!-- NEW QUIZ TOPIC FORM -->
-      <%= if @live_action == :new_quiz do %>
-        <.quiz_topic_form form={@quiz_topic_form} />
-      <% end %>
       <!-- QUESTION -->
       <%= if Quizzes.current_status(@state) in [:answering, :reviewing] do %>
         <!-- QUESTION COUNTER -->
@@ -216,7 +212,7 @@ defmodule MPGWeb.QuizLive do
         </button>
       <% end %>
       <!-- HOST NEW QUIZ BUTTON -->
-      <%= if @player.is_host and Quizzes.current_status(@state) == :complete do %>
+      <%= if @player.is_host and Quizzes.current_status(@state) == :complete and @live_action != :new_quiz do %>
         <.link
           id="new-quiz-button"
           class="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded"
@@ -224,6 +220,10 @@ defmodule MPGWeb.QuizLive do
         >
           New Quiz
         </.link>
+      <% end %>
+      <!-- NEW QUIZ TOPIC FORM -->
+      <%= if @live_action == :new_quiz do %>
+        <.quiz_topic_form form={@quiz_topic_form} />
       <% end %>
     <% end %>
     """
