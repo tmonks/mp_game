@@ -180,44 +180,10 @@ defmodule MPGWeb.ThingsLive do
           </div>
         </div>
       <% end %>
-      <!-- NEW QUESTION MODAL -->
-      <.modal
-        :if={
-          @live_action == :new_question or (@player.is_host and Things.current_status(@state) == :new)
-        }
-        id="new-question-modal"
-        show={true}
-        on_cancel={JS.patch("/things/#{@server_id}")}
-      >
-        <div class="font-bold mb-4">Things...</div>
-        <.form
-          for={@new_question_form}
-          id="new-question-form"
-          phx-change="validate_new_question"
-          phx-submit="set_new_question"
-        >
-          <div class="flex flex-col gap-4">
-            <.input
-              type="text"
-              field={@new_question_form[:question]}
-              class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-            <a
-              id="generate-question-button"
-              phx-click="generate_question"
-              class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded text-center cursor-pointer"
-            >
-              Generate <.icon name="hero-sparkles-solid" class="h-5 w-5" />
-            </a>
-            <button
-              disabled={length(@new_question_form.errors) > 0}
-              class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Submit
-            </button>
-          </div>
-        </.form>
-      </.modal>
+      <!-- NEW QUESTION FORM -->
+      <%= if @live_action == :new_question or (@player.is_host and Things.current_status(@state) == :new) do %>
+        <.new_question_form form={@new_question_form} />
+      <% end %>
       <!-- ANSWERS LIST -->
       <div>
         <%= if Things.all_players_answered?(@state) do %>
@@ -311,6 +277,41 @@ defmodule MPGWeb.ThingsLive do
         </.modal>
       </div>
     <% end %>
+    """
+  end
+
+  defp new_question_form(assigns) do
+    ~H"""
+    <.form
+      for={@form}
+      id="new-question-form"
+      phx-change="validate_new_question"
+      phx-submit="set_new_question"
+    >
+      <div class="font-bold mb-4">Things...</div>
+      <div class="flex flex-col gap-4">
+        <.input
+          type="text"
+          field={@form[:question]}
+          class="flex-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+        <div class="flex gap-4 w-full">
+          <a
+            id="generate-question-button"
+            phx-click="generate_question"
+            class="flex-1 bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded text-center cursor-pointer"
+          >
+            Generate <.icon name="hero-sparkles-solid" class="h-5 w-5" />
+          </a>
+          <button
+            disabled={length(@form.errors) > 0}
+            class="flex-1 bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </.form>
     """
   end
 

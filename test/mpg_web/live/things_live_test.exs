@@ -74,10 +74,10 @@ defmodule MPGWeb.ThingsLiveTest do
 
     {:ok, view, _html} = live(ctx.conn, ~p"/things?id=things_test")
 
-    assert has_element?(view, "#new-question-modal")
+    assert has_element?(view, "#new-question-form")
   end
 
-  test "host gets a 'New Question' button which opens a modal", ctx do
+  test "host gets a 'New Question' button which displays the form", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
     Session.new_question(@server_id, "Things that are red")
     Session.set_player_answer(@server_id, ctx.session_id, "apple")
@@ -86,13 +86,13 @@ defmodule MPGWeb.ThingsLiveTest do
     {:ok, view, _html} = live(ctx.conn, ~p"/things?id=things_test")
 
     assert has_element?(view, "#new-question-button")
-    refute has_element?(view, "#new-question-modal")
+    refute has_element?(view, "#new-question-form")
 
     # click the New Question button
     view |> element("#new-question-button") |> render_click()
 
-    # check that the modal is now visible
-    assert has_element?(view, "#new-question-modal")
+    # check that the form is now visible
+    assert has_element?(view, "#new-question-form")
   end
 
   test "host's 'New Question' button only shows when all players have been revealed", ctx do
@@ -164,7 +164,7 @@ defmodule MPGWeb.ThingsLiveTest do
            |> render_change() =~ "Question can&#39;t be blank"
   end
 
-  test "host can click a button on the modal to generate a new question", ctx do
+  test "host can click a button on the form to generate a new question", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/things/things_test/new_question")
