@@ -20,7 +20,7 @@ defmodule MPGWeb.HomeLive do
         Join a Game
       </h5>
       <form id="join-form" phx-submit="join" phx-page-loading>
-        <div class="relative flex gap-4 bg-white shadow-sm border border-slate-200 rounded-lg p-4">
+        <div class="relative flex gap-4">
           <input
             id="game_id"
             name="game_id"
