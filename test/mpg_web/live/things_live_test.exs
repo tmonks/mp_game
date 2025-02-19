@@ -91,8 +91,9 @@ defmodule MPGWeb.ThingsLiveTest do
     # click the New Question button
     view |> element("#new-question-button") |> render_click()
 
-    # check that the form is now visible
+    # check that the form is now visible, and the button is not
     assert has_element?(view, "#new-question-form")
+    refute has_element?(view, "#new-question-button")
   end
 
   test "host's 'New Question' button only shows when all players have been revealed", ctx do

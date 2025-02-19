@@ -180,10 +180,6 @@ defmodule MPGWeb.ThingsLive do
           </div>
         </div>
       <% end %>
-      <!-- NEW QUESTION FORM -->
-      <%= if @live_action == :new_question or (@player.is_host and Things.current_status(@state) == :new) do %>
-        <.new_question_form form={@new_question_form} />
-      <% end %>
       <!-- ANSWERS LIST -->
       <div>
         <%= if Things.all_players_answered?(@state) do %>
@@ -245,7 +241,7 @@ defmodule MPGWeb.ThingsLive do
           </form>
         <% end %>
         <!-- HOST NEXT QUESTION BUTTON -->
-        <%= if @player.is_host and Things.current_status(@state) == :complete do %>
+        <%= if @live_action != :new_question and @player.is_host and Things.current_status(@state) == :complete do %>
           <.link
             id="new-question-button"
             class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded text-center"
@@ -253,6 +249,10 @@ defmodule MPGWeb.ThingsLive do
           >
             Next Question <.icon name="hero-arrow-path" class="h-5 w-5" />
           </.link>
+        <% end %>
+        <!-- NEW QUESTION FORM -->
+        <%= if @live_action == :new_question or (@player.is_host and Things.current_status(@state) == :new) do %>
+          <.new_question_form form={@new_question_form} />
         <% end %>
         <!-- REVEALED MODAL -->
         <.modal
