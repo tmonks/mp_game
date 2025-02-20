@@ -347,13 +347,14 @@ defmodule MPGWeb.ThingsLiveTest do
 
     assert has_element?(view, "#reveal-button")
 
-    # clicking the button shows a modal
+    # clicking the button shows the reveal form
     view
     |> element("#reveal-button")
     |> render_click()
 
     assert_patch(view, ~p"/things/things_test/reveal")
-    assert has_element?(view, "#reveal-modal")
+    assert has_element?(view, "#reveal-form")
+    refute has_element?(view, "#reveal-button")
 
     # select player 2 as the guesser
     view

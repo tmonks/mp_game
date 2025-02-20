@@ -209,7 +209,7 @@ defmodule MPGWeb.ThingsLive do
                 <%= @player.current_answer %>
               </div>
             </div>
-            <%= if Things.all_players_answered?(@state) and !is_nil(@player) and !@player.revealed do %>
+            <%= if Things.all_players_answered?(@state) and !is_nil(@player) and !@player.revealed and @live_action != :reveal do %>
               <.link
                 id="reveal-button"
                 class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
@@ -255,26 +255,9 @@ defmodule MPGWeb.ThingsLive do
           <.new_question_form form={@new_question_form} />
         <% end %>
         <!-- REVEALED MODAL -->
-        <.modal
-          :if={@live_action == :reveal}
-          id="reveal-modal"
-          show={true}
-          on_cancel={JS.patch("/things?id=#{@server_id}")}
-        >
-          <form id="reveal-form" phx-submit="reveal" class="flex flex-col gap-6">
-            <div class="font-bold">Who guessed your answer?</div>
-            <select
-              id="guesser-select"
-              name="guesser_id"
-              class="flex-auto block appearance-none bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
-            >
-              <%= options_for_select(player_options(@state.players, @player), []) %>
-            </select>
-            <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
-              Submit
-            </button>
-          </form>
-        </.modal>
+        <%= if @live_action == :reveal do %>
+          <.reveal_form players={@state.players} current_player={@player} />
+        <% end %>
       </div>
     <% end %>
     """
@@ -312,6 +295,24 @@ defmodule MPGWeb.ThingsLive do
         </div>
       </div>
     </.form>
+    """
+  end
+
+  defp reveal_form(assigns) do
+    ~H"""
+    <form id="reveal-form" phx-submit="reveal" class="flex flex-col gap-6">
+      <div class="font-bold">Who guessed your answer?</div>
+      <select
+        id="guesser-select"
+        name="guesser_id"
+        class="flex-auto block appearance-none bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+      >
+        <%= options_for_select(player_options(@players, @current_player), []) %>
+      </select>
+      <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
+        Submit
+      </button>
+    </form>
     """
   end
 
