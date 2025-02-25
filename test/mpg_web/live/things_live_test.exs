@@ -365,6 +365,47 @@ defmodule MPGWeb.ThingsLiveTest do
     assert has_element?(view, "#player-#{player2_id} [data-role=score]", "1")
   end
 
+  test "Reveal button is disabled until selecting a player", ctx do
+    Session.new_question(@server_id, "Things that are red")
+
+    # join players
+    Session.add_player(@server_id, ctx.session_id, "Player 1")
+    player2_id = UUID.uuid4()
+    Session.add_player(@server_id, player2_id, "Player 2")
+    player3_id = UUID.uuid4()
+    Session.add_player(@server_id, player3_id, "Player 3")
+
+    # set answers
+    Session.set_player_answer(@server_id, ctx.session_id, "apple")
+    Session.set_player_answer(@server_id, player2_id, "strawberry")
+    Session.set_player_answer(@server_id, player3_id, "roses")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/things?id=things_test")
+
+    assert has_element?(view, "#reveal-button")
+
+    # clicking the button shows the reveal form
+    view
+    |> element("#reveal-button")
+    |> render_click()
+
+    assert_patch(view, ~p"/things/things_test/reveal")
+    assert has_element?(view, "#reveal-form")
+    refute has_element?(view, "#reveal-button")
+
+    # click submit without selecting a player
+    assert has_element?(view, "#reveal-form button[disabled]")
+
+    # select player 2 as the guesser
+    view
+    |> form("#reveal-form", %{guesser_id: player2_id})
+    |> render_change()
+
+    # button is enabled
+    assert has_element?(view, "#reveal-form button")
+    refute has_element?(view, "#reveal-form button[disabled]")
+  end
+
   test "players cannot award themselves a point when revealing", ctx do
     Session.new_question(@server_id, "Things that are red")
 

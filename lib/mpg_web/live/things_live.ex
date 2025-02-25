@@ -17,6 +17,7 @@ defmodule MPGWeb.ThingsLive do
       |> assign(page_title: "The Things Game")
       |> assign(primary_color: "bg-emerald-500")
       |> assign(session_id: session_id)
+      |> assign(reveal_button_disabled: true)
 
     {:ok, socket}
   end
@@ -92,10 +93,24 @@ defmodule MPGWeb.ThingsLive do
   end
 
   @impl true
+  def handle_event("select_guesser", %{"guesser_id" => ""}, socket) do
+    {:noreply, assign(socket, reveal_button_disabled: true)}
+  end
+
+  @impl true
+  def handle_event("select_guesser", %{"guesser_id" => _guesser_id}, socket) do
+    {:noreply, assign(socket, reveal_button_disabled: false)}
+  end
+
+  @impl true
   def handle_event("reveal", %{"guesser_id" => guesser_id}, socket) do
     server_id = socket.assigns.server_id
     Session.reveal_player(server_id, socket.assigns.session_id, guesser_id)
-    {:noreply, push_patch(socket, to: ~p"/things/#{server_id}")}
+
+    {:noreply,
+     socket
+     |> assign(reveal_button_disabled: true)
+     |> push_patch(to: ~p"/things/#{server_id}")}
   end
 
   @impl true
@@ -256,7 +271,11 @@ defmodule MPGWeb.ThingsLive do
         <% end %>
         <!-- REVEALED MODAL -->
         <%= if @live_action == :reveal do %>
-          <.reveal_form players={@state.players} current_player={@player} />
+          <.reveal_form
+            players={@state.players}
+            current_player={@player}
+            button_disabled={@reveal_button_disabled}
+          />
         <% end %>
       </div>
     <% end %>
@@ -300,7 +319,7 @@ defmodule MPGWeb.ThingsLive do
 
   defp reveal_form(assigns) do
     ~H"""
-    <form id="reveal-form" phx-submit="reveal" class="flex flex-col gap-6">
+    <form id="reveal-form" phx-change="select_guesser" phx-submit="reveal" class="flex flex-col gap-6">
       <div class="font-bold">Who guessed your answer?</div>
       <select
         id="guesser-select"
@@ -309,7 +328,10 @@ defmodule MPGWeb.ThingsLive do
       >
         <%= options_for_select(player_options(@players, @current_player), []) %>
       </select>
-      <button class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
+      <button
+        class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+        disabled={@button_disabled}
+      >
         Submit
       </button>
     </form>
@@ -317,10 +339,13 @@ defmodule MPGWeb.ThingsLive do
   end
 
   defp player_options(all_players, current_player) do
-    all_players
-    |> Enum.reject(&(&1.id == current_player.id))
-    |> Enum.map(&{&1.name, &1.id})
-    |> Enum.sort_by(&elem(&1, 0))
+    player_options =
+      all_players
+      |> Enum.reject(&(&1.id == current_player.id))
+      |> Enum.map(&{&1.name, &1.id})
+      |> Enum.sort_by(&elem(&1, 0))
+
+    [{"Select a player...", ""} | player_options]
   end
 
   defp player_avatar(assigns) do
