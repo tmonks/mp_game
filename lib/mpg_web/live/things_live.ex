@@ -329,7 +329,7 @@ defmodule MPGWeb.ThingsLive do
         <%= options_for_select(player_options(@players, @current_player), []) %>
       </select>
       <button
-        class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+        class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
         disabled={@button_disabled}
       >
         Submit
