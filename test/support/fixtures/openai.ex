@@ -110,4 +110,42 @@ defmodule MPG.Fixtures.OpenAI do
       }
     ]
   end
+
+  def chat_response_quiz_suggestions(topics) do
+    content = %{topics: topics} |> Jason.encode!()
+
+    %{
+      id: "chatcmpl-B5Znp5z8W2oN9rKUvqcdw2jgGOo5v",
+      usage: %{
+        "completion_tokens" => 94,
+        "completion_tokens_details" => %{
+          "accepted_prediction_tokens" => 0,
+          "audio_tokens" => 0,
+          "reasoning_tokens" => 0,
+          "rejected_prediction_tokens" => 0
+        },
+        "prompt_tokens" => 188,
+        "prompt_tokens_details" => %{"audio_tokens" => 0, "cached_tokens" => 0},
+        "total_tokens" => 282
+      },
+      created: 1_740_668_965,
+      object: "chat.completion",
+      model: "gpt-4o-mini-2024-07-18",
+      choices: [
+        %{
+          "finish_reason" => "stop",
+          "index" => 0,
+          "logprobs" => nil,
+          "message" => %{
+            "content" => content,
+            "refusal" => nil,
+            "role" => "assistant"
+          }
+        }
+      ],
+      service_tier: "default",
+      system_fingerprint: "fp_06737a9306"
+    }
+    |> Jason.encode!()
+  end
 end

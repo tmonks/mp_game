@@ -52,9 +52,45 @@ defmodule MPG.Generator do
   end
 
   @doc """
-  Takes a list of quiz topics and generates 10 more new topics.
+  Generates suggested quiz topics.
+
+  When given a topic, generates 5 slightly more specific, random quiz topics within that area.
+  When given a list of topics, generates 10 more similar topics, but not the same as the ones provided.
   """
-  def generate_quiz_topics(topics) do
+  def generate_quiz_topics(topic) when is_binary(topic) do
+    system_prompt = """
+         I would like you to please act as a quiz topic generator that generates topics for fun quizzes.
+         I will provide you a topic and you will give me with 5 slightly more specific, random quiz topics within that area.
+         Please respond only with JSON in the format below and no additional text.
+
+         User: "Random & Wacky"
+
+         You:
+
+         {
+           "topics":
+           [
+             "Fact or Fiction – Can you tell the difference between real and made-up facts?",
+             "Bizarre Laws Around the World – Guess which strange laws actually exist",
+             "Weird Animal Superpowers – Animals with abilities that sound like science fiction",
+             "The Most Unusual World Records – Can you guess which world records are real?",
+             "Strange but True: Food Edition – Weird food facts and traditions from around the world."
+           ]
+         }
+    """
+
+    user_prompt = topic
+
+    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+      temperature: 0.8,
+      response_format: %{type: "json_object"}
+    )
+    |> parse_chat()
+    |> decode_json()
+    |> Map.get(:topics)
+  end
+
+  def generate_quiz_topics(topics) when is_list(topics) do
     system_prompt = """
       You are a quiz topic generator that generates fun and interesting trivia topics.
       I will give you a list of topics.
