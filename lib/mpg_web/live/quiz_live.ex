@@ -39,7 +39,7 @@ defmodule MPGWeb.QuizLive do
           |> assign(state: state)
           |> assign_current_status()
           |> assign_player()
-          |> assign_quiz_topic_form("")
+          |> maybe_set_host_assigns()
       end
 
     {:noreply, socket}
@@ -56,7 +56,23 @@ defmodule MPGWeb.QuizLive do
     {:noreply, push_patch(socket, to: ~p"/quiz/#{server_id}")}
   end
 
-  defp assign_quiz_topic_form(socket, topic) do
+  defp maybe_set_host_assigns(%{assigns: %{player: %{is_host: true}}} = socket) do
+    suggested_topics = [
+      "Pop Culture & Entertainment – Movies, TV shows, music, and celebrity trivia",
+      "Science & Nature – Space, animals, inventions, and weird scientific facts",
+      "History & Geography – World events, historical figures, and places around the globe",
+      "Games & Hobbies – Video games, board games, sports, and creative activities",
+      "Random & Wacky – Unusual facts, urban legends, and 'Which one is fake?' style quizzes"
+    ]
+
+    socket
+    |> assign_quiz_topic_form()
+    |> assign(suggested_topics: suggested_topics)
+  end
+
+  defp maybe_set_host_assigns(socket), do: socket
+
+  defp assign_quiz_topic_form(socket, topic \\ "") do
     errors = verify_not_empty(topic)
     form = to_form(%{"topic" => topic}, errors: errors)
     assign(socket, quiz_topic_form: form)
@@ -105,6 +121,10 @@ defmodule MPGWeb.QuizLive do
 
   def handle_event("generate_quiz_topic", _params, socket) do
     topic = Generator.random_quiz_topic()
+    {:noreply, assign_quiz_topic_form(socket, topic)}
+  end
+
+  def handle_event("select_suggested_topic", %{"topic" => topic}, socket) do
     {:noreply, assign_quiz_topic_form(socket, topic)}
   end
 
@@ -223,7 +243,7 @@ defmodule MPGWeb.QuizLive do
       <% end %>
       <!-- NEW QUIZ TOPIC FORM -->
       <%= if @live_action == :new_quiz do %>
-        <.quiz_topic_form form={@quiz_topic_form} />
+        <.quiz_topic_form form={@quiz_topic_form} suggested_topics={@suggested_topics} />
       <% end %>
     <% end %>
     """
@@ -255,6 +275,22 @@ defmodule MPGWeb.QuizLive do
           <button class="flex-1 bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded">
             Submit
           </button>
+        </div>
+      </div>
+      <!-- suggested topics-->
+      <div class="mt-4">
+        <div class="font-bold mb-2">Suggested Topics</div>
+        <div class="flex flex-col flex-wrap gap-2">
+          <%= for topic <- @suggested_topics do %>
+            <a
+              phx-click="select_suggested_topic"
+              phx-value-topic={topic}
+              class="bg-gray-200 text-gray-800 py-1 px-2 rounded cursor-pointer"
+              data-role="suggested-topic"
+            >
+              <%= topic %>
+            </a>
+          <% end %>
         </div>
       </div>
     </.form>

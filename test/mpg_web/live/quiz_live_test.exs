@@ -112,6 +112,32 @@ defmodule MPGWeb.QuizLiveTest do
            |> render_change() =~ "Topic can&#39;t be blank"
   end
 
+  test "host gets suggested quiz topic areas", ctx do
+    Session.add_player(@server_id, ctx.session_id, "Host")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
+
+    assert has_element?(view, "#quiz-topic-form")
+    assert has_element?(view, "[data-role=suggested-topic]", "Pop Culture")
+  end
+
+  test "can click a suggested quiz topic to fill in the form", ctx do
+    Session.add_player(@server_id, ctx.session_id, "Host")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
+
+    assert has_element?(view, "#quiz-topic-form")
+    assert has_element?(view, "[data-role=suggested-topic]", "Pop Culture")
+
+    view
+    |> element("[data-role=suggested-topic]", "Pop Culture")
+    |> render_click()
+
+    assert has_element?(view, "input#topic")
+    # no longer empty
+    refute has_element?(view, "input#topic[value='']")
+  end
+
   test "host can click a button on the quiz topic form to generate a new question", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
 
