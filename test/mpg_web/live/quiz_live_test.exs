@@ -30,7 +30,7 @@ defmodule MPGWeb.QuizLiveTest do
       Plug.Conn.resp(conn, 200, chat_response_quiz_questions())
     end)
 
-    {:ok, conn: conn, session_id: session_id}
+    {:ok, conn: conn, session_id: session_id, bypass: bypass}
   end
 
   test "visiting /quiz redirects to a random server ID", %{conn: conn} do
@@ -136,6 +136,26 @@ defmodule MPGWeb.QuizLiveTest do
     assert has_element?(view, "input#topic")
     # no longer empty
     refute has_element?(view, "input#topic[value='']")
+  end
+
+  test "can click a 'more' button for each suggestion to get more similar suggestions", ctx do
+    Session.add_player(@server_id, ctx.session_id, "Host")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
+
+    view
+    |> element("#more-topics-1")
+    |> render_click()
+
+    # expect a call to OpenAI API
+    Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
+      expected_topics = ["Marvel", "DC", "Star Wars", "Harry Potter", "Lord of the Rings"]
+      Plug.Conn.resp(conn, 200, chat_response_quiz_topics(expected_topics))
+    end)
+
+    Process.sleep(1000)
+
+    assert has_element?(view, "[data-role=suggested-topic]", "Marvel")
   end
 
   test "host can click a button on the quiz topic form to generate a new question", ctx do

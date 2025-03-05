@@ -111,7 +111,7 @@ defmodule MPG.Fixtures.OpenAI do
     ]
   end
 
-  def chat_response_quiz_suggestions(topics) do
+  def chat_response_quiz_topics(topics) do
     content = %{topics: topics} |> Jason.encode!()
 
     %{
