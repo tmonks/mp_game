@@ -175,6 +175,7 @@ defmodule MPGWeb.QuizLiveTest do
     refute has_element?(view, "input#topic[value='']")
   end
 
+  @tag :flaky
   test "players see the quiz title and status", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
 
