@@ -8,6 +8,7 @@ defmodule MPGWeb.QuizLive do
   alias MPG.Quizzes.Question
   alias MPG.Quizzes.Session
   alias Phoenix.PubSub
+  alias Phoenix.LiveView.AsyncResult
 
   @impl true
   def mount(_params, session, socket) do
@@ -133,7 +134,8 @@ defmodule MPGWeb.QuizLive do
      socket
      |> assign_async(:suggested_topics, fn ->
        {:ok, %{suggested_topics: Generator.generate_quiz_topics(topic)}}
-     end)}
+     end)
+     |> assign(:suggested_topics, AsyncResult.loading())}
   end
 
   @impl true
@@ -287,35 +289,30 @@ defmodule MPGWeb.QuizLive do
       </div>
       <!-- suggested topics-->
       <div class="mt-4">
-        <div class="font-bold mb-2">Suggested Topics</div>
-        <%= if @suggested_topics.loading do %>
-          <div>Loading...</div>
-        <% else %>
-          <%= if @suggested_topics.failed do %>
-            <div class="text-red-500">Failed to load suggested topics</div>
-          <% else %>
-            <div class="flex flex-col flex-wrap gap-2">
-              <%= for {topic, i} <- Enum.with_index(@suggested_topics.result, 1) do %>
-                <div class="flex gap-2 items-center">
-                  <a
-                    phx-click="select_suggested_topic"
-                    phx-value-topic={topic}
-                    class="bg-gray-200 text-gray-800 py-1 px-2 rounded cursor-pointer flex-1"
-                    data-role="suggested-topic"
-                  >
-                    <%= topic %>
-                  </a>
-                  <a id={"more-topics-#{i}"} phx-click="more_topics" phx-value-topic={topic}>
-                    <.icon
-                      name="hero-chevron-double-right cursor-pointer"
-                      class="h-6 w-6 text-gray-500"
-                    />
-                  </a>
-                </div>
-              <% end %>
-            </div>
-          <% end %>
-        <% end %>
+        <.async_result :let={suggested_topics} assign={@suggested_topics}>
+          <:loading>Loading suggestions...</:loading>
+          <:failed :let={_failure}>Something went wrong, please refresh and try again</:failed>
+          <div class="flex flex-col flex-wrap gap-2">
+            <%= for {topic, i} <- Enum.with_index(suggested_topics, 1) do %>
+              <div class="flex gap-2 items-center">
+                <a
+                  phx-click="select_suggested_topic"
+                  phx-value-topic={topic}
+                  class="bg-gray-200 text-gray-800 py-1 px-2 rounded cursor-pointer flex-1"
+                  data-role="suggested-topic"
+                >
+                  <%= topic %>
+                </a>
+                <a id={"more-topics-#{i}"} phx-click="more_topics" phx-value-topic={topic}>
+                  <.icon
+                    name="hero-chevron-double-right cursor-pointer"
+                    class="h-6 w-6 text-gray-500"
+                  />
+                </a>
+              </div>
+            <% end %>
+          </div>
+        </.async_result>
       </div>
     </.form>
     """
