@@ -58,17 +58,11 @@ defmodule MPGWeb.QuizLive do
   end
 
   defp maybe_set_host_assigns(%{assigns: %{player: %{is_host: true}}} = socket) do
-    suggested_topics = [
-      "Pop Culture & Entertainment – Movies, TV shows, music, and celebrity trivia",
-      "Science & Nature – Space, animals, inventions, and weird scientific facts",
-      "History & Geography – World events, historical figures, and places around the globe",
-      "Games & Hobbies – Video games, board games, sports, and creative activities",
-      "Random & Wacky – Unusual facts, urban legends, and 'Which one is fake?' style quizzes"
-    ]
-
     socket
     |> assign_quiz_topic_form()
-    |> assign_async(:suggested_topics, fn -> {:ok, %{suggested_topics: suggested_topics}} end)
+    |> assign_async(:suggested_topics, fn ->
+      {:ok, %{suggested_topics: Generator.generate_quiz_topics("start")}}
+    end)
   end
 
   defp maybe_set_host_assigns(socket), do: socket
