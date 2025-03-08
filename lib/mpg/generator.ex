@@ -59,11 +59,31 @@ defmodule MPG.Generator do
   """
   def generate_quiz_topics(topic) when is_binary(topic) do
     system_prompt = """
-         I would like you to please act as a quiz topic generator that generates topics for fun quizzes.
-         I will provide you a topic and you will give me with 5 slightly more specific, random quiz topics within that area.
+         I would like you to act as a quiz topic generator that generates topics for fun quizzes.
+         If I say "start", please provide me with 5 random high level quiz categories to choose from,
+         similar to the example below, but different each time.
+         If I give you a quiz category, please provide me with 5 quiz topics within that category.
+         If I give you a specific quiz topic, please provide me with 5 similar but different quiz topics.
+         The quizzes will be text only, and should not reference images, audio, or video.
          Please respond only with JSON in the format below and no additional text.
+         Below is an example conversation:
 
-         User: "Random & Wacky"
+         Me: "start"
+
+         You:
+
+          {
+            "topics":
+            [
+              "Pop Culture & Entertainment – Movies, TV shows, music, and celebrity trivia",
+              "Science & Nature – Space, animals, inventions, and weird scientific facts",
+              "History & Geography – World events, historical figures, and places around the globe",
+              "Games & Hobbies – Video games, board games, sports, and creative activities",
+              "Random & Wacky – Unusual facts, urban legends, and 'Which one is fake?' style quizzes"
+            ]
+          }
+
+         Me: "Random & Wacky"
 
          You:
 
@@ -77,6 +97,21 @@ defmodule MPG.Generator do
              "Strange but True: Food Edition – Weird food facts and traditions from around the world."
            ]
          }
+
+         Me: "Weird Animal Superpowers – Animals with abilities that sound like science fiction"
+
+         You:
+
+          {
+            "topics":
+            [
+              "Incredible Animal Adaptations – How animals have evolved to survive in extreme environments",
+              "The Science of Animal Communication – How animals talk to each other in the wild",
+              "The World's Strangest Creatures – Animals that look like they're from another planet",
+              "The Secret Lives of Animals – Surprising behaviors of animals in the wild",
+              "The Animal Kingdom's Superheroes – Animals with real-life superpowers"
+            ]
+          }
     """
 
     user_prompt = topic
