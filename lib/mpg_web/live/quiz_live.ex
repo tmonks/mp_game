@@ -61,7 +61,7 @@ defmodule MPGWeb.QuizLive do
     socket
     |> assign_quiz_topic_form()
     |> assign_async(:suggested_topics, fn ->
-      {:ok, %{suggested_topics: Generator.generate_quiz_topics("start")}}
+      {:ok, %{suggested_topics: []}}
     end)
   end
 
@@ -123,7 +123,9 @@ defmodule MPGWeb.QuizLive do
     {:noreply, assign_quiz_topic_form(socket, topic)}
   end
 
-  def handle_event("more_topics", %{"topic" => topic}, socket) do
+  def handle_event("suggest_topics", %{"topic" => topic}, socket) do
+    topic = if topic == "", do: "start", else: topic
+
     {:noreply,
      socket
      |> assign_async(:suggested_topics, fn ->
@@ -270,11 +272,12 @@ defmodule MPGWeb.QuizLive do
         />
         <div class="flex gap-4 w-full">
           <a
-            id="generate-topic-button"
-            phx-click="generate_quiz_topic"
+            id="suggest-topics-button"
+            phx-click="suggest_topics"
+            phx-value-topic={@form[:topic].value}
             class="flex-1 bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded text-center cursor-pointer"
           >
-            Generate <.icon name="hero-sparkles-solid" class="h-5 w-5" />
+            Suggest Topics <.icon name="hero-sparkles-solid" class="h-5 w-5" />
           </a>
           <button class="flex-1 bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded">
             Submit
@@ -287,7 +290,7 @@ defmodule MPGWeb.QuizLive do
           <:loading>Loading suggestions...</:loading>
           <:failed :let={_failure}>Something went wrong, please refresh and try again</:failed>
           <div class="flex flex-col flex-wrap gap-2">
-            <%= for {topic, i} <- Enum.with_index(suggested_topics, 1) do %>
+            <%= for topic <- suggested_topics do %>
               <div class="flex gap-2 items-center">
                 <a
                   phx-click="select_suggested_topic"
@@ -296,12 +299,6 @@ defmodule MPGWeb.QuizLive do
                   data-role="suggested-topic"
                 >
                   <%= topic %>
-                </a>
-                <a id={"more-topics-#{i}"} phx-click="more_topics" phx-value-topic={topic}>
-                  <.icon
-                    name="hero-chevron-double-right cursor-pointer"
-                    class="h-6 w-6 text-gray-500"
-                  />
                 </a>
               </div>
             <% end %>

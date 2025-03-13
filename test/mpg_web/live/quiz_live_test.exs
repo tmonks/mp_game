@@ -112,67 +112,48 @@ defmodule MPGWeb.QuizLiveTest do
            |> render_change() =~ "Topic can&#39;t be blank"
   end
 
-  test "host gets suggested quiz topic areas", ctx do
+  test "host can click a 'Suggest' button to get suggested quiz topic categories", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
 
-    assert has_element?(view, "#quiz-topic-form")
-    assert has_element?(view, "[data-role=suggested-topic]", "Pop Culture")
-  end
-
-  test "can click a suggested quiz topic to fill in the form", ctx do
-    Session.add_player(@server_id, ctx.session_id, "Host")
-
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
-
-    assert has_element?(view, "#quiz-topic-form")
-    assert has_element?(view, "[data-role=suggested-topic]", "Pop Culture")
-
-    view
-    |> element("[data-role=suggested-topic]", "Pop Culture")
-    |> render_click()
-
-    assert has_element?(view, "input#topic")
-    # no longer empty
-    refute has_element?(view, "input#topic[value='']")
-  end
-
-  test "can click a 'more' button for each suggestion to get more similar suggestions", ctx do
-    Session.add_player(@server_id, ctx.session_id, "Host")
-
-    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
-
-    view
-    |> element("#more-topics-1")
-    |> render_click()
-
-    # expect a call to OpenAI API
     Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
       expected_topics = ["Marvel", "DC", "Star Wars", "Harry Potter", "Lord of the Rings"]
       Plug.Conn.resp(conn, 200, chat_response_quiz_topics(expected_topics))
     end)
 
-    Process.sleep(1000)
+    view
+    |> element("#suggest-topics-button")
+    |> render_click()
 
+    _html = render_async(view)
     assert has_element?(view, "[data-role=suggested-topic]", "Marvel")
   end
 
-  test "host can click a button on the quiz topic form to generate a new question", ctx do
+  test "can click a suggested quiz topic to populate the form", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
 
-    assert has_element?(view, "#quiz-topic-form")
-    assert has_element?(view, "input#topic[value='']")
+    Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
+      expected_topics = ["Marvel", "DC", "Star Wars", "Harry Potter", "Lord of the Rings"]
+      Plug.Conn.resp(conn, 200, chat_response_quiz_topics(expected_topics))
+    end)
 
     view
-    |> element("#generate-topic-button")
+    |> element("#suggest-topics-button")
     |> render_click()
 
-    assert has_element?(view, "input#topic")
-    # no longer empty
-    refute has_element?(view, "input#topic[value='']")
+    _html = render_async(view)
+
+    assert has_element?(view, "#quiz-topic-form")
+    assert has_element?(view, "[data-role=suggested-topic]", "Marvel")
+
+    view
+    |> element("[data-role=suggested-topic]", "Marvel")
+    |> render_click()
+
+    assert has_element?(view, "input#topic[value='Marvel']")
   end
 
   @tag :flaky
