@@ -130,6 +130,54 @@ defmodule MPGWeb.QuizLiveTest do
     assert has_element?(view, "[data-role=suggested-topic]", "Marvel")
   end
 
+  test "host can click the Suggest button to get 'starter' categories", ctx do
+    Session.add_player(@server_id, ctx.session_id, "Host")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
+
+    Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
+      # retrieve and assert the topic from the form is in one of the messages
+      {:ok, body, _} = Plug.Conn.read_body(conn)
+      %{"messages" => messages} = Jason.decode!(body)
+      assert %{"content" => "start"} = List.last(messages)
+
+      expected_topics = ["Marvel", "DC", "Star Wars", "Harry Potter", "Lord of the Rings"]
+      Plug.Conn.resp(conn, 200, chat_response_quiz_topics(expected_topics))
+    end)
+
+    view
+    |> element("#suggest-topics-button")
+    |> render_click()
+
+    _html = render_async(view)
+  end
+
+  test "host can enter a topic and request suggestions for it", ctx do
+    Session.add_player(@server_id, ctx.session_id, "Host")
+
+    {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
+
+    view
+    |> form("#quiz-topic-form", %{topic: "Guardians of the Galaxy"})
+    |> render_change()
+
+    Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
+      # retrieve and assert the topic from the form is in one of the messages
+      {:ok, body, _} = Plug.Conn.read_body(conn)
+      %{"messages" => messages} = Jason.decode!(body)
+      assert %{"content" => "Guardians of the Galaxy"} = List.last(messages)
+
+      expected_topics = ["Starlord", "Groot", "Rocket Raccoon", "Gamora", "Drax"]
+      Plug.Conn.resp(conn, 200, chat_response_quiz_topics(expected_topics))
+    end)
+
+    view
+    |> element("#suggest-topics-button")
+    |> render_click()
+
+    _html = render_async(view)
+  end
+
   test "can click a suggested quiz topic to populate the form", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
 
