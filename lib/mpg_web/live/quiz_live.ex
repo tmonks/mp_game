@@ -275,7 +275,7 @@ defmodule MPGWeb.QuizLive do
             id="suggest-topics-button"
             phx-click="suggest_topics"
             phx-value-topic={@form[:topic].value}
-            class="flex-1 bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded text-center cursor-pointer"
+            class="flex-1 border border-violet-500 text-violet-500 font-bold py-2 px-4 rounded text-center cursor-pointer hover:bg-violet-500 hover:text-white"
           >
             Suggest Topics <.icon name="hero-sparkles-solid" class="h-5 w-5" />
           </a>
