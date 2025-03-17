@@ -287,7 +287,9 @@ defmodule MPGWeb.QuizLive do
       <!-- suggested topics-->
       <div class="mt-4">
         <.async_result :let={suggested_topics} assign={@suggested_topics}>
-          <:loading>Loading suggestions...</:loading>
+          <:loading>
+            <div class="loader">Loading...</div>
+          </:loading>
           <:failed :let={_failure}>Something went wrong, please refresh and try again</:failed>
           <div class="flex flex-col flex-wrap gap-2">
             <%= for topic <- suggested_topics do %>
