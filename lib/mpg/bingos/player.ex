@@ -1,3 +1,3 @@
 defmodule MPG.Bingos.Player do
-  defstruct [:name, :color]
+  defstruct [:id, :name, :color]
 end

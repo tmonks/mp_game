@@ -1,6 +1,7 @@
 defmodule MPG.Bingos do
   alias MPG.Bingos.State
   alias MPG.Bingos.Cell
+  alias MPG.Bingos.Player
 
   @doc """
   Creates a new bingo game state with a randomized board of 25 cells
@@ -8,18 +9,47 @@ defmodule MPG.Bingos do
   def new do
     %State{
       players: [],
-      cells: get_cells()
+      cells: get_random_cells()
     }
   end
 
   @doc """
-  Returns a list of 25 randomized cells
+  Adds a player to the state
   """
-  def get_cells do
+  def add_player(state, id, name) do
+    player_num = Enum.count(state.players)
+
+    player = %Player{
+      id: id,
+      name: name,
+      color: get_color_for_player(player_num)
+    }
+
+    %State{state | players: state.players ++ [player]}
+  end
+
+  defp get_random_cells do
     cells()
     |> Enum.shuffle()
     |> Enum.take(25)
     |> Enum.map(&%Cell{text: &1, toggled: false, toggled_by: nil})
+  end
+
+  defp get_color_for_player(num) do
+    colors = [
+      "Gold",
+      "DarkSlateBlue",
+      "DeepPink",
+      "DeepSkyBlue",
+      "DarkOrange",
+      "DarkViolet",
+      "YellowGreen",
+      "Teal"
+    ]
+
+    # start with 0, and wrap around if we go over the length of the list
+    num = rem(num, length(colors))
+    Enum.at(colors, num)
   end
 
   defp cells do
