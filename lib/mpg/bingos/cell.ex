@@ -1,3 +1,3 @@
 defmodule MPG.Bingos.Cell do
-  defstruct [:text, :toggled, :toggled_by]
+  defstruct [:text, :player_id]
 end

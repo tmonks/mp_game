@@ -12,8 +12,7 @@ defmodule MPG.BingosTest do
       assert %State{players: [], cells: cells} = state
       assert length(cells) == 25
       assert Enum.all?(cells, &match?(%Cell{}, &1))
-      assert Enum.all?(cells, &(&1.toggled == false))
-      assert Enum.all?(cells, &(&1.toggled_by == nil))
+      assert Enum.all?(cells, &(&1.player_id == nil))
     end
   end
 

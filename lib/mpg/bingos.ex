@@ -32,7 +32,7 @@ defmodule MPG.Bingos do
     cells()
     |> Enum.shuffle()
     |> Enum.take(25)
-    |> Enum.map(&%Cell{text: &1, toggled: false, toggled_by: nil})
+    |> Enum.map(&%Cell{text: &1, player_id: nil})
   end
 
   defp get_color_for_player(num) do
