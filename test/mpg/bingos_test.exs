@@ -33,4 +33,31 @@ defmodule MPG.BingosTest do
       assert player1.color != player2.color
     end
   end
+
+  describe "toggle/3" do
+    test "sets the player_id of the specified cell" do
+      state = Bingos.new()
+      state = Bingos.add_player(state, "player1", "Alice")
+      player = get_player(state, "player1")
+
+      state = Bingos.toggle(state, 0, player)
+      [cell | _] = state.cells
+      assert cell.player_id == "player1"
+    end
+
+    test "only updates the specified cell" do
+      state = Bingos.new()
+      state = Bingos.add_player(state, "player1", "Alice")
+      player = get_player(state, "player1")
+
+      state = Bingos.toggle(state, 0, player)
+      {[first_cell], rest_cells} = Enum.split(state.cells, 1)
+      assert first_cell.player_id == "player1"
+      assert Enum.all?(rest_cells, &(&1.player_id == nil))
+    end
+  end
+
+  defp get_player(state, id) do
+    Enum.find(state.players, &(&1.id == id))
+  end
 end

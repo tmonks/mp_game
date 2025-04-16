@@ -28,6 +28,21 @@ defmodule MPG.Bingos do
     %State{state | players: state.players ++ [player]}
   end
 
+  @doc """
+  Toggles the specified cell for the given player
+  """
+  def toggle(state, cell_index, player) do
+    cells =
+      state.cells
+      |> Enum.with_index()
+      |> Enum.map(fn
+        {cell, ^cell_index} -> %Cell{cell | player_id: player.id}
+        {cell, _} -> cell
+      end)
+
+    %State{state | cells: cells}
+  end
+
   defp get_random_cells do
     cells()
     |> Enum.shuffle()
