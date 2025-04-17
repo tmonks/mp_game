@@ -38,9 +38,8 @@ defmodule MPG.BingosTest do
     test "sets the player_id of the specified cell" do
       state = Bingos.new()
       state = Bingos.add_player(state, "player1", "Alice")
-      player = get_player(state, "player1")
 
-      state = Bingos.toggle(state, 0, player)
+      state = Bingos.toggle(state, 0, "player1")
       [cell | _] = state.cells
       assert cell.player_id == "player1"
     end
@@ -48,16 +47,11 @@ defmodule MPG.BingosTest do
     test "only updates the specified cell" do
       state = Bingos.new()
       state = Bingos.add_player(state, "player1", "Alice")
-      player = get_player(state, "player1")
 
-      state = Bingos.toggle(state, 0, player)
+      state = Bingos.toggle(state, 0, "player1")
       {[first_cell], rest_cells} = Enum.split(state.cells, 1)
       assert first_cell.player_id == "player1"
       assert Enum.all?(rest_cells, &(&1.player_id == nil))
     end
-  end
-
-  defp get_player(state, id) do
-    Enum.find(state.players, &(&1.id == id))
   end
 end

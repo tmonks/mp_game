@@ -29,14 +29,14 @@ defmodule MPG.Bingos do
   end
 
   @doc """
-  Toggles the specified cell for the given player
+  Toggles the specified cell for the given player_id
   """
-  def toggle(state, cell_index, player) do
+  def toggle(state, cell_index, player_id) do
     cells =
       state.cells
       |> Enum.with_index()
       |> Enum.map(fn
-        {cell, ^cell_index} -> %Cell{cell | player_id: player.id}
+        {cell, ^cell_index} -> %Cell{cell | player_id: player_id}
         {cell, _} -> cell
       end)
 
