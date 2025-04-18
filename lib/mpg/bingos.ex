@@ -6,8 +6,9 @@ defmodule MPG.Bingos do
   @doc """
   Creates a new bingo game state with a randomized board of 25 cells
   """
-  def new do
+  def new(server_id) do
     %State{
+      server_id: server_id,
       players: [],
       cells: get_random_cells()
     }

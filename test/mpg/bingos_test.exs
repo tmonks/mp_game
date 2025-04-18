@@ -5,9 +5,11 @@ defmodule MPG.BingosTest do
   alias MPG.Bingos.Cell
   alias MPG.Bingos.State
 
+  @server_id "bingos_test"
+
   describe "new/0" do
     test "returns a new randomized bingo board with 25 cells" do
-      state = Bingos.new()
+      state = Bingos.new(@server_id)
 
       assert %State{players: [], cells: cells} = state
       assert length(cells) == 25
@@ -18,14 +20,14 @@ defmodule MPG.BingosTest do
 
   describe "add_player/3" do
     test "adds a player to the state" do
-      state = Bingos.new()
+      state = Bingos.new(@server_id)
       state = Bingos.add_player(state, "player1", "Alice")
 
       assert [%{id: "player1", name: "Alice"}] = state.players
     end
 
     test "assigns different colors to players" do
-      state = Bingos.new()
+      state = Bingos.new(@server_id)
       state = Bingos.add_player(state, "player1", "Alice")
       state = Bingos.add_player(state, "player2", "Bob")
 
@@ -36,7 +38,7 @@ defmodule MPG.BingosTest do
 
   describe "toggle/3" do
     test "sets the player_id of the specified cell" do
-      state = Bingos.new()
+      state = Bingos.new(@server_id)
       state = Bingos.add_player(state, "player1", "Alice")
 
       state = Bingos.toggle(state, 0, "player1")
@@ -45,7 +47,7 @@ defmodule MPG.BingosTest do
     end
 
     test "only updates the specified cell" do
-      state = Bingos.new()
+      state = Bingos.new(@server_id)
       state = Bingos.add_player(state, "player1", "Alice")
 
       state = Bingos.toggle(state, 0, "player1")
