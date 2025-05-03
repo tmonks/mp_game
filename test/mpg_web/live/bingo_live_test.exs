@@ -24,8 +24,11 @@ defmodule MPGWeb.BingoLiveTest do
   end
 
   test "redirects to home page if the server ID is invalid", %{conn: conn} do
-    conn = get(conn, "/bingo/invalid_id")
-    assert redirected_to(conn) == "/"
+    {:error, {:live_redirect, %{to: new_path, flash: flash}}} =
+      live(conn, ~p"/quiz/invalidid")
+
+    assert new_path == "/"
+    assert flash["error"] == "Game not found"
   end
 
   test "can access bingo page with valid server ID", %{conn: conn, server_id: server_id} do

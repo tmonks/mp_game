@@ -15,7 +15,10 @@ defmodule MPGWeb.BingoLive do
          |> assign(:state, state)}
 
       {:error, :not_found} ->
-        {:ok, redirect(socket, to: "/")}
+        {:ok,
+         socket
+         |> put_flash(:error, "Game not found")
+         |> push_navigate(to: ~p"/")}
     end
   end
 
