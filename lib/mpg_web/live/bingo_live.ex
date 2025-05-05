@@ -74,6 +74,7 @@ defmodule MPGWeb.BingoLive do
       <h1 class="text-2xl font-bold mb-4"><%= @page_title %></h1>
       <div class="w-full max-w-md">
         <%= if @player == nil do %>
+          <!-- JOIN FORM -->
           <form id="join-form" phx-submit="join">
             <div class="flex gap-4 pt-16">
               <div>
@@ -92,6 +93,7 @@ defmodule MPGWeb.BingoLive do
             </div>
           </form>
         <% else %>
+          <!-- PLAYER LIST -->
           <div class="mb-8">
             <div id="player-list" class="flex gap-2">
               <%= for player <- @state.players do %>
