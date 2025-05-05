@@ -5,18 +5,20 @@ defmodule MPGWeb.BingoLiveTest do
   alias MPG.Bingos.Session
   alias MPG.Bingos.State
 
-  setup do
-    server_id = "test_server"
-    start_supervised!({Session, [name: server_id]})
+  @server_id "bingo_session"
+  setup %{conn: conn} do
+    conn = init_test_session(conn, %{})
 
     # populate a session_id on the conn
     session_id = UUID.uuid4()
-    conn = init_test_session(build_conn(), %{session_id: session_id})
+    conn = put_session(conn, :session_id, session_id)
+
+    start_supervised!({Session, [name: @server_id]})
 
     # subscribe to PubSub
-    :ok = Phoenix.PubSub.subscribe(MPG.PubSub, server_id)
+    :ok = Phoenix.PubSub.subscribe(MPG.PubSub, @server_id)
 
-    %{conn: conn, server_id: server_id, session_id: session_id}
+    %{conn: conn, session_id: session_id}
   end
 
   test "visiting /bingo redirects to a random server ID", %{conn: conn} do
@@ -40,16 +42,15 @@ defmodule MPGWeb.BingoLiveTest do
   end
 
   test "if the player with the session_id does not exist, prompts for name", %{
-    conn: conn,
-    server_id: server_id
+    conn: conn
   } do
-    {:ok, view, _html} = live(conn, ~p"/bingo/#{server_id}")
+    {:ok, view, _html} = live(conn, ~p"/bingo/#{@server_id}")
 
     assert has_element?(view, "#join-form")
   end
 
-  test "can join the game", %{conn: conn, server_id: server_id, session_id: session_id} do
-    {:ok, view, _html} = live(conn, ~p"/bingo/#{server_id}")
+  test "can join the game", %{conn: conn, session_id: session_id} do
+    {:ok, view, _html} = live(conn, ~p"/bingo/#{@server_id}")
 
     view
     |> form("#join-form", %{player_name: "Peter"})
@@ -62,12 +63,11 @@ defmodule MPGWeb.BingoLiveTest do
 
   test "loads user from session_id if it exists", %{
     conn: conn,
-    server_id: server_id,
     session_id: session_id
   } do
-    Session.add_player(server_id, session_id, "Peter")
+    Session.add_player(@server_id, session_id, "Peter")
 
-    {:ok, view, _html} = live(conn, ~p"/bingo/#{server_id}")
+    {:ok, view, _html} = live(conn, ~p"/bingo/#{@server_id}")
 
     assert has_element?(view, "#player-#{session_id}[data-role=avatar]", "Pet")
     refute has_element?(view, "#join-form")
