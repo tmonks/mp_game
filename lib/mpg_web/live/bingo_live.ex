@@ -60,6 +60,13 @@ defmodule MPGWeb.BingoLive do
   end
 
   @impl true
+  def handle_event("toggle_cell", %{"index" => index}, socket) do
+    %{session_id: session_id, server_id: server_id} = socket.assigns
+    Session.toggle_cell(server_id, String.to_integer(index), session_id)
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:state_updated, state}, socket) do
     {:noreply,
      socket
@@ -71,7 +78,6 @@ defmodule MPGWeb.BingoLive do
   def render(assigns) do
     ~H"""
     <div class="flex flex-col items-center p-4">
-      <h1 class="text-2xl font-bold mb-4"><%= @page_title %></h1>
       <div class="w-full max-w-md">
         <%= if @player == nil do %>
           <!-- JOIN FORM -->
@@ -101,6 +107,22 @@ defmodule MPGWeb.BingoLive do
               <% end %>
             </div>
           </div>
+          <!-- BINGO GRID -->
+          <div class="grid grid-cols-5 gap-2">
+            <%= for {cell, index} <- Enum.with_index(@state.cells) do %>
+              <div
+                phx-click="toggle_cell"
+                phx-value-index={index}
+                class={"relative w-full flex items-center text-center rounded text-white #{if cell.player_id, do: "bg-green-500", else: "bg-blue-500"}"}
+                id={"cell-#{index}"}
+              >
+                <%= cell.text %>
+                <%= if cell.player_id do %>
+                  <.player_marker player={Enum.find(@state.players, &(&1.id == cell.player_id))} />
+                <% end %>
+              </div>
+            <% end %>
+          </div>
         <% end %>
       </div>
     </div>
@@ -119,6 +141,19 @@ defmodule MPGWeb.BingoLive do
       id={"player-" <> @player.id}
     >
       <%= String.slice(@player.name, 0..2) %>
+    </div>
+    """
+  end
+
+  attr :player, Player, required: true
+
+  defp player_marker(assigns) do
+    ~H"""
+    <div
+      class="absolute bottom-1 right-1 w-4 h-4 text-white font-bold rounded-full flex items-center justify-center text-xs"
+      style={"background-color: #{@player.color}"}
+    >
+      <%= String.slice(@player.name, 0..1) %>
     </div>
     """
   end

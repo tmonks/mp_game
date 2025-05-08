@@ -72,4 +72,38 @@ defmodule MPGWeb.BingoLiveTest do
     assert has_element?(view, "#player-#{session_id}[data-role=avatar]", "Pet")
     refute has_element?(view, "#join-form")
   end
+
+  test "shows bingo grid after joining", %{conn: conn, session_id: session_id} do
+    Session.add_player(@server_id, session_id, "Peter")
+
+    {:ok, view, _html} = live(conn, ~p"/bingo/#{@server_id}")
+
+    # Check that all 25 cells are present
+    for i <- 0..24 do
+      assert has_element?(view, "#cell-#{i}")
+    end
+  end
+
+  test "can toggle a cell", %{conn: conn, session_id: session_id} do
+    Session.add_player(@server_id, session_id, "Peter")
+
+    {:ok, view, _html} = live(conn, ~p"/bingo/#{@server_id}")
+
+    # Click a cell
+    view
+    |> element("#cell-0")
+    |> render_click()
+
+    assert_receive {:state_updated, %State{}}
+
+    # Cell should be green and show player marker
+    assert has_element?(view, "#cell-0.bg-green-500")
+    assert has_element?(view, "#cell-0 div[style*='#{get_player_color(session_id)}']")
+  end
+
+  defp get_player_color(session_id) do
+    {:ok, state} = Session.get_state(@server_id)
+    player = Enum.find(state.players, &(&1.id == session_id))
+    player.color
+  end
 end
