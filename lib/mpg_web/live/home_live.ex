@@ -6,6 +6,7 @@ defmodule MPGWeb.HomeLive do
     case Registry.lookup(MPG.GameRegistry, game_id) do
       [{_pid, :quiz}] -> {:noreply, redirect(socket, to: "/quiz/#{game_id}")}
       [{_pid, :things}] -> {:noreply, redirect(socket, to: "/things/#{game_id}")}
+      [{_pid, :bingo}] -> {:noreply, redirect(socket, to: "/bingo/#{game_id}")}
       _ -> {:noreply, put_flash(socket, :error, "Invalid game code")}
     end
   end
@@ -59,6 +60,19 @@ defmodule MPGWeb.HomeLive do
             </h5>
             <p class="text-slate-600 leading-normal font-light">
               Try to outsmart your friends in an AI-generated quiz on whatever topic you choose.
+            </p>
+          </div>
+        </div>
+      </a>
+      <!-- BINGO LINK -->
+      <a id="bingo-link" href="/bingo">
+        <div class="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg">
+          <div class="p-4">
+            <h5 class="mb-2 text-blue-400 text-xl font-semibold">
+              Dinner Bingo
+            </h5>
+            <p class="text-slate-600 leading-normal font-light">
+              Play a collaborative game of bingo with friends by sharing stories about your week.
             </p>
           </div>
         </div>

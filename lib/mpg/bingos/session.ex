@@ -59,7 +59,7 @@ defmodule MPG.Bingos.Session do
   Determines the Registry name ("via tuple") from a string id
   """
   def registered_name(id) do
-    {:via, Registry, {MPG.GameRegistry, id, :bingos}}
+    {:via, Registry, {MPG.GameRegistry, id, :bingo}}
   end
 
   @impl true

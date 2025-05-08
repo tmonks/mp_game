@@ -32,6 +32,18 @@ defmodule MPGWeb.HomeLiveTest do
     assert_redirect(view, ~p"/quiz/12345")
   end
 
+  test "redirects to Bingo if a Bingo server ID is provided", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    start_supervised!({MPG.Bingos.Session, [name: "12345"]})
+
+    view
+    |> form("#join-form", %{game_id: "12345"})
+    |> render_submit()
+
+    assert_redirect(view, ~p"/bingo/12345")
+  end
+
   test "shows a flash error message if the server ID is invalid", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/")
 
