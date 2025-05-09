@@ -13,7 +13,7 @@ defmodule MPGWeb.BingoLive do
     socket =
       socket
       |> assign(:page_title, "Dinner Bingo")
-      |> assign(:primary_color, "bg-orange-500")
+      |> assign(:primary_color, "bg-rose-500")
       |> assign(:session_id, session_id)
 
     case Session.get_state(server_id) do
@@ -77,7 +77,7 @@ defmodule MPGWeb.BingoLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="flex flex-col items-center p-4">
+    <div class="flex flex-col items-center">
       <div class="w-full max-w-md">
         <%= if @player == nil do %>
           <!-- JOIN FORM -->
@@ -92,7 +92,7 @@ defmodule MPGWeb.BingoLive do
                 />
               </div>
               <div>
-                <button class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded">
+                <button class="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded">
                   Submit
                 </button>
               </div>
@@ -108,12 +108,12 @@ defmodule MPGWeb.BingoLive do
             </div>
           </div>
           <!-- BINGO GRID -->
-          <div class="grid grid-cols-5 gap-2">
+          <div class="grid grid-cols-5 gap-1">
             <%= for {cell, index} <- Enum.with_index(@state.cells) do %>
               <div
                 phx-click="toggle_cell"
                 phx-value-index={index}
-                class={"relative w-full flex items-center text-center rounded text-white #{if cell.player_id, do: "bg-green-500", else: "bg-blue-500"}"}
+                class={"relative w-full flex items-center text-center rounded cursor-pointer text-white text-sm #{if cell.player_id, do: "bg-green-500", else: "bg-rose-500"}"}
                 id={"cell-#{index}"}
               >
                 <%= cell.text %>
