@@ -30,18 +30,27 @@ defmodule MPG.Bingos do
   end
 
   @doc """
-  Toggles the specified cell for the given player_id
+  Toggles the specified cell for the given player_id.
+  If the cell is already toggled by the player, it will be untoggled.
   """
   def toggle(state, cell_index, player_id) do
     cells =
       state.cells
       |> Enum.with_index()
       |> Enum.map(fn
-        {cell, ^cell_index} -> %Cell{cell | player_id: player_id}
+        {cell, ^cell_index} -> toggle_cell(cell, player_id)
         {cell, _} -> cell
       end)
 
     %State{state | cells: cells}
+  end
+
+  defp toggle_cell(%Cell{player_id: nil} = cell, player_id) do
+    %Cell{cell | player_id: player_id}
+  end
+
+  defp toggle_cell(%Cell{player_id: player_id} = cell, player_id) do
+    %Cell{cell | player_id: nil}
   end
 
   defp get_random_cells do

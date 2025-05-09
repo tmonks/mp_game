@@ -55,5 +55,20 @@ defmodule MPG.BingosTest do
       assert first_cell.player_id == "player1"
       assert Enum.all?(rest_cells, &(&1.player_id == nil))
     end
+
+    test "untoggles a cell if it's already toggled" do
+      state = Bingos.new(@server_id)
+      state = Bingos.add_player(state, "player1", "Alice")
+
+      # First toggle
+      state = Bingos.toggle(state, 0, "player1")
+      [cell | _] = state.cells
+      assert cell.player_id == "player1"
+
+      # Second toggle (untoggle)
+      state = Bingos.toggle(state, 0, "player1")
+      [cell | _] = state.cells
+      assert cell.player_id == nil
+    end
   end
 end
