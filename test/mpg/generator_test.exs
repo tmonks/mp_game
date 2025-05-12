@@ -32,4 +32,18 @@ defmodule MPG.GeneratorTest do
       assert Generator.generate_quiz_topics("test_topic") == expected_topics
     end
   end
+
+  describe "generate_bingo_cells/1" do
+    test "returns a list of 25 conversation prompts", ctx do
+      Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
+        Plug.Conn.resp(conn, 200, chat_response_bingo_cells())
+      end)
+
+      assert prompts = Generator.generate_bingo_cells("conversation")
+      assert length(prompts) == 25
+      assert [first_prompt | _] = prompts
+      assert is_binary(first_prompt)
+      assert first_prompt == "Changed your opinion about something"
+    end
+  end
 end

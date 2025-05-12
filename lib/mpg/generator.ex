@@ -52,6 +52,79 @@ defmodule MPG.Generator do
   end
 
   @doc """
+  Gets a summary of today's top news
+  """
+  def get_news_summary do
+    system_prompt =
+      """
+        You are a news summary generator that provides a brief overview of the top 10 news stories of the day.
+        The summary should include the headline and a brief description.
+        Example:
+
+        User: "start"
+
+        You:
+          1. Headline: Description
+          2. Headline: Description
+          3. Headline: Description
+          ...
+      """
+
+    user_prompt = "start"
+
+    get_completion("gpt-4o-mini-search-preview", system_prompt, user_prompt)
+    |> IO.inspect()
+    |> parse_chat()
+
+    # |> decode_json()
+    # |> Map.get(:news)
+  end
+
+  @doc """
+  Creates a quiz base on today's top news stories
+  """
+  def generate_news_quiz do
+    system_prompt =
+      """
+        You are a quiz question generator that generates fun and interesting questions based on today's top news stories.
+        Start by searching for today's top news stories and then generate 10 questions based on those stories.
+        Unless I specify the difficulty (Easy, Medium or Hard), the questions should be of a difficulty level
+        appropriate for an adult who is familiar with the subject.
+        Each question should include the `correct_answer`, which is the zero-based index of the correct answer in the list.
+        Each question should have a brief explanation about the correct answer.
+        IMPORTANT: Please be sure the correct answer is correct and it matches the explanation!
+        Respond ONLY with the JSON with no additional text.
+        Please generate each of the questions in JSON format like the example below:
+
+        User: "start"
+
+        You:
+
+        {
+          "questions": [
+            {
+              "text": "In which country did the recent earthquake occur?",
+              "answers": ["Japan", "Mexico", "Italy", "Indonesia"],
+              "correct_answer": 1,
+              "explanation": "A 7.0 magnitude earthquake struck Mexico on Tuesday."
+            }
+            /* 9 more questions */
+          ]
+        }
+      """
+
+    user_prompt = "start"
+
+    get_completion("gpt-4o-mini-search-preview", system_prompt, user_prompt,
+      response_format: %{type: "json_object"}
+    )
+    |> IO.inspect()
+    |> parse_chat()
+    |> decode_json()
+    |> Map.get(:questions)
+  end
+
+  @doc """
   Generates suggested quiz topics.
 
   When given a topic, generates 5 slightly more specific, random quiz topics within that area.
@@ -163,7 +236,49 @@ defmodule MPG.Generator do
     |> Map.get(:topics)
   end
 
-  def get_completion(model, system_prompt, user_prompt, options) do
+  @doc """
+  Generates 25 random cells for a 'conversation bingo' card
+  """
+  def generate_bingo_cells(_type) do
+    system_prompt = """
+    You are a conversation topic generator that generates unique and engaging conversation prompts for a collaborative bingo-style game.
+    Each prompt should describe something that may have happened to someone in the past week,
+    encouraging them to share a short personal story or experience with the group.
+    The tone should be warm, fun, and inclusive — aimed at sparking connection, laughter, and reflection.
+    Prompts should be varied and relatable to a wide range of people.
+    Generate 25 random prompts.
+    Please respond only with the JSON with no additional text.
+
+    Example:
+
+    User: "start"
+
+    You:
+
+    {
+      "prompts": [
+        "Changed your opinion about something",
+        "Had a 'fail' moment",
+        "Pushed yourself outside your comfort zone",
+        "Saw something beautiful in nature",
+        "Heard or read a quote that stuck with you"
+        /* 20 more prompts */
+      ]
+    }
+    """
+
+    user_prompt = "start"
+
+    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+      temperature: 0.8,
+      response_format: %{type: "json_object"}
+    )
+    |> parse_chat()
+    |> decode_json()
+    |> Map.get(:prompts)
+  end
+
+  def get_completion(model, system_prompt, user_prompt, options \\ []) do
     messages = [
       %{role: "system", content: system_prompt},
       %{role: "user", content: user_prompt}

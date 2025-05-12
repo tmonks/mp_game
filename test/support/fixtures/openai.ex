@@ -148,4 +148,70 @@ defmodule MPG.Fixtures.OpenAI do
     }
     |> Jason.encode!()
   end
+
+  def chat_response_bingo_cells do
+    prompts = [
+      "Changed your opinion about something",
+      "Had a 'fail' moment",
+      "Pushed yourself outside your comfort zone",
+      "Saw something beautiful in nature",
+      "Heard or read a quote that stuck with you",
+      "Tried a new food or recipe",
+      "Learned something interesting",
+      "Made someone laugh",
+      "Did something kind for someone",
+      "Had an encounter with an animal",
+      "Solved a problem",
+      "Received a compliment",
+      "Helped a friend or co-worker",
+      "Learned a new word or phrase",
+      "Faced a fear",
+      "Noticed something beautiful",
+      "Made a new friend or acquaintance",
+      "Completed a goal or task",
+      "Had a moment of relaxation",
+      "Experienced a moment of gratitude",
+      "Observed an act of kindness",
+      "Learned from a mistake",
+      "Felt inspired by something or someone",
+      "Saw something new on the way to school/work",
+      "Tried a new activity"
+    ]
+
+    content = %{prompts: prompts} |> Jason.encode!()
+
+    %{
+      id: "chatcmpl-C5Znp5z8W2oN9rKUvqcdw2jgGOo5v",
+      usage: %{
+        "completion_tokens" => 94,
+        "completion_tokens_details" => %{
+          "accepted_prediction_tokens" => 0,
+          "audio_tokens" => 0,
+          "reasoning_tokens" => 0,
+          "rejected_prediction_tokens" => 0
+        },
+        "prompt_tokens" => 188,
+        "prompt_tokens_details" => %{"audio_tokens" => 0, "cached_tokens" => 0},
+        "total_tokens" => 282
+      },
+      created: 1_740_668_965,
+      object: "chat.completion",
+      model: "gpt-4o-mini-2024-07-18",
+      choices: [
+        %{
+          "finish_reason" => "stop",
+          "index" => 0,
+          "logprobs" => nil,
+          "message" => %{
+            "content" => content,
+            "refusal" => nil,
+            "role" => "assistant"
+          }
+        }
+      ],
+      service_tier: "default",
+      system_fingerprint: "fp_06737a9306"
+    }
+    |> Jason.encode!()
+  end
 end
