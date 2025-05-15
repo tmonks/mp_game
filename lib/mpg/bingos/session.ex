@@ -2,6 +2,7 @@ defmodule MPG.Bingos.Session do
   use GenServer
 
   alias MPG.Bingos
+  alias MPG.Generator
   alias Phoenix.PubSub
 
   def child_spec(opts) do
@@ -56,6 +57,14 @@ defmodule MPG.Bingos.Session do
   end
 
   @doc """
+  Generates new bingo cells asynchronously for the given type.
+  """
+  def generate(server_id, type) do
+    registered_name(server_id)
+    |> GenServer.cast({:generate, type})
+  end
+
+  @doc """
   Determines the Registry name ("via tuple") from a string id
   """
   def registered_name(id) do
@@ -88,6 +97,14 @@ defmodule MPG.Bingos.Session do
   @impl true
   def handle_cast({:toggle_cell, cell_index, player_id}, state) do
     state = Bingos.toggle(state, cell_index, player_id)
+    broadcast_state_updated(state)
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_cast({:generate, type}, state) do
+    cells = Generator.generate_bingo_cells(type)
+    state = Bingos.update_cells(state, cells)
     broadcast_state_updated(state)
     {:noreply, state}
   end

@@ -118,6 +118,7 @@ defmodule MPG.Quizzes.Session do
 
     server = registered_name(state.server_id)
 
+    # TODO: could this be done in a separate cast fn instead of a task?
     # start a background task to generate the quiz questions
     Task.start(fn ->
       questions = Generator.generate_quiz_questions(title)

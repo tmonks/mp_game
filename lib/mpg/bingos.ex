@@ -45,6 +45,15 @@ defmodule MPG.Bingos do
     %State{state | cells: cells}
   end
 
+  @doc """
+  Updates the state's cells with a new list of 25 strings.
+  Each string will be converted into a new Cell with no player_id.
+  """
+  def update_cells(state, new_cells) when length(new_cells) == 25 do
+    cells = Enum.map(new_cells, &%Cell{text: &1, player_id: nil})
+    %State{state | cells: cells}
+  end
+
   defp toggle_cell(%Cell{player_id: nil} = cell, player_id) do
     %Cell{cell | player_id: player_id}
   end

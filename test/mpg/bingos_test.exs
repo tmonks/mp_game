@@ -71,4 +71,22 @@ defmodule MPG.BingosTest do
       assert cell.player_id == nil
     end
   end
+
+  describe "update_cells/2" do
+    test "updates the state's cells with new strings" do
+      state = Bingos.new(@server_id)
+      new_cells = Enum.map(1..25, &"Cell #{&1}")
+
+      updated_state = Bingos.update_cells(state, new_cells)
+
+      assert length(updated_state.cells) == 25
+      assert Enum.all?(updated_state.cells, &match?(%Cell{}, &1))
+      assert Enum.all?(updated_state.cells, &(&1.player_id == nil))
+
+      # Verify the cells have the new text
+      Enum.each(updated_state.cells, fn cell ->
+        assert String.starts_with?(cell.text, "Cell ")
+      end)
+    end
+  end
 end

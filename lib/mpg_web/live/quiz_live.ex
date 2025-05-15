@@ -138,6 +138,7 @@ defmodule MPGWeb.QuizLive do
   def handle_event("new_quiz_topic", %{"topic" => topic}, socket) do
     server_id = socket.assigns.server_id
     Session.create_quiz(server_id, topic)
+    # patch back to the quiz page
     {:noreply, push_patch(socket, to: ~p"/quiz/#{server_id}")}
   end
 
