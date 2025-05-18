@@ -10,7 +10,7 @@ defmodule MPG.Bingos do
     %State{
       server_id: server_id,
       players: [],
-      cells: get_random_cells()
+      cells: []
     }
   end
 
@@ -62,13 +62,6 @@ defmodule MPG.Bingos do
     %Cell{cell | player_id: nil}
   end
 
-  defp get_random_cells do
-    cells()
-    |> Enum.shuffle()
-    |> Enum.take(25)
-    |> Enum.map(&%Cell{text: &1, player_id: nil})
-  end
-
   defp get_color_for_player(num) do
     colors = [
       "Gold",
@@ -86,52 +79,59 @@ defmodule MPG.Bingos do
     Enum.at(colors, num)
   end
 
-  defp cells do
-    [
-      "Learned something interesting",
-      "Had something funny happen to you",
-      "Did something embarrassing",
-      "Made someone laugh",
-      "Did something kind for someone",
-      "Tried a new food",
-      "Got a new idea you're excited about",
-      "Had an encounter with an animal",
-      "Solved a problem",
-      "Received a compliment",
-      "Helped a friend or co-worker",
-      "Learned a new word or phrase",
-      "Faced a fear",
-      "Noticed something beautiful",
-      "Made a new friend or acquaintance",
-      "Completed a goal or task",
-      "Had a moment of relaxation",
-      "Experienced a moment of gratitude",
-      "Observed an act of kindness",
-      "Learned from a mistake",
-      "Felt inspired by something or someone",
-      "Saw something new on the way to school/work",
-      "Tried a new activity",
-      "Had a meaningful conversation",
-      "Overcame a challenge",
-      "Changed an opinion about something",
-      "Found something lost or thought was gone",
-      "Saw or heard something weird",
-      "Heard a new song that you really liked",
-      "Read something interesting",
-      "Gave someone advice",
-      "Received some good advice",
-      "Received unexpected good news",
-      "Saw an impressive piece of art or creativity",
-      "Adapted to a an unexpected change",
-      "Dreamt something vivid or memorable",
-      "Laughed at a joke or funny situation",
-      "Recognized a personal improvement",
-      "Found a new movie or TV show to watch",
-      "Found a new recipe to try",
-      "Did something creative",
-      "Made progress on a big project or goal",
-      "Learned something about a different culture",
-      "Did something to help the environment"
-    ]
-  end
+  # defp get_random_cells do
+  #   cells()
+  #   |> Enum.shuffle()
+  #   |> Enum.take(25)
+  #   |> Enum.map(&%Cell{text: &1, player_id: nil})
+  # end
+
+  # defp cells do
+  #   [
+  #     "Learned something interesting",
+  #     "Had something funny happen to you",
+  #     "Did something embarrassing",
+  #     "Made someone laugh",
+  #     "Did something kind for someone",
+  #     "Tried a new food",
+  #     "Got a new idea you're excited about",
+  #     "Had an encounter with an animal",
+  #     "Solved a problem",
+  #     "Received a compliment",
+  #     "Helped a friend or co-worker",
+  #     "Learned a new word or phrase",
+  #     "Faced a fear",
+  #     "Noticed something beautiful",
+  #     "Made a new friend or acquaintance",
+  #     "Completed a goal or task",
+  #     "Had a moment of relaxation",
+  #     "Experienced a moment of gratitude",
+  #     "Observed an act of kindness",
+  #     "Learned from a mistake",
+  #     "Felt inspired by something or someone",
+  #     "Saw something new on the way to school/work",
+  #     "Tried a new activity",
+  #     "Had a meaningful conversation",
+  #     "Overcame a challenge",
+  #     "Changed an opinion about something",
+  #     "Found something lost or thought was gone",
+  #     "Saw or heard something weird",
+  #     "Heard a new song that you really liked",
+  #     "Read something interesting",
+  #     "Gave someone advice",
+  #     "Received some good advice",
+  #     "Received unexpected good news",
+  #     "Saw an impressive piece of art or creativity",
+  #     "Adapted to a an unexpected change",
+  #     "Dreamt something vivid or memorable",
+  #     "Laughed at a joke or funny situation",
+  #     "Recognized a personal improvement",
+  #     "Found a new movie or TV show to watch",
+  #     "Found a new recipe to try",
+  #     "Did something creative",
+  #     "Made progress on a big project or goal",
+  #     "Learned something about a different culture",
+  #     "Did something to help the environment"
+  #   ]
+  # end
 end

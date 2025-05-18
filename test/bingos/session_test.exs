@@ -30,9 +30,21 @@ defmodule MPG.Bingos.SessionTest do
     assert {:error, :not_found} = Session.get_state("non_existent_server")
   end
 
-  test "init/1 creates a new state with no players and 25 cells" do
-    assert {:ok, %State{players: [], cells: cells}} = Session.get_state(@server_id)
-    assert length(cells) == 25
+  test "init/1 creates a new state with no players and no cells" do
+    assert {:ok, %State{players: [], cells: []}} = Session.get_state(@server_id)
+  end
+
+  test "update_cells/2 updates the cells in the state", %{server: server} do
+    Session.update_cells(@server_id, make_cells())
+    state = :sys.get_state(server)
+
+    assert length(state.cells) == 25
+  end
+
+  test "update_cells/2 broadcasts the new state" do
+    Session.update_cells(@server_id, make_cells())
+    assert_receive({:state_updated, state})
+    assert length(state.cells) == 25
   end
 
   test "add_player/3 adds a new player", %{server: server} do
@@ -51,6 +63,7 @@ defmodule MPG.Bingos.SessionTest do
 
   test "toggle_cell/3 toggles a cell for a player", %{server: server} do
     Session.add_player(@server_id, @player_id, "Joe")
+    Session.update_cells(@server_id, make_cells())
     Session.toggle_cell(@server_id, 5, @player_id)
     state = :sys.get_state(server)
 
@@ -59,6 +72,9 @@ defmodule MPG.Bingos.SessionTest do
 
   test "toggle_cell/3 broadcasts the new state" do
     Session.add_player(@server_id, @player_id, "Joe")
+    assert_receive({:state_updated, _state})
+
+    Session.update_cells(@server_id, make_cells())
     assert_receive({:state_updated, _state})
 
     Session.toggle_cell(@server_id, 5, @player_id)
@@ -75,5 +91,9 @@ defmodule MPG.Bingos.SessionTest do
     assert_receive({:state_updated, state})
     assert length(state.cells) == 25
     assert Enum.all?(state.cells, &(&1.text != nil))
+  end
+
+  defp make_cells do
+    Enum.map(1..25, &"Cell #{&1}")
   end
 end

@@ -41,6 +41,14 @@ defmodule MPG.Bingos.Session do
   end
 
   @doc """
+  Updates the cells in the state.
+  """
+  def update_cells(server_id, cells) do
+    registered_name(server_id)
+    |> GenServer.cast({:update_cells, cells})
+  end
+
+  @doc """
   Adds a player to the state.
   """
   def add_player(server_id, player_id, player_name) do
@@ -85,6 +93,13 @@ defmodule MPG.Bingos.Session do
   @impl true
   def handle_call(:get_state, _from, state) do
     {:reply, state, state}
+  end
+
+  @impl true
+  def handle_cast({:update_cells, cells}, state) do
+    state = Bingos.update_cells(state, cells)
+    broadcast_state_updated(state)
+    {:noreply, state}
   end
 
   @impl true

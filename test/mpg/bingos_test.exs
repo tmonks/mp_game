@@ -8,13 +8,10 @@ defmodule MPG.BingosTest do
   @server_id "bingos_test"
 
   describe "new/0" do
-    test "returns a new randomized bingo board with 25 cells" do
+    test "returns a new bingo state" do
       state = Bingos.new(@server_id)
 
-      assert %State{players: [], cells: cells} = state
-      assert length(cells) == 25
-      assert Enum.all?(cells, &match?(%Cell{}, &1))
-      assert Enum.all?(cells, &(&1.player_id == nil))
+      assert %State{players: [], cells: []} = state
     end
   end
 
@@ -39,6 +36,7 @@ defmodule MPG.BingosTest do
   describe "toggle/3" do
     test "sets the player_id of the specified cell" do
       state = Bingos.new(@server_id)
+      state = Bingos.update_cells(state, make_cells())
       state = Bingos.add_player(state, "player1", "Alice")
 
       state = Bingos.toggle(state, 0, "player1")
@@ -48,6 +46,7 @@ defmodule MPG.BingosTest do
 
     test "only updates the specified cell" do
       state = Bingos.new(@server_id)
+      state = Bingos.update_cells(state, make_cells())
       state = Bingos.add_player(state, "player1", "Alice")
 
       state = Bingos.toggle(state, 0, "player1")
@@ -58,6 +57,7 @@ defmodule MPG.BingosTest do
 
     test "untoggles a cell if it's already toggled" do
       state = Bingos.new(@server_id)
+      state = Bingos.update_cells(state, make_cells())
       state = Bingos.add_player(state, "player1", "Alice")
 
       # First toggle
@@ -75,7 +75,7 @@ defmodule MPG.BingosTest do
   describe "update_cells/2" do
     test "updates the state's cells with new strings" do
       state = Bingos.new(@server_id)
-      new_cells = Enum.map(1..25, &"Cell #{&1}")
+      new_cells = make_cells()
 
       updated_state = Bingos.update_cells(state, new_cells)
 
@@ -88,5 +88,9 @@ defmodule MPG.BingosTest do
         assert String.starts_with?(cell.text, "Cell ")
       end)
     end
+  end
+
+  defp make_cells() do
+    Enum.map(1..25, &"Cell #{&1}")
   end
 end
