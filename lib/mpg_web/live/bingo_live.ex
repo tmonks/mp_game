@@ -108,21 +108,25 @@ defmodule MPGWeb.BingoLive do
             </div>
           </div>
           <!-- BINGO GRID -->
-          <div class="grid grid-cols-5 gap-1">
-            <%= for {cell, index} <- Enum.with_index(@state.cells) do %>
-              <div
-                phx-click="toggle_cell"
-                phx-value-index={index}
-                class={"relative w-full flex items-center text-center rounded cursor-pointer text-white text-sm #{if cell.player_id, do: "bg-green-500", else: "bg-rose-500"}"}
-                id={"cell-#{index}"}
-              >
-                <%= cell.text %>
-                <%= if cell.player_id do %>
-                  <.player_marker player={Enum.find(@state.players, &(&1.id == cell.player_id))} />
-                <% end %>
-              </div>
-            <% end %>
-          </div>
+          <%= if @state.cells == [] do %>
+            <div class="loader">Loading...</div>
+          <% else %>
+            <div class="grid grid-cols-5 gap-1">
+              <%= for {cell, index} <- Enum.with_index(@state.cells) do %>
+                <div
+                  phx-click="toggle_cell"
+                  phx-value-index={index}
+                  class={"relative w-full flex items-center text-center rounded cursor-pointer text-white text-sm #{if cell.player_id, do: "bg-green-500", else: "bg-rose-500"}"}
+                  id={"cell-#{index}"}
+                >
+                  <%= cell.text %>
+                  <%= if cell.player_id do %>
+                    <.player_marker player={Enum.find(@state.players, &(&1.id == cell.player_id))} />
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
         <% end %>
       </div>
     </div>

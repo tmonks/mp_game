@@ -73,6 +73,16 @@ defmodule MPGWeb.BingoLiveTest do
     refute has_element?(view, "#join-form")
   end
 
+  test "shows a loading animation while the game is loading", %{
+    conn: conn,
+    session_id: session_id
+  } do
+    Session.add_player(@server_id, session_id, "Peter")
+    {:ok, view, _html} = live(conn, ~p"/bingo/#{@server_id}")
+
+    assert has_element?(view, ".loader")
+  end
+
   test "shows bingo grid after joining", %{conn: conn, session_id: session_id} do
     Session.add_player(@server_id, session_id, "Peter")
 
