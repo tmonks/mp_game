@@ -276,6 +276,7 @@ defmodule MPG.Generator do
     |> parse_chat()
     |> decode_json()
     |> Map.get(:prompts)
+    |> Enum.take(25)
   end
 
   def get_completion(model, system_prompt, user_prompt, options \\ []) do

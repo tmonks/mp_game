@@ -45,5 +45,16 @@ defmodule MPG.GeneratorTest do
       assert is_binary(first_prompt)
       assert first_prompt == "Changed your opinion about something"
     end
+
+    test "returns the first 25 if the API returns more than 25", ctx do
+      expected_prompts = Enum.map(1..30, &"Cell #{&1}")
+
+      Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
+        Plug.Conn.resp(conn, 200, chat_response_bingo_cells(expected_prompts))
+      end)
+
+      assert prompts = Generator.generate_bingo_cells("conversation")
+      assert length(prompts) == 25
+    end
   end
 end

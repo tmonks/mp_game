@@ -149,35 +149,35 @@ defmodule MPG.Fixtures.OpenAI do
     |> Jason.encode!()
   end
 
-  def chat_response_bingo_cells do
-    prompts = [
-      "Changed your opinion about something",
-      "Had a 'fail' moment",
-      "Pushed yourself outside your comfort zone",
-      "Saw something beautiful in nature",
-      "Heard or read a quote that stuck with you",
-      "Tried a new food or recipe",
-      "Learned something interesting",
-      "Made someone laugh",
-      "Did something kind for someone",
-      "Had an encounter with an animal",
-      "Solved a problem",
-      "Received a compliment",
-      "Helped a friend or co-worker",
-      "Learned a new word or phrase",
-      "Faced a fear",
-      "Noticed something beautiful",
-      "Made a new friend or acquaintance",
-      "Completed a goal or task",
-      "Had a moment of relaxation",
-      "Experienced a moment of gratitude",
-      "Observed an act of kindness",
-      "Learned from a mistake",
-      "Felt inspired by something or someone",
-      "Saw something new on the way to school/work",
-      "Tried a new activity"
-    ]
+  @bingo_prompts [
+    "Changed your opinion about something",
+    "Had a 'fail' moment",
+    "Pushed yourself outside your comfort zone",
+    "Saw something beautiful in nature",
+    "Heard or read a quote that stuck with you",
+    "Tried a new food or recipe",
+    "Learned something interesting",
+    "Made someone laugh",
+    "Did something kind for someone",
+    "Had an encounter with an animal",
+    "Solved a problem",
+    "Received a compliment",
+    "Helped a friend or co-worker",
+    "Learned a new word or phrase",
+    "Faced a fear",
+    "Noticed something beautiful",
+    "Made a new friend or acquaintance",
+    "Completed a goal or task",
+    "Had a moment of relaxation",
+    "Experienced a moment of gratitude",
+    "Observed an act of kindness",
+    "Learned from a mistake",
+    "Felt inspired by something or someone",
+    "Saw something new on the way to school/work",
+    "Tried a new activity"
+  ]
 
+  def chat_response_bingo_cells(prompts \\ @bingo_prompts) do
     content = %{prompts: prompts} |> Jason.encode!()
 
     %{
