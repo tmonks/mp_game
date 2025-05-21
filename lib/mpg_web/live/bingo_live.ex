@@ -44,6 +44,8 @@ defmodule MPGWeb.BingoLive do
     {:ok, _pid} =
       DynamicSupervisor.start_child(MPG.GameSupervisor, {Session, name: server_id})
 
+    Session.generate(server_id, :normal)
+
     {:ok, push_navigate(socket, to: "/bingo/#{server_id}")}
   end
 
