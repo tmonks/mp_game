@@ -44,7 +44,7 @@ defmodule MPGWeb.BingoLive do
     {:ok, _pid} =
       DynamicSupervisor.start_child(MPG.GameSupervisor, {Session, name: server_id})
 
-    Session.generate(server_id, :normal)
+    Session.generate(server_id, :guilty)
 
     {:ok, push_navigate(socket, to: "/bingo/#{server_id}")}
   end
@@ -80,7 +80,7 @@ defmodule MPGWeb.BingoLive do
   def render(assigns) do
     ~H"""
     <div class="flex flex-col items-center">
-      <div class="w-full max-w-md">
+      <div class="w-full max-w-xl">
         <%= if @player == nil do %>
           <!-- JOIN FORM -->
           <form id="join-form" phx-submit="join">
@@ -118,7 +118,7 @@ defmodule MPGWeb.BingoLive do
                 <div
                   phx-click="toggle_cell"
                   phx-value-index={index}
-                  class={"relative w-full flex items-center text-center rounded cursor-pointer text-white text-sm #{if cell.player_id, do: "bg-green-500", else: "bg-rose-500"}"}
+                  class={"relative w-full flex items-center text-center rounded cursor-pointer text-white sm:text-sm text-xs #{if cell.player_id, do: "bg-green-500", else: "bg-rose-500"}"}
                   id={"cell-#{index}"}
                 >
                   <%= cell.text %>

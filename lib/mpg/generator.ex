@@ -239,7 +239,7 @@ defmodule MPG.Generator do
   @doc """
   Generates 25 random cells for a 'conversation bingo' card
   """
-  def generate_bingo_cells(_type) do
+  def generate_bingo_cells(:conversation) do
     system_prompt = """
     You are a conversation topic generator that generates unique and engaging conversation prompts for a collaborative bingo-style game.
     Each prompt should describe something that may have happened to someone in the past week,
@@ -262,6 +262,47 @@ defmodule MPG.Generator do
         "Pushed yourself outside your comfort zone",
         "Saw something beautiful in nature",
         "Heard or read a quote that stuck with you"
+        /* 20 more prompts */
+      ]
+    }
+    """
+
+    user_prompt = "start"
+
+    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+      temperature: 0.8,
+      response_format: %{type: "json_object"}
+    )
+    |> parse_chat()
+    |> decode_json()
+    |> Map.get(:prompts)
+    |> Enum.take(25)
+  end
+
+  def generate_bingo_cells(:guilty) do
+    system_prompt = """
+    You are a conversation topic generator that generates unique and engaging conversation prompts.
+    Each prompt should describe funny, mildly embarrassing, or quirky confessions that people
+    would be willing to share a short personal story or experience about with the group.
+    The tone should be warm, fun, and inclusive — aimed at sparking connection, laughter, and reflection.
+    Prompts should be varied and relatable to a wide range of people.
+    Generate 25 random prompts.
+    The prompts will be displayed in a 5x5 grid, so make sure they are short and easy to read.
+    Please respond only with the JSON with no additional text.
+
+    Example:
+
+    User: "start"
+
+    You:
+
+    {
+      "prompts": [
+        "I've never been able to touch my toes",
+        "Laughed so hard I snorted",
+        "Still remember a childhood crush",
+        "Sang karaoke and regretted it",
+        "Googled something ridiculous recently",
         /* 20 more prompts */
       ]
     }
