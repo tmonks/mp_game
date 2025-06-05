@@ -39,7 +39,7 @@ defmodule MPG.GeneratorTest do
         Plug.Conn.resp(conn, 200, chat_response_bingo_cells())
       end)
 
-      assert prompts = Generator.generate_bingo_cells("conversation")
+      assert prompts = Generator.generate_bingo_cells(:conversation)
       assert length(prompts) == 25
       assert [first_prompt | _] = prompts
       assert is_binary(first_prompt)
@@ -53,8 +53,17 @@ defmodule MPG.GeneratorTest do
         Plug.Conn.resp(conn, 200, chat_response_bingo_cells(expected_prompts))
       end)
 
-      assert prompts = Generator.generate_bingo_cells("conversation")
+      assert prompts = Generator.generate_bingo_cells(:conversation)
       assert length(prompts) == 25
+    end
+  end
+
+  describe "list_bingo_types/0" do
+    test "returns a list of bingo types and their descriptions" do
+      assert Generator.list_bingo_types() == [
+               {"Stories about my week", :conversation},
+               {"Embarrassing stories & guilty pleasures", :guilty}
+             ]
     end
   end
 end

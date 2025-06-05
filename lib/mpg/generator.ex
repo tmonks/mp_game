@@ -320,6 +320,16 @@ defmodule MPG.Generator do
     |> Enum.take(25)
   end
 
+  @doc """
+  Returns a list of bingo types and their descriptions
+  """
+  def list_bingo_types do
+    [
+      {"Stories about my week", :conversation},
+      {"Embarrassing stories & guilty pleasures", :guilty}
+    ]
+  end
+
   def get_completion(model, system_prompt, user_prompt, options \\ []) do
     messages = [
       %{role: "system", content: system_prompt},
