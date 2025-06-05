@@ -87,7 +87,7 @@ defmodule MPG.Bingos.SessionTest do
       Plug.Conn.resp(conn, 200, chat_response_bingo_cells())
     end)
 
-    Session.generate(@server_id, "test")
+    Session.generate(@server_id, :conversation)
     assert_receive({:state_updated, state})
     assert length(state.cells) == 25
     assert Enum.all?(state.cells, &(&1.text != nil))

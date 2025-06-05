@@ -3,6 +3,7 @@ defmodule MPGWeb.BingoLiveTest do
 
   import MPG.Fixtures.OpenAI
   import Phoenix.LiveViewTest
+  alias MPG.Bingos.Player
   alias MPG.Bingos.Session
   alias MPG.Bingos.State
 
@@ -65,7 +66,8 @@ defmodule MPGWeb.BingoLiveTest do
     |> form("#join-form", %{player_name: "Peter"})
     |> render_submit()
 
-    assert_receive {:state_updated, %State{}}
+    assert_receive {:state_updated, %State{} = state}
+    assert [%Player{name: "Peter", id: ^session_id}] = state.players
     assert has_element?(view, "#player-#{session_id}[data-role=avatar]", "Pet")
     refute has_element?(view, "#join-form")
   end
@@ -92,29 +94,30 @@ defmodule MPGWeb.BingoLiveTest do
     assert has_element?(view, ".loader")
   end
 
-  test "calls Generator to generate the bingo grid", %{conn: conn, bypass: bypass} do
-    # Visit /bingo and follow the redirect
-    {:error, {:live_redirect, %{to: new_path}}} = live(conn, ~p"/bingo")
-    server_id = new_path |> String.split("/") |> List.last()
+  test "host is prompted to select a bingo type right after joining", ctx do
+    {:ok, view, _html} = live(ctx.conn, ~p"/bingo/#{@server_id}")
 
-    Bypass.expect_once(bypass, "POST", "/v1/chat/completions", fn conn ->
+    view
+    |> form("#join-form", %{player_name: "Host"})
+    |> render_submit()
+
+    assert_receive({:state_updated, _state})
+    assert_patch(view, ~p"/bingo/#{@server_id}/new")
+    assert has_element?(view, "#bingo-type-form")
+
+    Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
       Plug.Conn.resp(conn, 200, chat_response_bingo_cells())
     end)
 
-    # Visit the new server ID and join the game
-    {:ok, view, _html} = live(conn, ~p"/bingo/#{server_id}")
-
-    # wait for the cells to be generated
-    assert_receive {:state_updated, %State{cells: cells}}
-    assert length(cells) == 25
-
     view
-    |> form("#join-form", %{player_name: "Peter"})
+    |> form("#bingo-type-form", %{type: "conversation"})
     |> render_submit()
 
-    # Wait for state update and verify cells are populated
-    assert_receive {:state_updated, %State{}}
-    refute has_element?(view, ".loader")
+    assert_patch(view, ~p"/bingo/#{@server_id}")
+    refute has_element?(view, "#bingo-type-form")
+
+    assert_receive({:state_updated, state})
+    assert state.cells |> length() == 25
     assert has_element?(view, "#cell-0")
     assert has_element?(view, "#cell-24")
   end
