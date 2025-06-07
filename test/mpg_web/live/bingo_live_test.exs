@@ -3,7 +3,6 @@ defmodule MPGWeb.BingoLiveTest do
 
   import MPG.Fixtures.OpenAI
   import Phoenix.LiveViewTest
-  alias MPG.Bingos.Player
   alias MPG.Bingos.Session
   alias MPG.Bingos.State
 
@@ -26,8 +25,7 @@ defmodule MPGWeb.BingoLiveTest do
     %{conn: conn, session_id: session_id, bypass: bypass}
   end
 
-  @tag :skip
-  test "visiting /bingo redirects to a random server ID and generates cells", %{conn: conn} do
+  test "visiting /bingo redirects to a random server ID", %{conn: conn} do
     {:error, {:live_redirect, %{to: new_path}}} = live(conn, ~p"/bingo")
 
     assert new_path =~ ~r"/bingo/[0-9]{5}"
@@ -37,10 +35,6 @@ defmodule MPGWeb.BingoLiveTest do
 
     # Session GenServer started with that name
     assert {:ok, %State{server_id: ^server_id}} = Session.get_state(server_id)
-
-    # wait for the cells to be generated
-    assert_receive {:state_updated, %State{cells: cells}}
-    assert length(cells) == 25
   end
 
   test "redirects to home page if the server ID is invalid", %{conn: conn} do
@@ -57,19 +51,6 @@ defmodule MPGWeb.BingoLiveTest do
     {:ok, view, _html} = live(conn, ~p"/bingo/#{@server_id}")
 
     assert has_element?(view, "#join-form")
-  end
-
-  test "can join the game", %{conn: conn, session_id: session_id} do
-    {:ok, view, _html} = live(conn, ~p"/bingo/#{@server_id}")
-
-    view
-    |> form("#join-form", %{player_name: "Peter"})
-    |> render_submit()
-
-    assert_receive {:state_updated, %State{} = state}
-    assert [%Player{name: "Peter", id: ^session_id}] = state.players
-    assert has_element?(view, "#player-#{session_id}[data-role=avatar]", "Pet")
-    refute has_element?(view, "#join-form")
   end
 
   test "loads user from session_id if it exists", %{
@@ -116,10 +97,30 @@ defmodule MPGWeb.BingoLiveTest do
     assert_patch(view, ~p"/bingo/#{@server_id}")
     refute has_element?(view, "#bingo-type-form")
 
+    assert_receive({:state_updated, _state})
+    # TODO: why are we receiving two state_updated events?
     assert_receive({:state_updated, state})
     assert state.cells |> length() == 25
     assert has_element?(view, "#cell-0")
     assert has_element?(view, "#cell-24")
+  end
+
+  test "non-host players can join and see their avatar", %{conn: conn, session_id: session_id} do
+    uuid = UUID.uuid4()
+    Session.add_player(@server_id, uuid, "Host")
+
+    {:ok, view, _html} = live(conn, ~p"/bingo/#{@server_id}")
+
+    view
+    |> form("#join-form", %{player_name: "Peter"})
+    |> render_submit()
+
+    assert_receive {:state_updated, %State{} = state}
+    assert length(state.players) == 1
+    assert_receive {:state_updated, %State{} = state}
+    assert length(state.players) == 2
+    assert has_element?(view, "#player-#{session_id}[data-role=avatar]", "Pet")
+    refute has_element?(view, "#join-form")
   end
 
   test "can toggle a cell", %{conn: conn, session_id: session_id} do
