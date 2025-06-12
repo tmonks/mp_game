@@ -320,13 +320,65 @@ defmodule MPG.Generator do
     |> Enum.take(25)
   end
 
+  def generate_bingo_cells(:unique) do
+    system_prompt = """
+    You are a conversation topic generator that generates unique and engaging conversation prompts.
+    Each prompt should describe a unique skill, quirk, or trait that is interesting and worth sharing.
+    The prompts will be displayed in a 5x5 grid, so make sure they are short and easy to read.
+    Important: Generate 25 random prompts. Please respond only with the JSON with no additional text.
+
+    Example:
+
+    User: "start"
+
+    You:
+
+    {
+      "prompts": [
+        "Can name all 50 U.S. states",
+        "Has a secret recipe or signature dish",
+        "Can do a celebrity impression",
+        "Has gone a whole day without using a phone",
+        "Can recite a poem from memory",
+        "Has a quirky collection",
+        "Can juggle (even a little)",
+        "Prefers odd numbers",
+        "Can wiggle ears or raise one eyebrow",
+        "Can write with their non-dominant hand",
+        "Can make a balloon animal",
+        "Has never broken a bone",
+        "Has solved a Rubik's Cube",
+        "Knows how to sew or knit",
+        "Speaks or is learning another language",
+        "Has memorized a movie scene or monologue",
+        "Loves pineapple on pizza",
+        "Knows a magic trick",
+        "Can tie a tie without help",
+        "Has a 'weird but useful' life hack",
+        /* 5 more prompts */
+      ]
+    }
+    """
+
+    user_prompt = "start"
+
+    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+      temperature: 0.8,
+      response_format: %{type: "json_object"}
+    )
+    |> parse_chat()
+    |> decode_json()
+    |> Map.get(:prompts)
+  end
+
   @doc """
   Returns a list of bingo types and their descriptions
   """
   def list_bingo_types do
     [
       {"Stories about my week", :conversation},
-      {"Embarrassing stories & guilty pleasures", :guilty}
+      {"Embarrassing stories & guilty pleasures", :guilty},
+      {"Unique skills, quirks, and traits", :unique}
     ]
   end
 
