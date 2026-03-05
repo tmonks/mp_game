@@ -383,14 +383,7 @@ defmodule MPG.Generator do
   end
 
   def get_completion(model, system_prompt, user_prompt, options \\ []) do
-    messages = [
-      %{role: "system", content: system_prompt},
-      %{role: "user", content: user_prompt}
-    ]
-
-    args = Keyword.merge([model: model, messages: messages], options)
-
-    OpenAI.chat_completion(args)
+    MPG.AI.client().get_completion(model, system_prompt, user_prompt, options)
   end
 
   defp parse_chat({:ok, %{choices: [%{"message" => %{"content" => content}} | _]}}),
