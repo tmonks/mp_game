@@ -17,7 +17,7 @@ defmodule MPG.Bingos do
   @doc """
   Adds a player to the state
   """
-  def add_player(state, id, name) do
+  def add_player(%State{} = state, id, name) do
     player_num = Enum.count(state.players)
 
     player = %Player{
@@ -33,7 +33,7 @@ defmodule MPG.Bingos do
   Toggles the specified cell for the given player_id.
   If the cell is already toggled by the player, it will be untoggled.
   """
-  def toggle(state, cell_index, player_id) do
+  def toggle(%State{} = state, cell_index, player_id) do
     cells =
       state.cells
       |> Enum.with_index()
@@ -49,7 +49,7 @@ defmodule MPG.Bingos do
   Updates the state's cells with a new list of 25 strings.
   Each string will be converted into a new Cell with no player_id.
   """
-  def update_cells(state, new_cells) do
+  def update_cells(%State{} = state, new_cells) do
     cells = Enum.take(new_cells, 25) |> Enum.map(&%Cell{text: &1, player_id: nil})
     %State{state | cells: cells}
   end

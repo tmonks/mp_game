@@ -21,7 +21,7 @@ defmodule MPG.Quizzes do
   @doc """
   Sets the questions of the quiz
   """
-  def set_questions(state, questions) do
+  def set_questions(%State{} = state, questions) do
     %State{state | questions: Enum.map(questions, &struct(Question, &1))}
   end
 
@@ -39,7 +39,7 @@ defmodule MPG.Quizzes do
   @doc """
   Adds a player to the state
   """
-  def add_player(state, id, name) do
+  def add_player(%State{} = state, id, name) do
     player_num = Enum.count(state.players)
     is_host = Enum.empty?(state.players)
 
@@ -74,7 +74,7 @@ defmodule MPG.Quizzes do
   @doc """
   Sets the current answer for the specified player
   """
-  def answer_question(state, player_id, answer) do
+  def answer_question(%State{} = state, player_id, answer) do
     players =
       Enum.map(state.players, fn
         %Player{id: ^player_id} = player -> %Player{player | current_answer: answer}
@@ -90,7 +90,7 @@ defmodule MPG.Quizzes do
   """
   def next_question(%{current_question: nil} = state), do: %{state | current_question: 0}
 
-  def next_question(state) do
+  def next_question(%State{} = state) do
     correct_answer = get_answer_for_current_question(state)
     players = Enum.map(state.players, &update_player_score(&1, correct_answer))
 

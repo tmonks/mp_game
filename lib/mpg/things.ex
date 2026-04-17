@@ -9,8 +9,8 @@ defmodule MPG.Things do
   @doc """
   Resets the topic and all player answers
   """
-  def new_question(state, topic) do
-    players = Enum.map(state.players, &%Player{&1 | current_answer: nil, revealed: false})
+  def new_question(%State{} = state, topic) do
+    players = Enum.map(state.players, fn %Player{} = p -> %Player{p | current_answer: nil, revealed: false} end)
 
     %State{state | topic: topic, players: players}
   end
@@ -18,7 +18,7 @@ defmodule MPG.Things do
   @doc """
   Adds a player to the state
   """
-  def add_player(state, id, name) do
+  def add_player(%State{} = state, id, name) do
     player_num = Enum.count(state.players)
     is_host = Enum.empty?(state.players)
 
@@ -61,7 +61,7 @@ defmodule MPG.Things do
   @doc """
   Sets the current_answer for the specified player
   """
-  def set_player_answer(state, player_id, answer) do
+  def set_player_answer(%State{} = state, player_id, answer) do
     players =
       Enum.map(state.players, fn
         %Player{id: ^player_id} = player -> %Player{player | current_answer: answer}
@@ -75,7 +75,7 @@ defmodule MPG.Things do
   Sets the player with player_id to revealed.
   Adds 1 to the guesser's score.
   """
-  def reveal_player(state, player_id, guesser_id) do
+  def reveal_player(%State{} = state, player_id, guesser_id) do
     unrevealed_ids = get_unrevealed_player_ids(state.players)
 
     players =
@@ -93,9 +93,7 @@ defmodule MPG.Things do
 
   # only 2 remaining players, reveal both
   defp reveal(players, _player_id, [_, _]) do
-    Enum.map(players, fn
-      player -> %Player{player | revealed: true}
-    end)
+    Enum.map(players, fn %Player{} = player -> %Player{player | revealed: true} end)
   end
 
   # reveal the specified player
