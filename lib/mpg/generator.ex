@@ -46,7 +46,6 @@ defmodule MPG.Generator do
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
-    |> parse_chat()
     |> decode_json()
     |> Map.get(:questions)
   end
@@ -73,11 +72,6 @@ defmodule MPG.Generator do
     user_prompt = "start"
 
     get_completion("gpt-4o-mini-search-preview", system_prompt, user_prompt)
-    |> IO.inspect()
-    |> parse_chat()
-
-    # |> decode_json()
-    # |> Map.get(:news)
   end
 
   @doc """
@@ -118,8 +112,6 @@ defmodule MPG.Generator do
     get_completion("gpt-4o-mini-search-preview", system_prompt, user_prompt,
       response_format: %{type: "json_object"}
     )
-    |> IO.inspect()
-    |> parse_chat()
     |> decode_json()
     |> Map.get(:questions)
   end
@@ -193,7 +185,6 @@ defmodule MPG.Generator do
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
-    |> parse_chat()
     |> decode_json()
     |> Map.get(:topics)
   end
@@ -231,7 +222,6 @@ defmodule MPG.Generator do
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
-    |> parse_chat()
     |> decode_json()
     |> Map.get(:topics)
   end
@@ -273,7 +263,6 @@ defmodule MPG.Generator do
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
-    |> parse_chat()
     |> decode_json()
     |> Map.get(:prompts)
     |> Enum.take(25)
@@ -314,7 +303,6 @@ defmodule MPG.Generator do
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
-    |> parse_chat()
     |> decode_json()
     |> Map.get(:prompts)
     |> Enum.take(25)
@@ -366,7 +354,6 @@ defmodule MPG.Generator do
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
-    |> parse_chat()
     |> decode_json()
     |> Map.get(:prompts)
   end
@@ -386,13 +373,12 @@ defmodule MPG.Generator do
     MPG.AI.client().get_completion(model, system_prompt, user_prompt, options)
   end
 
-  defp parse_chat({:ok, %{choices: [%{"message" => %{"content" => content}} | _]}}),
-    do: {:ok, content}
-
-  defp parse_chat({:error, %{"error" => %{"message" => message}}}), do: {:error, message}
-
   defp decode_json({:ok, json}) do
     Jason.decode!(json, keys: :atoms)
+  end
+
+  defp decode_json({:error, reason}) do
+    raise "AI completion failed: #{reason}"
   end
 
   @things [

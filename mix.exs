@@ -46,9 +46,7 @@ defmodule MPG.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:uuid, "~> 1.1"},
       {:ecto, "~> 3.12"},
-      {:openai_ex, "~> 0.8"},
-      {:openai, "~> 0.6.2"},
-      {:bypass, "~> 2.1", only: :test},
+      {:openai_ex, "~> 0.9"},
       {:mox, "~> 1.2", only: :test}
     ]
   end

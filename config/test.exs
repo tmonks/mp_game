@@ -12,3 +12,6 @@ config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+# Use mock AI client in tests
+config :mpg, :ai_client, MPG.AI.MockClient

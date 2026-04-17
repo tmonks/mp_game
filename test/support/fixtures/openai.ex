@@ -1,43 +1,70 @@
 defmodule MPG.Fixtures.OpenAI do
-  def chat_response_quiz_questions do
-    questions = make_questions()
-    content = %{questions: questions} |> Jason.encode!()
+  import Mox
 
-    %{
-      id: "chatcmpl-AcgX5cZX5Xl3x69jxGDDtWfEPoLAg",
-      usage: %{
-        "completion_tokens" => 418,
-        "completion_tokens_details" => %{
-          "accepted_prediction_tokens" => 0,
-          "audio_tokens" => 0,
-          "reasoning_tokens" => 0,
-          "rejected_prediction_tokens" => 0
-        },
-        "prompt_tokens" => 233,
-        "prompt_tokens_details" => %{"audio_tokens" => 0, "cached_tokens" => 0},
-        "total_tokens" => 651
-      },
-      created: 1_733_783_323,
-      model: "gpt-4o-mini-2024-07-18",
-      choices: [
-        %{
-          "finish_reason" => "stop",
-          "index" => 0,
-          "logprobs" => nil,
-          "message" => %{
-            "content" => content,
-            "refusal" => nil,
-            "role" => "assistant"
-          }
-        }
-      ],
-      object: "chat.completion",
-      system_fingerprint: "fp_bba3c8e70b"
-    }
-    |> Jason.encode!()
+  @bingo_prompts [
+    "Changed your opinion about something",
+    "Had a 'fail' moment",
+    "Pushed yourself outside your comfort zone",
+    "Saw something beautiful in nature",
+    "Heard or read a quote that stuck with you",
+    "Tried a new food or recipe",
+    "Learned something interesting",
+    "Made someone laugh",
+    "Did something kind for someone",
+    "Had an encounter with an animal",
+    "Solved a problem",
+    "Received a compliment",
+    "Helped a friend or co-worker",
+    "Learned a new word or phrase",
+    "Faced a fear",
+    "Noticed something beautiful",
+    "Made a new friend or acquaintance",
+    "Completed a goal or task",
+    "Had a moment of relaxation",
+    "Experienced a moment of gratitude",
+    "Observed an act of kindness",
+    "Learned from a mistake",
+    "Felt inspired by something or someone",
+    "Saw something new on the way to school/work",
+    "Tried a new activity"
+  ]
+
+  def mock_quiz_questions do
+    content = %{questions: make_questions()} |> Jason.encode!()
+
+    MPG.AI.MockClient
+    |> expect(:get_completion, fn _model, _system, _user, _opts -> {:ok, content} end)
   end
 
-  defp make_questions do
+  def stub_quiz_questions do
+    content = %{questions: make_questions()} |> Jason.encode!()
+
+    MPG.AI.MockClient
+    |> stub(:get_completion, fn _model, _system, _user, _opts -> {:ok, content} end)
+  end
+
+  def mock_quiz_topics(topics) do
+    content = %{topics: topics} |> Jason.encode!()
+
+    MPG.AI.MockClient
+    |> expect(:get_completion, fn _model, _system, _user, _opts -> {:ok, content} end)
+  end
+
+  def mock_bingo_cells(prompts \\ @bingo_prompts) do
+    content = %{prompts: prompts} |> Jason.encode!()
+
+    MPG.AI.MockClient
+    |> expect(:get_completion, fn _model, _system, _user, _opts -> {:ok, content} end)
+  end
+
+  def stub_bingo_cells do
+    content = %{prompts: @bingo_prompts} |> Jason.encode!()
+
+    MPG.AI.MockClient
+    |> stub(:get_completion, fn _model, _system, _user, _opts -> {:ok, content} end)
+  end
+
+  def make_questions do
     [
       %{
         text: "What is the first movie in the MCU?",
@@ -109,109 +136,5 @@ defmodule MPG.Fixtures.OpenAI do
           "Ultron is the AI created by Tony Stark and Bruce Banner that turns against them."
       }
     ]
-  end
-
-  def chat_response_quiz_topics(topics) do
-    content = %{topics: topics} |> Jason.encode!()
-
-    %{
-      id: "chatcmpl-B5Znp5z8W2oN9rKUvqcdw2jgGOo5v",
-      usage: %{
-        "completion_tokens" => 94,
-        "completion_tokens_details" => %{
-          "accepted_prediction_tokens" => 0,
-          "audio_tokens" => 0,
-          "reasoning_tokens" => 0,
-          "rejected_prediction_tokens" => 0
-        },
-        "prompt_tokens" => 188,
-        "prompt_tokens_details" => %{"audio_tokens" => 0, "cached_tokens" => 0},
-        "total_tokens" => 282
-      },
-      created: 1_740_668_965,
-      object: "chat.completion",
-      model: "gpt-4o-mini-2024-07-18",
-      choices: [
-        %{
-          "finish_reason" => "stop",
-          "index" => 0,
-          "logprobs" => nil,
-          "message" => %{
-            "content" => content,
-            "refusal" => nil,
-            "role" => "assistant"
-          }
-        }
-      ],
-      service_tier: "default",
-      system_fingerprint: "fp_06737a9306"
-    }
-    |> Jason.encode!()
-  end
-
-  @bingo_prompts [
-    "Changed your opinion about something",
-    "Had a 'fail' moment",
-    "Pushed yourself outside your comfort zone",
-    "Saw something beautiful in nature",
-    "Heard or read a quote that stuck with you",
-    "Tried a new food or recipe",
-    "Learned something interesting",
-    "Made someone laugh",
-    "Did something kind for someone",
-    "Had an encounter with an animal",
-    "Solved a problem",
-    "Received a compliment",
-    "Helped a friend or co-worker",
-    "Learned a new word or phrase",
-    "Faced a fear",
-    "Noticed something beautiful",
-    "Made a new friend or acquaintance",
-    "Completed a goal or task",
-    "Had a moment of relaxation",
-    "Experienced a moment of gratitude",
-    "Observed an act of kindness",
-    "Learned from a mistake",
-    "Felt inspired by something or someone",
-    "Saw something new on the way to school/work",
-    "Tried a new activity"
-  ]
-
-  def chat_response_bingo_cells(prompts \\ @bingo_prompts) do
-    content = %{prompts: prompts} |> Jason.encode!()
-
-    %{
-      id: "chatcmpl-C5Znp5z8W2oN9rKUvqcdw2jgGOo5v",
-      usage: %{
-        "completion_tokens" => 94,
-        "completion_tokens_details" => %{
-          "accepted_prediction_tokens" => 0,
-          "audio_tokens" => 0,
-          "reasoning_tokens" => 0,
-          "rejected_prediction_tokens" => 0
-        },
-        "prompt_tokens" => 188,
-        "prompt_tokens_details" => %{"audio_tokens" => 0, "cached_tokens" => 0},
-        "total_tokens" => 282
-      },
-      created: 1_740_668_965,
-      object: "chat.completion",
-      model: "gpt-4o-mini-2024-07-18",
-      choices: [
-        %{
-          "finish_reason" => "stop",
-          "index" => 0,
-          "logprobs" => nil,
-          "message" => %{
-            "content" => content,
-            "refusal" => nil,
-            "role" => "assistant"
-          }
-        }
-      ],
-      service_tier: "default",
-      system_fingerprint: "fp_06737a9306"
-    }
-    |> Jason.encode!()
   end
 end

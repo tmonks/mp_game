@@ -1,6 +1,7 @@
 defmodule MPG.Bingos.SessionTest do
   use ExUnit.Case, async: false
 
+  import Mox
   import MPG.Fixtures.OpenAI
 
   alias MPG.Bingos.Player
@@ -11,11 +12,11 @@ defmodule MPG.Bingos.SessionTest do
   @server_id "bingos_test"
 
   setup do
+    set_mox_global()
     server_pid = start_supervised!({Session, [name: @server_id]})
     :ok = Phoenix.PubSub.subscribe(MPG.PubSub, @server_id)
-    bypass = Bypass.open(port: 4010)
 
-    %{server: server_pid, bypass: bypass}
+    %{server: server_pid}
   end
 
   test "can ping the server" do
@@ -82,10 +83,8 @@ defmodule MPG.Bingos.SessionTest do
     assert Enum.at(state.cells, 5).player_id == @player_id
   end
 
-  test "generate/1 generates new cells and broadcasts the updated state", ctx do
-    Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
-      Plug.Conn.resp(conn, 200, chat_response_bingo_cells())
-    end)
+  test "generate/1 generates new cells and broadcasts the updated state" do
+    mock_bingo_cells()
 
     Session.generate(@server_id, :conversation)
     assert_receive({:state_updated, state})

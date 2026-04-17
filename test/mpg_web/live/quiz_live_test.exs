@@ -2,6 +2,7 @@ defmodule MPGWeb.QuizLiveTest do
   use MPGWeb.ConnCase, async: false
 
   import Phoenix.LiveViewTest
+  import Mox
   import MPG.Fixtures.OpenAI
 
   alias MPG.Quizzes.Player
@@ -12,6 +13,8 @@ defmodule MPGWeb.QuizLiveTest do
   @server_id "quiz_session"
 
   setup %{conn: conn} do
+    set_mox_global()
+
     conn = init_test_session(conn, %{})
 
     # populate a session_id on the conn
@@ -23,14 +26,10 @@ defmodule MPGWeb.QuizLiveTest do
     # subscribe to PubSub
     :ok = Phoenix.PubSub.subscribe(MPG.PubSub, @server_id)
 
-    # set up bypass with stub for OpenAI API call
-    bypass = Bypass.open(port: 4010)
+    # stub AI client for tests that trigger quiz generation
+    stub_quiz_questions()
 
-    Bypass.stub(bypass, "POST", "/v1/chat/completions", fn conn ->
-      Plug.Conn.resp(conn, 200, chat_response_quiz_questions())
-    end)
-
-    {:ok, conn: conn, session_id: session_id, bypass: bypass}
+    {:ok, conn: conn, session_id: session_id}
   end
 
   test "visiting /quiz redirects to a random server ID", %{conn: conn} do
@@ -117,10 +116,8 @@ defmodule MPGWeb.QuizLiveTest do
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
 
-    Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
-      expected_topics = ["Marvel", "DC", "Star Wars", "Harry Potter", "Lord of the Rings"]
-      Plug.Conn.resp(conn, 200, chat_response_quiz_topics(expected_topics))
-    end)
+    expected_topics = ["Marvel", "DC", "Star Wars", "Harry Potter", "Lord of the Rings"]
+    mock_quiz_topics(expected_topics)
 
     view
     |> element("#suggest-topics-button")
@@ -135,14 +132,12 @@ defmodule MPGWeb.QuizLiveTest do
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
 
-    Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
-      # retrieve and assert the topic from the form is in one of the messages
-      {:ok, body, _} = Plug.Conn.read_body(conn)
-      %{"messages" => messages} = Jason.decode!(body)
-      assert %{"content" => "start"} = List.last(messages)
+    expected_topics = ["Marvel", "DC", "Star Wars", "Harry Potter", "Lord of the Rings"]
 
-      expected_topics = ["Marvel", "DC", "Star Wars", "Harry Potter", "Lord of the Rings"]
-      Plug.Conn.resp(conn, 200, chat_response_quiz_topics(expected_topics))
+    MPG.AI.MockClient
+    |> expect(:get_completion, fn _model, _system, user_prompt, _opts ->
+      assert user_prompt == "start"
+      {:ok, Jason.encode!(%{topics: expected_topics})}
     end)
 
     view
@@ -161,14 +156,12 @@ defmodule MPGWeb.QuizLiveTest do
     |> form("#quiz-topic-form", %{topic: "Guardians of the Galaxy"})
     |> render_change()
 
-    Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
-      # retrieve and assert the topic from the form is in one of the messages
-      {:ok, body, _} = Plug.Conn.read_body(conn)
-      %{"messages" => messages} = Jason.decode!(body)
-      assert %{"content" => "Guardians of the Galaxy"} = List.last(messages)
+    expected_topics = ["Starlord", "Groot", "Rocket Raccoon", "Gamora", "Drax"]
 
-      expected_topics = ["Starlord", "Groot", "Rocket Raccoon", "Gamora", "Drax"]
-      Plug.Conn.resp(conn, 200, chat_response_quiz_topics(expected_topics))
+    MPG.AI.MockClient
+    |> expect(:get_completion, fn _model, _system, user_prompt, _opts ->
+      assert user_prompt == "Guardians of the Galaxy"
+      {:ok, Jason.encode!(%{topics: expected_topics})}
     end)
 
     view
@@ -183,10 +176,8 @@ defmodule MPGWeb.QuizLiveTest do
 
     {:ok, view, _html} = live(ctx.conn, ~p"/quiz/#{@server_id}/new_quiz")
 
-    Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
-      expected_topics = ["Marvel", "DC", "Star Wars", "Harry Potter", "Lord of the Rings"]
-      Plug.Conn.resp(conn, 200, chat_response_quiz_topics(expected_topics))
-    end)
+    expected_topics = ["Marvel", "DC", "Star Wars", "Harry Potter", "Lord of the Rings"]
+    mock_quiz_topics(expected_topics)
 
     view
     |> element("#suggest-topics-button")

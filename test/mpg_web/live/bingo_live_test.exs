@@ -1,6 +1,7 @@
 defmodule MPGWeb.BingoLiveTest do
   use MPGWeb.ConnCase, async: false
 
+  import Mox
   import MPG.Fixtures.OpenAI
   import Phoenix.LiveViewTest
   alias MPG.Bingos.Session
@@ -8,6 +9,8 @@ defmodule MPGWeb.BingoLiveTest do
 
   @server_id "bingo_session"
   setup %{conn: conn} do
+    set_mox_global()
+
     conn = init_test_session(conn, %{})
 
     # populate a session_id on the conn
@@ -19,10 +22,10 @@ defmodule MPGWeb.BingoLiveTest do
     # subscribe to PubSub
     :ok = Phoenix.PubSub.subscribe(MPG.PubSub, @server_id)
 
-    # Set up Bypass expectation for the API calls to generate cells
-    bypass = Bypass.open(port: 4010)
+    # stub AI client for any background cell generation
+    stub_bingo_cells()
 
-    %{conn: conn, session_id: session_id, bypass: bypass}
+    %{conn: conn, session_id: session_id}
   end
 
   test "visiting /bingo redirects to a random server ID", %{conn: conn} do
@@ -86,9 +89,7 @@ defmodule MPGWeb.BingoLiveTest do
     assert_patch(view, ~p"/bingo/#{@server_id}/new")
     assert has_element?(view, "#bingo-type-form")
 
-    Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
-      Plug.Conn.resp(conn, 200, chat_response_bingo_cells())
-    end)
+    mock_bingo_cells()
 
     view
     |> form("#bingo-type-form", %{type: "conversation"})
