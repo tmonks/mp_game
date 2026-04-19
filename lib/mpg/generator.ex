@@ -42,84 +42,10 @@ defmodule MPG.Generator do
 
     user_prompt = "Subject: #{title}"
 
-    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
-    |> parse_chat()
-    |> decode_json()
-    |> Map.get(:questions)
-  end
-
-  @doc """
-  Gets a summary of today's top news
-  """
-  def get_news_summary do
-    system_prompt =
-      """
-        You are a news summary generator that provides a brief overview of the top 10 news stories of the day.
-        The summary should include the headline and a brief description.
-        Example:
-
-        User: "start"
-
-        You:
-          1. Headline: Description
-          2. Headline: Description
-          3. Headline: Description
-          ...
-      """
-
-    user_prompt = "start"
-
-    get_completion("gpt-4o-mini-search-preview", system_prompt, user_prompt)
-    |> IO.inspect()
-    |> parse_chat()
-
-    # |> decode_json()
-    # |> Map.get(:news)
-  end
-
-  @doc """
-  Creates a quiz base on today's top news stories
-  """
-  def generate_news_quiz do
-    system_prompt =
-      """
-        You are a quiz question generator that generates fun and interesting questions based on today's top news stories.
-        Start by searching for today's top news stories and then generate 10 questions based on those stories.
-        Unless I specify the difficulty (Easy, Medium or Hard), the questions should be of a difficulty level
-        appropriate for an adult who is familiar with the subject.
-        Each question should include the `correct_answer`, which is the zero-based index of the correct answer in the list.
-        Each question should have a brief explanation about the correct answer.
-        IMPORTANT: Please be sure the correct answer is correct and it matches the explanation!
-        Respond ONLY with the JSON with no additional text.
-        Please generate each of the questions in JSON format like the example below:
-
-        User: "start"
-
-        You:
-
-        {
-          "questions": [
-            {
-              "text": "In which country did the recent earthquake occur?",
-              "answers": ["Japan", "Mexico", "Italy", "Indonesia"],
-              "correct_answer": 1,
-              "explanation": "A 7.0 magnitude earthquake struck Mexico on Tuesday."
-            }
-            /* 9 more questions */
-          ]
-        }
-      """
-
-    user_prompt = "start"
-
-    get_completion("gpt-4o-mini-search-preview", system_prompt, user_prompt,
-      response_format: %{type: "json_object"}
-    )
-    |> IO.inspect()
-    |> parse_chat()
     |> decode_json()
     |> Map.get(:questions)
   end
@@ -189,11 +115,10 @@ defmodule MPG.Generator do
 
     user_prompt = topic
 
-    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
-    |> parse_chat()
     |> decode_json()
     |> Map.get(:topics)
   end
@@ -227,11 +152,10 @@ defmodule MPG.Generator do
 
     user_prompt = topics |> Enum.join(", ")
 
-    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
-    |> parse_chat()
     |> decode_json()
     |> Map.get(:topics)
   end
@@ -269,11 +193,10 @@ defmodule MPG.Generator do
 
     user_prompt = "start"
 
-    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
-    |> parse_chat()
     |> decode_json()
     |> Map.get(:prompts)
     |> Enum.take(25)
@@ -310,11 +233,10 @@ defmodule MPG.Generator do
 
     user_prompt = "start"
 
-    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
-    |> parse_chat()
     |> decode_json()
     |> Map.get(:prompts)
     |> Enum.take(25)
@@ -362,11 +284,10 @@ defmodule MPG.Generator do
 
     user_prompt = "start"
 
-    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
-    |> parse_chat()
     |> decode_json()
     |> Map.get(:prompts)
   end
@@ -383,23 +304,15 @@ defmodule MPG.Generator do
   end
 
   def get_completion(model, system_prompt, user_prompt, options \\ []) do
-    messages = [
-      %{role: "system", content: system_prompt},
-      %{role: "user", content: user_prompt}
-    ]
-
-    args = Keyword.merge([model: model, messages: messages], options)
-
-    OpenAI.chat_completion(args)
+    MPG.AI.client().get_completion(model, system_prompt, user_prompt, options)
   end
-
-  defp parse_chat({:ok, %{choices: [%{"message" => %{"content" => content}} | _]}}),
-    do: {:ok, content}
-
-  defp parse_chat({:error, %{"error" => %{"message" => message}}}), do: {:error, message}
 
   defp decode_json({:ok, json}) do
     Jason.decode!(json, keys: :atoms)
+  end
+
+  defp decode_json({:error, reason}) do
+    raise "AI completion failed: #{reason}"
   end
 
   @things [

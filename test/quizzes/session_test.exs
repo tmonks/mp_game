@@ -1,21 +1,22 @@
 defmodule MPG.Quizzes.SessionTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias MPG.Quizzes.Player
   alias MPG.Quizzes.State
   alias MPG.Quizzes.Session
 
+  import Mox
   import MPG.Fixtures.OpenAI
 
   @player_id UUID.uuid4()
   @server_id "quiz_test"
 
   setup do
+    set_mox_global()
     server_pid = start_supervised!({Session, [name: @server_id]})
     :ok = Phoenix.PubSub.subscribe(MPG.PubSub, @server_id)
-    bypass = Bypass.open(port: 4010)
 
-    %{server: server_pid, bypass: bypass}
+    %{server: server_pid}
   end
 
   test "can ping the server" do
@@ -51,10 +52,8 @@ defmodule MPG.Quizzes.SessionTest do
     assert player.current_answer == 1
   end
 
-  test "create_quiz/2 sets the title and generates questions with a background task", ctx do
-    Bypass.expect_once(ctx.bypass, "POST", "/v1/chat/completions", fn conn ->
-      Plug.Conn.resp(conn, 200, chat_response_quiz_questions())
-    end)
+  test "create_quiz/2 sets the title and generates questions with a background task" do
+    mock_quiz_questions()
 
     Session.create_quiz(@server_id, "MCU Movie trivia")
 
@@ -87,11 +86,11 @@ defmodule MPG.Quizzes.SessionTest do
     assert [%{text: "What is 1 + 1"}] = state.questions
   end
 
-  test "next_question/2 progresses state to the next question", ctx do
+  test "next_question/2 progresses state to the next question" do
     Session.add_player(@server_id, @player_id, "Joe")
     assert_receive({:state_updated, _action, _state})
 
-    expect_api_call_to_generate_questions(ctx.bypass)
+    mock_quiz_questions()
 
     # create the quiz and receive the updated state (title set and questions generated)
     Session.create_quiz(@server_id, "MCU Movie trivia")
@@ -110,8 +109,9 @@ defmodule MPG.Quizzes.SessionTest do
     assert state.current_question == 1
   end
 
-  test "next_question/2 updates players' scores", ctx do
-    expect_api_call_to_generate_questions(ctx.bypass)
+  test "next_question/2 updates players' scores" do
+    mock_quiz_questions()
+
     # create the quiz and receive the updated state (title set and questions generated)
     Session.create_quiz(@server_id, "MCU Movie trivia")
     assert_receive({:state_updated, _action, _state})
@@ -133,11 +133,5 @@ defmodule MPG.Quizzes.SessionTest do
     assert_receive({:state_updated, _action, state})
 
     assert Enum.at(state.players, 0).score == 1
-  end
-
-  defp expect_api_call_to_generate_questions(bypass) do
-    Bypass.expect_once(bypass, "POST", "/v1/chat/completions", fn conn ->
-      Plug.Conn.resp(conn, 200, chat_response_quiz_questions())
-    end)
   end
 end
