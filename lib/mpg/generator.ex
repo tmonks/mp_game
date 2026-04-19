@@ -42,7 +42,7 @@ defmodule MPG.Generator do
 
     user_prompt = "Subject: #{title}"
 
-    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
@@ -115,7 +115,7 @@ defmodule MPG.Generator do
 
     user_prompt = topic
 
-    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
@@ -152,7 +152,7 @@ defmodule MPG.Generator do
 
     user_prompt = topics |> Enum.join(", ")
 
-    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
@@ -193,7 +193,7 @@ defmodule MPG.Generator do
 
     user_prompt = "start"
 
-    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
@@ -233,7 +233,7 @@ defmodule MPG.Generator do
 
     user_prompt = "start"
 
-    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
@@ -284,7 +284,7 @@ defmodule MPG.Generator do
 
     user_prompt = "start"
 
-    get_completion("gpt-4o-mini", system_prompt, user_prompt,
+    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
       temperature: 0.8,
       response_format: %{type: "json_object"}
     )
