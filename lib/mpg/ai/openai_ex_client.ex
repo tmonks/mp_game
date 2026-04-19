@@ -11,13 +11,12 @@ defmodule MPG.AI.OpenaiExClient do
 
     params =
       %{
-        model: map_model(model),
+        model: model,
         instructions: system_prompt,
         input: user_prompt
       }
       |> maybe_put(:temperature, Keyword.get(options, :temperature))
       |> maybe_add_text_format(options)
-      |> maybe_add_web_search(model)
 
     case OpenaiEx.Responses.create(client, params) do
       {:ok, %{"output" => output}} ->
@@ -42,9 +41,6 @@ defmodule MPG.AI.OpenaiExClient do
     end)
   end
 
-  defp map_model("gpt-4o-mini-search-preview"), do: "gpt-4o-mini"
-  defp map_model(model), do: model
-
   defp maybe_add_text_format(params, options) do
     case Keyword.get(options, :response_format) do
       %{type: "json_object"} ->
@@ -63,12 +59,6 @@ defmodule MPG.AI.OpenaiExClient do
         params
     end
   end
-
-  defp maybe_add_web_search(params, "gpt-4o-mini-search-preview") do
-    Map.put(params, :tools, [%{type: "web_search_preview"}])
-  end
-
-  defp maybe_add_web_search(params, _model), do: params
 
   defp maybe_put(map, _key, nil), do: map
   defp maybe_put(map, key, value), do: Map.put(map, key, value)
