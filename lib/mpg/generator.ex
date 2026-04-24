@@ -163,12 +163,13 @@ defmodule MPG.Generator do
   @doc """
   Generates 25 random cells for a 'conversation bingo' card
   """
-  def generate_bingo_cells(:conversation) do
+  def generate_bingo_cells(type) do
+    {description, examples} = bingo_prompt(type)
+
     system_prompt = """
-    You are a conversation topic generator that generates unique and engaging conversation prompts for a collaborative bingo-style game.
-    Each prompt should describe something that may have happened to someone in the past week,
-    encouraging them to share a short personal story or experience with the group.
-    The tone should be warm, fun, and inclusive — aimed at sparking connection, laughter, and reflection.
+    You are a conversation topic generator that generates unique and engaging conversation prompts.
+    #{description}
+    The prompts will be displayed in a 5x5 grid, so make sure they are short and easy to read.
     Prompts should be varied and relatable to a wide range of people.
     Generate 25 random prompts.
     Please respond only with the JSON with no additional text.
@@ -181,115 +182,66 @@ defmodule MPG.Generator do
 
     {
       "prompts": [
+        #{examples |> Enum.map(&inspect/1) |> Enum.join(",\n        ")}
+        /* more prompts */
+      ]
+    }
+    """
+
+    get_completion("gpt-5.4-mini", system_prompt, "start",
+      temperature: 0.8,
+      response_format: %{type: "json_object"}
+    )
+    |> decode_json()
+    |> Map.get(:prompts)
+    |> Enum.take(25)
+  end
+
+  defp bingo_prompt(:conversation) do
+    {
+      """
+      Each prompt should describe something that may have happened to someone in the past week,
+      encouraging them to share a short personal story or experience with the group.
+      The tone should be warm, fun, and inclusive — aimed at sparking connection, laughter, and reflection.
+      """,
+      [
         "Changed your opinion about something",
         "Had a 'fail' moment",
         "Pushed yourself outside your comfort zone",
         "Saw something beautiful in nature",
         "Heard or read a quote that stuck with you"
-        /* 20 more prompts */
       ]
     }
-    """
-
-    user_prompt = "start"
-
-    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
-      temperature: 0.8,
-      response_format: %{type: "json_object"}
-    )
-    |> decode_json()
-    |> Map.get(:prompts)
-    |> Enum.take(25)
   end
 
-  def generate_bingo_cells(:guilty) do
-    system_prompt = """
-    You are a conversation topic generator that generates unique and engaging conversation prompts.
-    Each prompt should describe funny, mildly embarrassing, or quirky confessions that people
-    would be willing to share a short personal story or experience about with the group.
-    The tone should be warm, fun, and inclusive — aimed at sparking connection, laughter, and reflection.
-    Prompts should be varied and relatable to a wide range of people.
-    Generate 25 random prompts.
-    The prompts will be displayed in a 5x5 grid, so make sure they are short and easy to read.
-    Please respond only with the JSON with no additional text.
-
-    Example:
-
-    User: "start"
-
-    You:
-
+  defp bingo_prompt(:guilty) do
     {
-      "prompts": [
+      """
+      Each prompt should describe funny, mildly embarrassing, or quirky confessions that people
+      would be willing to share a short personal story or experience about with the group.
+      The tone should be warm, fun, and inclusive — aimed at sparking connection, laughter, and reflection.
+      """,
+      [
         "I've never been able to touch my toes",
         "Laughed so hard I snorted",
         "Still remember a childhood crush",
         "Sang karaoke and regretted it",
-        "Googled something ridiculous recently",
-        /* 20 more prompts */
+        "Googled something ridiculous recently"
       ]
     }
-    """
-
-    user_prompt = "start"
-
-    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
-      temperature: 0.8,
-      response_format: %{type: "json_object"}
-    )
-    |> decode_json()
-    |> Map.get(:prompts)
-    |> Enum.take(25)
   end
 
-  def generate_bingo_cells(:unique) do
-    system_prompt = """
-    You are a conversation topic generator that generates unique and engaging conversation prompts.
-    Each prompt should describe a unique skill, quirk, or trait that is interesting and worth sharing.
-    The prompts will be displayed in a 5x5 grid, so make sure they are short and easy to read.
-    Important: Generate 25 random prompts. Please respond only with the JSON with no additional text.
-
-    Example:
-
-    User: "start"
-
-    You:
-
+  defp bingo_prompt(:unique) do
     {
-      "prompts": [
+      "Each prompt should describe a unique skill, quirk, or trait that is interesting and worth sharing.",
+      [
         "Can name all 50 U.S. states",
         "Has a secret recipe or signature dish",
         "Can do a celebrity impression",
         "Has gone a whole day without using a phone",
-        "Can recite a poem from memory",
-        "Has a quirky collection",
-        "Can juggle (even a little)",
-        "Prefers odd numbers",
-        "Can wiggle ears or raise one eyebrow",
-        "Can write with their non-dominant hand",
-        "Can make a balloon animal",
-        "Has never broken a bone",
-        "Has solved a Rubik's Cube",
-        "Knows how to sew or knit",
-        "Speaks or is learning another language",
-        "Has memorized a movie scene or monologue",
-        "Loves pineapple on pizza",
-        "Knows a magic trick",
-        "Can tie a tie without help",
-        "Has a 'weird but useful' life hack",
-        /* 5 more prompts */
+        "Can recite a poem from memory"
       ]
     }
-    """
-
-    user_prompt = "start"
-
-    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
-      temperature: 0.8,
-      response_format: %{type: "json_object"}
-    )
-    |> decode_json()
-    |> Map.get(:prompts)
   end
 
   @doc """
