@@ -244,6 +244,109 @@ defmodule MPG.Generator do
     }
   end
 
+  defp bingo_prompt(:never_have_i_ever) do
+    {
+      """
+      Generate a list of "Never have I ever…" prompts that describe relatable, interesting, or slightly funny
+      life experiences. The prompts should be varied in tone (some light, some surprising, some thought-provoking)
+      and suitable for a wide range of people. Avoid anything too extreme, inappropriate, or likely to make
+      players uncomfortable. Each prompt should be concise and does NOT need to start with "Never have I ever…".
+      """,
+      [
+        "Accidentally sent a message to the wrong person",
+        "Stayed up way too late binge-watching something",
+        "Waved back at someone who wasn't waving at me",
+        "Tried to fix something and made it worse",
+        "Forgotten someone's name right after meeting them"
+      ]
+    }
+  end
+
+  defp bingo_prompt(:personal_challenges) do
+    {
+      """
+      Generate a list of light, fun, and positive personal challenges that players can complete during a social game.
+      Each challenge should encourage interaction, self-expression, or small acts of courage, kindness, or creativity.
+      Keep them simple, inclusive, and achievable in the moment, and avoid anything physically demanding or uncomfortable.
+      """,
+      [
+        "Give a genuine compliment to someone in the group",
+        "Share something you're proud of from this week",
+        "Try to make the group laugh in under 30 seconds",
+        "Teach the group something small but interesting",
+        "Share a goal you're currently working toward"
+      ]
+    }
+  end
+
+  defp bingo_prompt(:tell_the_story) do
+    {
+      """
+      Generate a list of prompts that ask players to "tell the story behind" a specific object, moment,
+      or aspect of their life. Each prompt should invite a short personal story that is meaningful, funny,
+      or interesting. Keep prompts open-ended, relatable, and suitable for a wide range of people.
+      """,
+      [
+        "Something on your phone you never delete",
+        "A scar or minor injury",
+        "Your favorite photo",
+        "How you met someone important in your life",
+        "Something you own that has sentimental value"
+      ]
+    }
+  end
+
+  defp bingo_prompt(:spin_it_positive) do
+    {
+      """
+      Generate a list of prompts that invite players to share a challenging, awkward, or imperfect experience
+      and then "spin it positive" by highlighting what they learned, what was funny about it, or how it turned
+      out well. Keep the tone light and constructive, and avoid topics that are too heavy or sensitive.
+      """,
+      [
+        "A recent mistake and what it taught you",
+        "An awkward moment that you can laugh about now",
+        "A plan that didn't work out and what came from it",
+        "A time something went wrong but led to something better",
+        "A small failure that helped you grow"
+      ]
+    }
+  end
+
+  defp bingo_prompt(:hot_takes) do
+    {
+      """
+      Generate a list of playful, lighthearted "hot take" or debate prompts that people can respond to with
+      an opinion and brief explanation. Prompts should be fun, a little provocative, and spark friendly discussion,
+      but avoid politics, religion, or divisive or sensitive topics.
+      """,
+      [
+        "Pineapple belongs on pizza — yes or no?",
+        "Morning person vs night owl — which is better?",
+        "Is it better to rewatch favorites or always try something new?",
+        "Are leftovers better the next day?",
+        "Is texting better than calling?"
+      ]
+    }
+  end
+
+  defp bingo_prompt(:memory_triggers) do
+    {
+      """
+      Generate a list of prompts that act as "memory triggers," encouraging players to recall and share
+      a specific type of past experience. Prompts should be nostalgic, vivid, and relatable, helping players
+      quickly think of a story from their life. Avoid anything too personal or uncomfortable.
+      """,
+      [
+        "A time you got lost somewhere",
+        "Your first day at a new school or job",
+        "A moment you laughed uncontrollably",
+        "A time you tried something new and surprising",
+        "A memorable meal you had"
+      ]
+    }
+  end
+
   @doc """
   Returns a list of bingo types and their descriptions
   """
@@ -251,7 +354,13 @@ defmodule MPG.Generator do
     [
       {"Stories about my week", :conversation},
       {"Embarrassing stories & guilty pleasures", :guilty},
-      {"Unique skills, quirks, and traits", :unique}
+      {"Unique skills, quirks, and traits", :unique},
+      {"Never have I ever", :never_have_i_ever},
+      {"Personal challenges", :personal_challenges},
+      {"Tell the story behind…", :tell_the_story},
+      {"Spin it positive", :spin_it_positive},
+      {"Hot takes & debates", :hot_takes},
+      {"Memory triggers", :memory_triggers}
     ]
   end
 
