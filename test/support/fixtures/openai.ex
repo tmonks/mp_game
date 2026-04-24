@@ -64,6 +64,54 @@ defmodule MPG.Fixtures.OpenAI do
     |> stub(:get_completion, fn _model, _system, _user, _opts -> {:ok, content} end)
   end
 
+  @likely_questions [
+    %{text: "Who's most likely to survive a zombie apocalypse?"},
+    %{text: "Who's most likely to become famous?"},
+    %{text: "Who's most likely to forget their own birthday?"},
+    %{text: "Who's most likely to win a reality TV show?"},
+    %{text: "Who's most likely to talk to animals?"},
+    %{text: "Who's most likely to become a millionaire?"},
+    %{text: "Who's most likely to sleep through an alarm?"},
+    %{text: "Who's most likely to cry during a movie?"},
+    %{text: "Who's most likely to get lost in their own city?"},
+    %{text: "Who's most likely to laugh at the worst time?"}
+  ]
+
+  @likely_roasts %{
+    "Alice" =>
+      "Based on your results, you're basically the main character of everyone's chaos. Most likely to survive a zombie apocalypse AND forget your own birthday? Priorities, clearly.",
+    "Bob" =>
+      "You got voted most likely to become famous and cry during a movie. So basically, you're destined to be a very emotional celebrity. Prepare your Oscar speech."
+  }
+
+  def mock_likely_questions do
+    content = %{questions: @likely_questions} |> Jason.encode!()
+
+    MPG.AI.MockClient
+    |> expect(:get_completion, fn _model, _system, _user, _opts -> {:ok, content} end)
+  end
+
+  def stub_likely_questions do
+    content = %{questions: @likely_questions} |> Jason.encode!()
+
+    MPG.AI.MockClient
+    |> stub(:get_completion, fn _model, _system, _user, _opts -> {:ok, content} end)
+  end
+
+  def mock_likely_roasts(roasts \\ @likely_roasts) do
+    content = %{roasts: roasts} |> Jason.encode!()
+
+    MPG.AI.MockClient
+    |> expect(:get_completion, fn _model, _system, _user, _opts -> {:ok, content} end)
+  end
+
+  def stub_likely_roasts do
+    content = %{roasts: @likely_roasts} |> Jason.encode!()
+
+    MPG.AI.MockClient
+    |> stub(:get_completion, fn _model, _system, _user, _opts -> {:ok, content} end)
+  end
+
   def make_questions do
     [
       %{

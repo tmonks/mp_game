@@ -34,6 +34,9 @@ defmodule MPGWeb.Router do
     live "/bingo", BingoLive, :new
     live "/bingo/:id", BingoLive, :play
     live "/bingo/:id/new", BingoLive, :new
+
+    live "/likely", LikelyLive, :new
+    live "/likely/:id", LikelyLive, :play
   end
 
   defp assign_session_id(conn, _opts) do

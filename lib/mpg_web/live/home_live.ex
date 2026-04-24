@@ -7,6 +7,7 @@ defmodule MPGWeb.HomeLive do
       [{_pid, :quiz}] -> {:noreply, redirect(socket, to: "/quiz/#{game_id}")}
       [{_pid, :things}] -> {:noreply, redirect(socket, to: "/things/#{game_id}")}
       [{_pid, :bingo}] -> {:noreply, redirect(socket, to: "/bingo/#{game_id}")}
+      [{_pid, :likely}] -> {:noreply, redirect(socket, to: "/likely/#{game_id}")}
       _ -> {:noreply, put_flash(socket, :error, "Invalid game code")}
     end
   end
@@ -73,6 +74,19 @@ defmodule MPGWeb.HomeLive do
             </h5>
             <p class="text-slate-600 leading-normal font-light">
               Play a collaborative game of bingo with friends by sharing stories about your week.
+            </p>
+          </div>
+        </div>
+      </a>
+      <!-- LIKELY LINK -->
+      <a id="likely-link" href="/likely">
+        <div class="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg">
+          <div class="p-4">
+            <h5 class="mb-2 text-amber-500 text-xl font-semibold">
+              Who's Most Likely To
+            </h5>
+            <p class="text-slate-600 leading-normal font-light">
+              Vote on who in your group is most likely to do ridiculous things, then get roasted by AI.
             </p>
           </div>
         </div>

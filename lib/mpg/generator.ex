@@ -303,6 +303,87 @@ defmodule MPG.Generator do
     ]
   end
 
+  @doc """
+  Generates 10 "Who's most likely to..." questions for the Likely game
+  """
+  def generate_likely_questions do
+    system_prompt = """
+    You are a fun party game question generator. Generate 10 "Who's most likely to..." questions
+    for a group of friends playing a party game. The questions should be:
+    - Fun, lighthearted, and appropriate for all ages
+    - Varied in theme (adventure, habits, personality, hypothetical scenarios)
+    - Phrased as "Who's most likely to [do something]?"
+
+    Respond ONLY with JSON in the format below:
+
+    {
+      "questions": [
+        {"text": "Who's most likely to survive a zombie apocalypse?"},
+        {"text": "Who's most likely to become famous?"}
+      ]
+    }
+    """
+
+    user_prompt = "start"
+
+    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
+      temperature: 0.8,
+      response_format: %{type: "json_object"}
+    )
+    |> decode_json()
+    |> Map.get(:questions)
+  end
+
+  @doc """
+  Generates a fun, good-natured roast for each player based on their "most likely to" results.
+  Takes a list of {player_name, player_id, [question_texts]} tuples.
+  Returns a map of %{player_id => roast_text}.
+  """
+  def generate_likely_roasts(vote_summary) do
+    system_prompt = """
+    You are a witty, good-natured comedian at a party game. Based on the results of a
+    "Who's Most Likely To" game, write a short, funny, personalized roast (2-3 sentences)
+    for each player based on what they were voted most likely to do.
+    Keep it light, fun, and never mean-spirited. If a player wasn't voted most likely for anything,
+    roast them for being so forgettable that nobody picked them!
+
+    Respond ONLY with JSON in the format below:
+
+    {
+      "roasts": {
+        "PlayerName": "Your roast here...",
+        "AnotherPlayer": "Their roast here..."
+      }
+    }
+    """
+
+    user_prompt =
+      vote_summary
+      |> Enum.map(fn {name, _id, questions} ->
+        case questions do
+          [] ->
+            "#{name} received no votes for anything."
+
+          questions ->
+            "#{name} was voted most likely to: #{Enum.join(questions, ", ")}"
+        end
+      end)
+      |> Enum.join("\n")
+
+    name_to_id = Map.new(vote_summary, fn {name, id, _} -> {name, id} end)
+
+    get_completion("gpt-5.4-mini", system_prompt, user_prompt,
+      temperature: 0.8,
+      response_format: %{type: "json_object"}
+    )
+    |> decode_json()
+    |> Map.get(:roasts)
+    |> Map.new(fn {name, roast} ->
+      id = Map.get(name_to_id, to_string(name), to_string(name))
+      {id, roast}
+    end)
+  end
+
   def get_completion(model, system_prompt, user_prompt, options \\ []) do
     MPG.AI.client().get_completion(model, system_prompt, user_prompt, options)
   end
