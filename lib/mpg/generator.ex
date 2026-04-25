@@ -308,7 +308,7 @@ defmodule MPG.Generator do
   """
   def generate_likely_questions do
     system_prompt = """
-    You are a fun party game question generator. Generate 10 "Who's most likely to..." questions
+    You are a fun party game question generator. Generate 5 "Who's most likely to..." questions
     for a group of friends playing a party game. The questions should be:
     - Fun, lighthearted, and appropriate for all ages
     - Varied in theme (adventure, habits, personality, hypothetical scenarios)
@@ -344,7 +344,7 @@ defmodule MPG.Generator do
     You are a witty, good-natured comedian at a party game. Based on the results of a
     "Who's Most Likely To" game, write a short, funny, personalized roast (2-3 sentences)
     for each player based on what they were voted most likely to do.
-    Keep it light, fun, and never mean-spirited. If a player wasn't voted most likely for anything,
+    Keep it fun and playfully insulting. If a player wasn't voted most likely for anything,
     roast them for being so forgettable that nobody picked them!
 
     Respond ONLY with JSON in the format below:
