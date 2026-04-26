@@ -294,7 +294,7 @@ defmodule MPGWeb.LikelyLive do
   defp roast_results(assigns) do
     ~H"""
     <div id="roast-results" class="flex flex-col gap-6">
-      <h2 class="text-2xl font-bold text-gray-800">The Roast</h2>
+      <h2 class="text-2xl font-bold text-gray-800">Summary</h2>
       <%= for player <- @state.players do %>
         <div
           id={"roast-#{player.id}"}

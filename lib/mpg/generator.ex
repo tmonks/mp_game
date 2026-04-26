@@ -369,7 +369,7 @@ defmodule MPG.Generator do
   """
   def generate_likely_questions do
     system_prompt = """
-    You are a fun party game question generator. Generate 5 "Who's most likely to..." questions
+    You are a fun party game question generator. Generate 10 "Who's most likely to..." questions
     for a group of friends playing a party game. The questions should be:
     - Fun, lighthearted, and appropriate for all ages
     - Varied in theme (adventure, habits, personality, hypothetical scenarios)

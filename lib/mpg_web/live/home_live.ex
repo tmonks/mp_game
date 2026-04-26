@@ -82,11 +82,11 @@ defmodule MPGWeb.HomeLive do
       <a id="likely-link" href="/likely">
         <div class="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg">
           <div class="p-4">
-            <h5 class="mb-2 text-amber-500 text-xl font-semibold">
+            <h5 class="mb-2 text-blue-400 text-xl font-semibold">
               Who's Most Likely To
             </h5>
             <p class="text-slate-600 leading-normal font-light">
-              Vote on who in your group is most likely to do ridiculous things, then get roasted by AI.
+              Vote on who in your group is most likely to do ridiculous things.
             </p>
           </div>
         </div>
