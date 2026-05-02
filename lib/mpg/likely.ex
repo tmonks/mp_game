@@ -64,7 +64,9 @@ defmodule MPG.Likely do
     state = %State{state | players: players}
 
     # Update the running tally in results for the current question
-    %State{state | results: Map.put(state.results, state.current_question, tally_votes(state))}
+    tally = tally_votes(state)
+    new_results = Map.put(state.results, state.current_question, tally)
+    %State{state | results: new_results}
   end
 
   @doc """
@@ -179,6 +181,7 @@ defmodule MPG.Likely do
   Returns a list of {player_name, player_id, [question_texts]} for each player.
   """
   def vote_summary(%State{} = state) do
+    # TODO: this function is hard to follow, break out one or more self-documenting helper functions
     state.players
     |> Enum.map(fn player ->
       won_questions =

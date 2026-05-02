@@ -431,6 +431,7 @@ defmodule MPG.Generator do
       end)
       |> Enum.join("\n")
 
+    # TODO: clarify this, it's a little hard to follow how names are mapped to IDs
     name_to_id = Map.new(vote_summary, fn {name, id, _} -> {name, id} end)
 
     get_completion("gpt-5.4-mini", system_prompt, user_prompt,
