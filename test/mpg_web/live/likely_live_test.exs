@@ -267,7 +267,7 @@ defmodule MPGWeb.LikelyLiveTest do
     assert has_element?(view, "#roast-#{player2_id}", "Bob, what can we say.")
   end
 
-  test "host sees 'Play Again' when complete", ctx do
+  test "host can play again and new questions are generated", ctx do
     state = %State{
       server_id: @server_id,
       started: true,
@@ -285,6 +285,22 @@ defmodule MPGWeb.LikelyLiveTest do
     {:ok, view, _html} = live(ctx.conn, ~p"/likely/#{@server_id}")
 
     assert has_element?(view, "#play-again-button", "Play Again")
+
+    view
+    |> element("#play-again-button")
+    |> render_click()
+
+    # play_again resets state
+    assert_receive({:state_updated, :play_again, state})
+    assert state.questions == []
+    assert state.results == %{}
+    assert state.roasts == %{}
+    assert length(state.players) == 1
+
+    # new questions generated in background
+    assert_receive({:state_updated, :set_questions, state})
+    assert length(state.questions) == 10
+    assert has_element?(view, "#current-status", "Ready to start!")
   end
 
   # Helper functions

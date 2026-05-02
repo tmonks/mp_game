@@ -85,6 +85,22 @@ defmodule MPG.Likely do
   end
 
   @doc """
+  Resets the game for a new round, keeping existing players.
+  """
+  def play_again(%State{} = state) do
+    players = Enum.map(state.players, fn %Player{} = p -> %Player{p | current_vote: nil} end)
+
+    %State{
+      state
+      | questions: [],
+        current_question: nil,
+        results: %{},
+        roasts: %{},
+        players: players
+    }
+  end
+
+  @doc """
   Sets the roasts map on state
   """
   def set_roasts(%State{} = state, roasts) do

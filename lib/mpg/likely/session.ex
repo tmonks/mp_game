@@ -98,6 +98,14 @@ defmodule MPG.Likely.Session do
   end
 
   @doc """
+  Resets the game for a new round, keeping players, and generates new questions.
+  """
+  def play_again(server_id) do
+    registered_name(server_id)
+    |> GenServer.cast(:play_again)
+  end
+
+  @doc """
   Sets the state manually for testing purposes.
   """
   def set_state(server_id, state) do
@@ -178,6 +186,21 @@ defmodule MPG.Likely.Session do
   def handle_cast({:set_roasts, roasts}, state) do
     state = Likely.set_roasts(state, roasts)
     broadcast_state_updated(state, :set_roasts)
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_cast(:play_again, state) do
+    state = Likely.play_again(state)
+    broadcast_state_updated(state, :play_again)
+
+    server = registered_name(state.server_id)
+
+    Task.start(fn ->
+      questions = Generator.generate_likely_questions()
+      GenServer.cast(server, {:set_questions, questions})
+    end)
+
     {:noreply, state}
   end
 

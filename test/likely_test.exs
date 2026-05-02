@@ -150,6 +150,34 @@ defmodule MPG.LikelyTest do
     end
   end
 
+  describe "play_again/1" do
+    test "resets game state but keeps players" do
+      state = %State{
+        started: true,
+        players: [
+          %Player{id: "1", name: "Alice", is_host: true, color: "Gold", current_vote: "2"},
+          %Player{id: "2", name: "Bob", is_host: false, color: "DeepPink", current_vote: "1"}
+        ],
+        questions: [%Question{text: "Q1"}],
+        current_question: 1,
+        results: %{0 => %{"1" => 1, "2" => 1}},
+        roasts: %{"1" => "roast1", "2" => "roast2"}
+      }
+
+      new_state = Likely.play_again(state)
+
+      assert new_state.questions == []
+      assert new_state.current_question == nil
+      assert new_state.results == %{}
+      assert new_state.roasts == %{}
+      assert new_state.started == true
+      assert length(new_state.players) == 2
+      assert Enum.all?(new_state.players, &is_nil(&1.current_vote))
+      assert Enum.at(new_state.players, 0).name == "Alice"
+      assert Enum.at(new_state.players, 0).is_host == true
+    end
+  end
+
   describe "current_status/1" do
     test "returns :new when game has not started" do
       state = %State{questions: [], started: false}

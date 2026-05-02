@@ -88,6 +88,12 @@ defmodule MPGWeb.LikelyLive do
   end
 
   @impl true
+  def handle_event("play_again", _params, socket) do
+    Session.play_again(socket.assigns.server_id)
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:state_updated, _action, state}, socket) do
     socket =
       socket
@@ -183,13 +189,13 @@ defmodule MPGWeb.LikelyLive do
       <%= if @game_status == :complete do %>
         <.roast_results state={@state} />
         <%= if @player.is_host do %>
-          <a
+          <button
             id="play-again-button"
-            href={~p"/likely"}
-            class="bg-amber-500 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded inline-block mt-4"
+            phx-click="play_again"
+            class="bg-amber-500 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded mt-4"
           >
             Play Again
-          </a>
+          </button>
         <% end %>
       <% end %>
     <% end %>
