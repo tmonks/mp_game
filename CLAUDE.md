@@ -17,11 +17,12 @@ mix assets.build   # Build CSS and JS
 
 ## Architecture
 
-**MPG** is a multi-player real-time party games platform built with Phoenix LiveView. It supports three games:
+**MPG** is a multi-player real-time party games platform built with Phoenix LiveView. It supports four games:
 
 1. **Things** — Players write funny responses to prompts; others guess who wrote what
 2. **Quizoots** — AI-generated trivia quizzes on player-chosen topics
 3. **Dinner Bingo** — Teams mark bingo cells by sharing stories matching conversation prompts
+4. **Who's Most Likely To** — AI generates "most likely to" prompts; players vote on who fits best, then get roasted
 
 ### Real-Time Stack
 
@@ -29,11 +30,11 @@ mix assets.build   # Build CSS and JS
 - **Phoenix PubSub** broadcasts game state changes to all connected players
 - **DynamicSupervisor + Registry** manages individual game sessions as supervised GenServer processes
 - All game state is held in-memory (no database persistence during a game)
-- **OpenAI Responses API** (via `openai_ex`) generates quiz questions and bingo cells
+- **OpenAI Responses API** (via `openai_ex`) generates quiz questions, bingo cells, likely questions, and roasts
 
 ### Game Module Pattern
 
-Each game (`:quizzes`, `:things`, `:bingos`) follows the same structure:
+Each game (`:quizzes`, `:things`, `:bingos`, `:likely`) follows the same structure:
 
 | Module | Role |
 |--------|------|
