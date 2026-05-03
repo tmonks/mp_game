@@ -373,6 +373,7 @@ defmodule MPG.Generator do
     for a group of friends playing a party game. The questions should be:
     - Fun, lighthearted, and appropriate for all ages
     - Varied in theme (adventure, habits, personality, hypothetical scenarios)
+    - Creative and surprising — avoid cliché or commonly-used prompts
     - Phrased as "Who's most likely to [do something]?"
 
     Respond ONLY with JSON in the format: {"questions": [{"text": "Who's most likely to ...?"}, ...]}
