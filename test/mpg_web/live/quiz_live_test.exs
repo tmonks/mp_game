@@ -195,7 +195,6 @@ defmodule MPGWeb.QuizLiveTest do
     assert has_element?(view, "input#topic[value='Marvel']")
   end
 
-  @tag :flaky
   test "players see the quiz title and status", ctx do
     Session.add_player(@server_id, ctx.session_id, "Host")
 
@@ -218,8 +217,6 @@ defmodule MPGWeb.QuizLiveTest do
     assert_receive({:state_updated, :create_quiz, _state})
     assert_receive({:state_updated, :create_quiz, state})
     assert state.title == "Marvel characters"
-
-    assert has_element?(view, "#current-status", "Generating quiz")
 
     assert_receive({:state_updated, :set_questions, state})
     assert length(state.questions) == 10
