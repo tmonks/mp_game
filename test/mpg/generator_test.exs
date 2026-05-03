@@ -51,7 +51,13 @@ defmodule MPG.GeneratorTest do
       assert Generator.list_bingo_types() == [
                {"Stories about my week", :conversation},
                {"Embarrassing stories & guilty pleasures", :guilty},
-               {"Unique skills, quirks, and traits", :unique}
+               {"Unique skills, quirks, and traits", :unique},
+               {"Never have I ever", :never_have_i_ever},
+               {"Personal challenges", :personal_challenges},
+               {"Tell the story behind…", :tell_the_story},
+               {"Spin it positive", :spin_it_positive},
+               {"Hot takes & debates", :hot_takes},
+               {"Memory triggers", :memory_triggers}
              ]
     end
   end
