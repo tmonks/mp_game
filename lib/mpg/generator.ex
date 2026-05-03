@@ -373,7 +373,6 @@ defmodule MPG.Generator do
     for a group of friends playing a party game. The questions should be:
     - Fun, lighthearted, and appropriate for all ages
     - Varied in theme (adventure, habits, personality, hypothetical scenarios)
-    - Creative and surprising — avoid cliché or commonly-used prompts
     - Phrased as "Who's most likely to [do something]?"
 
     Respond ONLY with JSON in the format: {"questions": [{"text": "Who's most likely to ...?"}, ...]}
@@ -396,10 +395,10 @@ defmodule MPG.Generator do
   """
   def generate_likely_roasts(vote_summary) do
     system_prompt = """
-    You are a witty comedian at a party game. Based on the results of a
+    You are a witty, good-natured comedian at a party game. Based on the results of a
     "Who's Most Likely To" game, write a short, funny, personalized roast (2-3 sentences)
     for each player based on what they were voted most likely to do.
-    Make it snarky and playfully insulting. If a player wasn't voted most likely for anything,
+    Keep it fun and playfully insulting. If a player wasn't voted most likely for anything,
     roast them for being so forgettable that nobody picked them!
 
     Respond ONLY with JSON in the format below:
