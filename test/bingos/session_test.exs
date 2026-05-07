@@ -83,6 +83,32 @@ defmodule MPG.Bingos.SessionTest do
     assert Enum.at(state.cells, 5).player_id == @player_id
   end
 
+  test "reset_cells/1 clears cells and broadcasts the updated state", %{server: server} do
+    Session.update_cells(@server_id, make_cells())
+    assert_receive({:state_updated, _state})
+
+    Session.reset_cells(@server_id)
+    assert_receive({:state_updated, state})
+
+    assert state.cells == []
+    assert :sys.get_state(server).cells == []
+  end
+
+  test "reset_cells/1 preserves players", %{server: server} do
+    Session.add_player(@server_id, @player_id, "Joe")
+    assert_receive({:state_updated, _state})
+
+    Session.update_cells(@server_id, make_cells())
+    assert_receive({:state_updated, _state})
+
+    Session.reset_cells(@server_id)
+    assert_receive({:state_updated, state})
+
+    assert state.cells == []
+    assert [%Player{name: "Joe", id: @player_id}] = state.players
+    assert :sys.get_state(server).players == state.players
+  end
+
   test "generate/1 generates new cells and broadcasts the updated state" do
     mock_bingo_cells()
 

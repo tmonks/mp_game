@@ -79,6 +79,12 @@ defmodule MPGWeb.BingoLive do
   end
 
   @impl true
+  def handle_event("new_game", _params, socket) do
+    Session.reset_cells(socket.assigns.server_id)
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("toggle_cell", %{"index" => index}, socket) do
     %{session_id: session_id, server_id: server_id} = socket.assigns
     Session.toggle_cell(server_id, String.to_integer(index), session_id)
@@ -153,9 +159,18 @@ defmodule MPGWeb.BingoLive do
           <% else %>
             <!-- PLAYER LIST -->
             <div class="mb-8">
-              <div id="player-list" class="flex gap-2">
+              <div id="player-list" class="flex gap-2 items-center">
                 <%= for player <- @state.players do %>
                   <.player_avatar player={player} />
+                <% end %>
+                <%= if is_host?(@player, @state.players) && @state.cells != [] do %>
+                  <button
+                    id="new-game-btn"
+                    phx-click="new_game"
+                    class="ml-auto bg-rose-500 hover:bg-rose-700 text-white text-sm font-bold py-1 px-3 rounded"
+                  >
+                    New Game
+                  </button>
                 <% end %>
               </div>
             </div>

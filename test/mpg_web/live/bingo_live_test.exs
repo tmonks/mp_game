@@ -145,6 +145,45 @@ defmodule MPGWeb.BingoLiveTest do
     assert has_element?(view, "#cell-0 div[style*='#{get_player_color(session_id)}']")
   end
 
+  test "host sees New Game button when cells exist", %{conn: conn, session_id: session_id} do
+    Session.add_player(@server_id, session_id, "Host")
+    Session.update_cells(@server_id, for(i <- 0..24, do: "cell-#{i}"))
+
+    {:ok, view, _html} = live(conn, ~p"/bingo/#{@server_id}")
+    assert has_element?(view, "#new-game-btn")
+  end
+
+  test "non-host does not see New Game button", %{conn: conn, session_id: session_id} do
+    host_id = UUID.uuid4()
+    Session.add_player(@server_id, host_id, "Host")
+    Session.add_player(@server_id, session_id, "Player")
+    Session.update_cells(@server_id, for(i <- 0..24, do: "cell-#{i}"))
+
+    {:ok, view, _html} = live(conn, ~p"/bingo/#{@server_id}")
+    refute has_element?(view, "#new-game-btn")
+  end
+
+  test "clicking New Game resets the board and prompts host for bingo type", %{
+    conn: conn,
+    session_id: session_id
+  } do
+    Session.add_player(@server_id, session_id, "Host")
+    Session.update_cells(@server_id, for(i <- 0..24, do: "cell-#{i}"))
+
+    {:ok, view, _html} = live(conn, ~p"/bingo/#{@server_id}")
+    assert has_element?(view, "#cell-0")
+
+    view
+    |> element("#new-game-btn")
+    |> render_click()
+
+    assert_receive({:state_updated, %{cells: []}})
+
+    assert_patch(view, ~p"/bingo/#{@server_id}/new")
+    assert has_element?(view, "#bingo-type-form")
+    refute has_element?(view, "#cell-0")
+  end
+
   defp get_player_color(session_id) do
     {:ok, state} = Session.get_state(@server_id)
     player = Enum.find(state.players, &(&1.id == session_id))

@@ -73,6 +73,14 @@ defmodule MPG.Bingos.Session do
   end
 
   @doc """
+  Resets the cells to an empty list, allowing the host to start a new game.
+  """
+  def reset_cells(server_id) do
+    registered_name(server_id)
+    |> GenServer.cast(:reset_cells)
+  end
+
+  @doc """
   Determines the Registry name ("via tuple") from a string id
   """
   def registered_name(id) do
@@ -112,6 +120,13 @@ defmodule MPG.Bingos.Session do
   @impl true
   def handle_cast({:toggle_cell, cell_index, player_id}, state) do
     state = Bingos.toggle(state, cell_index, player_id)
+    broadcast_state_updated(state)
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_cast(:reset_cells, state) do
+    state = %{state | cells: []}
     broadcast_state_updated(state)
     {:noreply, state}
   end
