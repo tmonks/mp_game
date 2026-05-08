@@ -161,7 +161,7 @@ defmodule MPGWeb.BingoLive do
             <div class="mb-8">
               <div id="player-list" class="flex flex-wrap gap-2 items-center">
                 <%= for player <- @state.players do %>
-                  <.player_avatar player={player} />
+                  <.player_avatar player={player} current={player.id == @player.id} />
                 <% end %>
               </div>
             </div>
@@ -203,11 +203,12 @@ defmodule MPGWeb.BingoLive do
 
   attr :player, Player, required: true
   attr :size, :integer, default: 12
+  attr :current, :boolean, default: false
 
   defp player_avatar(assigns) do
     ~H"""
     <div
-      class={"relative flex items-center justify-center w-#{@size} h-#{@size} text-white font-bold rounded-full"}
+      class={"relative flex items-center justify-center w-#{@size} h-#{@size} text-white font-bold rounded-full #{if @current, do: "ring-[3px] ring-offset-2 ring-white outline outline-[3px] outline-gray-700"}"}
       data-role="avatar"
       style={"background-color: #{@player.color}"}
       id={"player-" <> @player.id}
