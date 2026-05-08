@@ -21,7 +21,7 @@ mix assets.build   # Build CSS and JS
 
 1. **Things** — Players write funny responses to prompts; others guess who wrote what
 2. **Quizoots** — AI-generated trivia quizzes on player-chosen topics
-3. **Dinner Bingo** — Teams mark bingo cells by sharing stories matching conversation prompts
+3. **Conversation Bingo** — Teams mark bingo cells by sharing stories matching conversation prompts
 4. **Who's Most Likely To** — AI generates "most likely to" prompts; players vote on who fits best, then get roasted
 
 ### Real-Time Stack

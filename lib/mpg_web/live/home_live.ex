@@ -70,7 +70,7 @@ defmodule MPGWeb.HomeLive do
         <div class="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg">
           <div class="p-4">
             <h5 class="mb-2 text-blue-400 text-xl font-semibold">
-              Dinner Bingo
+              Conversation Bingo
             </h5>
             <p class="text-slate-600 leading-normal font-light">
               Play a collaborative game of bingo with friends by sharing stories about your week.

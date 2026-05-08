@@ -15,7 +15,7 @@ defmodule MPGWeb.BingoLive do
 
     socket =
       socket
-      |> assign(:page_title, "Dinner Bingo")
+      |> assign(:page_title, "Conversation Bingo")
       |> assign(:primary_color, "bg-rose-500")
       |> assign(:session_id, session_id)
 
@@ -159,18 +159,9 @@ defmodule MPGWeb.BingoLive do
           <% else %>
             <!-- PLAYER LIST -->
             <div class="mb-8">
-              <div id="player-list" class="flex gap-2 items-center">
+              <div id="player-list" class="flex flex-wrap gap-2 items-center">
                 <%= for player <- @state.players do %>
                   <.player_avatar player={player} />
-                <% end %>
-                <%= if is_host?(@player, @state.players) && @state.cells != [] do %>
-                  <button
-                    id="new-game-btn"
-                    phx-click="new_game"
-                    class="ml-auto bg-rose-500 hover:bg-rose-700 text-white text-sm font-bold py-1 px-3 rounded"
-                  >
-                    New Game
-                  </button>
                 <% end %>
               </div>
             </div>
@@ -193,6 +184,15 @@ defmodule MPGWeb.BingoLive do
                   </div>
                 <% end %>
               </div>
+              <%= if is_host?(@player, @state.players) do %>
+                <button
+                  id="new-game-btn"
+                  phx-click="new_game"
+                  class="mt-8 bg-rose-500 hover:bg-rose-700 text-white text-sm font-bold py-1 px-3 rounded"
+                >
+                  New Game
+                </button>
+              <% end %>
             <% end %>
           <% end %>
         <% end %>
