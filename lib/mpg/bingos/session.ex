@@ -137,9 +137,16 @@ defmodule MPG.Bingos.Session do
     # start a background task to generate the bingo cells
     Task.start(fn ->
       cells = Generator.generate_bingo_cells(type)
-      GenServer.cast(server, {:update_cells, cells})
+      GenServer.cast(server, {:update_cells, cells, type})
     end)
 
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_cast({:update_cells, cells, type}, state) do
+    state = Bingos.update_cells(state, cells, type)
+    broadcast_state_updated(state)
     {:noreply, state}
   end
 

@@ -54,6 +54,11 @@ defmodule MPG.Bingos do
     %State{state | cells: cells}
   end
 
+  def update_cells(%State{} = state, new_cells, type) do
+    cells = Enum.take(new_cells, 25) |> Enum.map(&%Cell{text: &1, player_id: nil})
+    %State{state | cells: cells, bingo_type: to_string(type)}
+  end
+
   defp toggle_cell(%Cell{player_id: nil} = cell, player_id) do
     %Cell{cell | player_id: player_id}
   end

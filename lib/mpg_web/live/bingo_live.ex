@@ -16,7 +16,6 @@ defmodule MPGWeb.BingoLive do
     socket =
       socket
       |> assign(:page_title, "Conversation Bingo")
-      |> assign(:primary_color, "bg-rose-500")
       |> assign(:session_id, session_id)
 
     {:ok, socket}
@@ -62,6 +61,23 @@ defmodule MPGWeb.BingoLive do
   defp assign_player(%{assigns: assigns} = socket) do
     player = Enum.find(assigns.state.players, &(&1.id == assigns.session_id))
     assign(socket, :player, player)
+  end
+
+  defp bingo_type_label(nil), do: nil
+
+  defp bingo_type_label(type) do
+    type_atom = String.to_existing_atom(type)
+
+    Generator.list_bingo_types()
+    |> Enum.find(fn {_label, t} -> t == type_atom end)
+    |> case do
+      {label, _} -> label
+      nil -> type
+    end
+  end
+
+  defp marked_count(cells) do
+    Enum.count(cells, &(&1.player_id != nil))
   end
 
   @impl true
@@ -116,65 +132,92 @@ defmodule MPGWeb.BingoLive do
   @spec render(any()) :: Phoenix.LiveView.Rendered.t()
   def render(assigns) do
     ~H"""
-    <div class="flex flex-col items-center">
-      <div class="w-full max-w-xl">
-        <%= if @player == nil do %>
-          <!-- JOIN FORM -->
-          <form id="join-form" phx-submit="join">
-            <div class="flex gap-4 pt-16">
-              <div>
-                <input
-                  type="text"
-                  name="player_name"
-                  placeholder="Enter your name"
-                  class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-              <div>
-                <button class="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded">
-                  Submit
-                </button>
-              </div>
-            </div>
+    <div class="min-h-screen text-white">
+      <%= if @player == nil do %>
+        <!-- JOIN FORM -->
+        <div class="flex items-center justify-center pt-24 px-4">
+          <form id="join-form" phx-submit="join" class="w-full max-w-sm">
+            <h2 class="text-purple-400 font-bold text-xl mb-6 text-center">Join the Game</h2>
+            <input
+              type="text"
+              name="player_name"
+              placeholder="Enter your name"
+              class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 mb-4"
+            />
+            <button class="w-full bg-purple-700 hover:bg-purple-600 text-white font-bold py-3 px-4 rounded-xl transition-colors">
+              Join
+            </button>
           </form>
-        <% else %>
-          <%= if @live_action == :new && is_host?(@player, @state.players) do %>
-            <!-- BINGO TYPE SELECTION -->
-            <div class="pt-16">
-              <h2 class="text-2xl font-bold mb-8 text-center">Choose a Bingo Type</h2>
+        </div>
+      <% else %>
+        <%= if @live_action == :new && is_host?(@player, @state.players) do %>
+          <!-- BINGO TYPE SELECTION -->
+          <div class="flex items-center justify-center pt-24 px-4">
+            <div class="w-full max-w-sm">
+              <h2 class="text-purple-400 font-bold text-xl mb-6 text-center">Choose a Bingo Type</h2>
               <form id="bingo-type-form" phx-submit="select_type">
-                <div class="flex flex-col gap-4">
-                  <select
-                    name="type"
-                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  >
-                    <%= options_for_select(Generator.list_bingo_types(), []) %>
-                  </select>
-                  <button class="bg-rose-500 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded">
-                    Start Game
-                  </button>
-                </div>
+                <select
+                  name="type"
+                  class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 mb-4"
+                >
+                  <%= options_for_select(Generator.list_bingo_types(), []) %>
+                </select>
+                <button class="w-full bg-purple-700 hover:bg-purple-600 text-white font-bold py-3 px-4 rounded-xl transition-colors">
+                  Start Game
+                </button>
               </form>
             </div>
-          <% else %>
-            <!-- PLAYER LIST -->
-            <div class="mb-8">
-              <div id="player-list" class="flex flex-wrap gap-2 items-center">
-                <%= for player <- @state.players do %>
-                  <.player_avatar player={player} current={player.id == @player.id} />
-                <% end %>
+          </div>
+        <% else %>
+          <!-- GAME VIEW -->
+          <!-- Header -->
+          <div class="p-4 pb-2 flex items-center justify-between gap-3">
+            <h2 class="text-purple-400 font-bold text-lg tracking-tight">Conversation Bingo</h2>
+            <%= if @state.bingo_type do %>
+              <span id="bingo-type-label" class="flex-shrink-0 px-3 py-1 text-xs font-semibold bg-slate-800 border border-slate-700 text-purple-400 rounded-full">
+                <%= bingo_type_label(@state.bingo_type) %>
+              </span>
+            <% end %>
+          </div>
+
+          <!-- Players -->
+          <div class="px-4 pb-3">
+            <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">
+              Players — <%= length(@state.players) %> joined
+            </div>
+            <div class="flex gap-2 overflow-x-auto hide-scrollbar p-1">
+              <%= for player <- @state.players do %>
+                <.player_avatar player={player} current={player.id == @player.id} />
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Progress -->
+          <div class="px-4 pb-3">
+            <div class="flex justify-between text-sm mb-1.5">
+              <span class="text-slate-400">Completed</span>
+              <span class="text-purple-400 font-bold"><%= marked_count(@state.cells) %> / 25</span>
+            </div>
+            <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div
+                class="h-full bg-purple-600 rounded-full transition-all duration-500"
+                style={"width: #{marked_count(@state.cells) / 25 * 100}%"}
+              >
               </div>
             </div>
-            <!-- BINGO GRID -->
-            <%= if @state.cells == [] do %>
-              <div class="loader">Loading...</div>
-            <% else %>
-              <div class="grid grid-cols-5 gap-1">
+          </div>
+
+          <!-- Bingo Grid -->
+          <%= if @state.cells == [] do %>
+            <div class="loader">Loading...</div>
+          <% else %>
+            <div class="px-3 pb-4">
+              <div class="grid grid-cols-5 gap-1.5">
                 <%= for {cell, index} <- Enum.with_index(@state.cells) do %>
                   <div
                     phx-click="toggle_cell"
                     phx-value-index={index}
-                    class={"relative w-full flex items-center text-center rounded cursor-pointer text-white sm:text-sm text-xs #{if cell.player_id, do: "bg-green-500", else: "bg-rose-500"}"}
+                    class={"relative flex items-center justify-center text-center rounded-xl cursor-pointer font-semibold leading-tight aspect-[1/1.1] p-1 border transition-colors #{if cell.player_id, do: "bg-purple-900 border-purple-500 text-white", else: "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:border-slate-600"} sm:text-xs text-[9px]"}
                     id={"cell-#{index}"}
                   >
                     <%= cell.text %>
@@ -184,31 +227,32 @@ defmodule MPGWeb.BingoLive do
                   </div>
                 <% end %>
               </div>
-              <%= if is_host?(@player, @state.players) do %>
+            </div>
+            <%= if is_host?(@player, @state.players) do %>
+              <div class="px-4 pb-4">
                 <button
                   id="new-game-btn"
                   phx-click="new_game"
-                  class="mt-8 bg-rose-500 hover:bg-rose-700 text-white text-sm font-bold py-1 px-3 rounded"
+                  class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm font-bold py-2 px-4 rounded-xl transition-colors"
                 >
                   New Game
                 </button>
-              <% end %>
+              </div>
             <% end %>
           <% end %>
         <% end %>
-      </div>
+      <% end %>
     </div>
     """
   end
 
   attr :player, Player, required: true
-  attr :size, :integer, default: 12
   attr :current, :boolean, default: false
 
   defp player_avatar(assigns) do
     ~H"""
     <div
-      class={"relative flex items-center justify-center w-#{@size} h-#{@size} text-white font-bold rounded-full #{if @current, do: "ring-[3px] ring-offset-2 ring-white outline outline-[3px] outline-gray-700"}"}
+      class={"flex items-center justify-center w-10 h-10 text-xs text-white font-bold rounded-full flex-shrink-0 #{if @current, do: "ring-2 ring-purple-500"}"}
       data-role="avatar"
       style={"background-color: #{@player.color}"}
       id={"player-" <> @player.id}
@@ -223,7 +267,7 @@ defmodule MPGWeb.BingoLive do
   defp player_marker(assigns) do
     ~H"""
     <div
-      class="absolute bottom-1 right-1 w-4 h-4 text-white font-bold rounded-full flex items-center justify-center text-xs"
+      class="absolute bottom-1 right-1 w-4 h-4 text-white font-bold rounded-full flex items-center justify-center text-[7px] shadow-[0_0_0_1.5px_theme(colors.slate.900)]"
       style={"background-color: #{@player.color}"}
     >
       <%= String.slice(@player.name, 0..1) %>

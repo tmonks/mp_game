@@ -90,6 +90,18 @@ defmodule MPG.BingosTest do
     end
   end
 
+  describe "update_cells/3" do
+    test "updates cells and sets bingo_type" do
+      state = Bingos.new(@server_id)
+      new_cells = make_cells()
+
+      updated_state = Bingos.update_cells(state, new_cells, :conversation)
+
+      assert length(updated_state.cells) == 25
+      assert updated_state.bingo_type == "conversation"
+    end
+  end
+
   defp make_cells() do
     Enum.map(1..25, &"Cell #{&1}")
   end

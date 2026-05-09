@@ -6,6 +6,7 @@ defmodule MPG.Bingos.State do
 
   embedded_schema do
     field(:server_id, :string)
+    field(:bingo_type, :string)
     embeds_many(:players, Player)
     embeds_many(:cells, Cell)
   end

@@ -106,6 +106,28 @@ defmodule MPGWeb.BingoLiveTest do
     assert has_element?(view, "#cell-24")
   end
 
+  test "displays the bingo type label after cells are generated", ctx do
+    {:ok, view, _html} = live(ctx.conn, ~p"/bingo/#{@server_id}")
+
+    view
+    |> form("#join-form", %{player_name: "Host"})
+    |> render_submit()
+
+    assert_receive({:state_updated, _state})
+    assert_patch(view, ~p"/bingo/#{@server_id}/new")
+
+    mock_bingo_cells()
+
+    view
+    |> form("#bingo-type-form", %{type: "conversation"})
+    |> render_submit()
+
+    assert_receive({:state_updated, _state})
+    assert_receive({:state_updated, _state})
+
+    assert has_element?(view, "#bingo-type-label", "Stories about my week")
+  end
+
   test "non-host players can join and see their avatar", %{conn: conn, session_id: session_id} do
     uuid = UUID.uuid4()
     Session.add_player(@server_id, uuid, "Host")
@@ -140,8 +162,8 @@ defmodule MPGWeb.BingoLiveTest do
 
     assert_receive {:state_updated, %State{}}
 
-    # Cell should be green and show player marker
-    assert has_element?(view, "#cell-0.bg-green-500")
+    # Cell should be purple (marked) and show player marker
+    assert has_element?(view, "#cell-0.bg-purple-900")
     assert has_element?(view, "#cell-0 div[style*='#{get_player_color(session_id)}']")
   end
 

@@ -15,6 +15,16 @@ defmodule MPGWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :dark_browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {MPGWeb.Layouts, :dark_root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+    plug :assign_session_id
+  end
+
   scope "/", MPGWeb do
     pipe_through :browser
 
@@ -31,12 +41,16 @@ defmodule MPGWeb.Router do
     live "/quiz/:id/new_quiz", QuizLive, :new_quiz
     live "/quiz/:id/new", QuizLive.New, :new
 
+    live "/likely", LikelyLive, :new
+    live "/likely/:id", LikelyLive, :play
+  end
+
+  scope "/", MPGWeb do
+    pipe_through :dark_browser
+
     live "/bingo", BingoLive, :new
     live "/bingo/:id", BingoLive, :play
     live "/bingo/:id/new", BingoLive, :new
-
-    live "/likely", LikelyLive, :new
-    live "/likely/:id", LikelyLive, :play
   end
 
   defp assign_session_id(conn, _opts) do
