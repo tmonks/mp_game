@@ -171,12 +171,14 @@ defmodule MPGWeb.BingoLive do
         <% else %>
           <!-- GAME VIEW -->
           <!-- Header -->
-          <div class="p-4 pb-2 flex items-center justify-between gap-3">
-            <h2 class="text-purple-400 font-bold text-lg tracking-tight">Conversation Bingo</h2>
+          <div class="p-4 pb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            <h2 class="text-purple-400 font-bold text-xl tracking-tight whitespace-nowrap">
+              Conversation Bingo
+            </h2>
             <%= if @state.bingo_type do %>
               <span
                 id="bingo-type-label"
-                class="flex-shrink-0 px-3 py-1 text-xs font-semibold bg-slate-800 border border-slate-700 text-purple-400 rounded-full"
+                class="px-3 py-1 text-xs font-semibold bg-slate-800 border border-slate-700 text-purple-400 rounded-full"
               >
                 <%= bingo_type_label(@state.bingo_type) %>
               </span>
