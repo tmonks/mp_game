@@ -233,7 +233,7 @@ defmodule MPGWeb.BingoLive do
                 <button
                   id="new-game-btn"
                   phx-click="new_game"
-                  class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm font-bold py-2 px-4 rounded-xl transition-colors"
+                  class="bg-purple-700 hover:bg-purple-600 text-white text-sm font-bold py-2 px-4 rounded-xl transition-colors"
                 >
                   New Game
                 </button>
