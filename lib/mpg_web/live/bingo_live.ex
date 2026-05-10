@@ -174,12 +174,14 @@ defmodule MPGWeb.BingoLive do
           <div class="p-4 pb-2 flex items-center justify-between gap-3">
             <h2 class="text-purple-400 font-bold text-lg tracking-tight">Conversation Bingo</h2>
             <%= if @state.bingo_type do %>
-              <span id="bingo-type-label" class="flex-shrink-0 px-3 py-1 text-xs font-semibold bg-slate-800 border border-slate-700 text-purple-400 rounded-full">
+              <span
+                id="bingo-type-label"
+                class="flex-shrink-0 px-3 py-1 text-xs font-semibold bg-slate-800 border border-slate-700 text-purple-400 rounded-full"
+              >
                 <%= bingo_type_label(@state.bingo_type) %>
               </span>
             <% end %>
           </div>
-
           <!-- Players -->
           <div class="px-4 pb-3">
             <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">
@@ -191,7 +193,6 @@ defmodule MPGWeb.BingoLive do
               <% end %>
             </div>
           </div>
-
           <!-- Progress -->
           <div class="px-4 pb-3">
             <div class="flex justify-between text-sm mb-1.5">
@@ -206,18 +207,17 @@ defmodule MPGWeb.BingoLive do
               </div>
             </div>
           </div>
-
           <!-- Bingo Grid -->
           <%= if @state.cells == [] do %>
             <div class="loader">Loading...</div>
           <% else %>
-            <div class="px-3 pb-4">
+            <div class="px-3 pb-8">
               <div class="grid grid-cols-5 gap-1.5">
                 <%= for {cell, index} <- Enum.with_index(@state.cells) do %>
                   <div
                     phx-click="toggle_cell"
                     phx-value-index={index}
-                    class={"relative flex items-center justify-center text-center rounded-xl cursor-pointer font-semibold leading-tight aspect-[1/1.1] p-1 border transition-colors #{if cell.player_id, do: "bg-purple-900 border-purple-500 text-white", else: "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:border-slate-600"} sm:text-xs text-[9px]"}
+                    class={"relative flex items-center justify-center text-center rounded-xl cursor-pointer font-medium leading-tight aspect-[1/1.1] p-1 border transition-colors #{if cell.player_id, do: "bg-purple-900 border-purple-500 text-white", else: "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:border-slate-600"} sm:text-xs text-[10px]"}
                     id={"cell-#{index}"}
                   >
                     <%= cell.text %>
@@ -229,7 +229,7 @@ defmodule MPGWeb.BingoLive do
               </div>
             </div>
             <%= if is_host?(@player, @state.players) do %>
-              <div class="px-4 pb-4">
+              <div class="px-3 pb-4">
                 <button
                   id="new-game-btn"
                   phx-click="new_game"
