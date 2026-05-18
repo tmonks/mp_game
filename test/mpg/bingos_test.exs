@@ -70,6 +70,23 @@ defmodule MPG.BingosTest do
       [cell | _] = state.cells
       assert cell.player_id == nil
     end
+
+    test "does not toggle a cell already claimed by another player" do
+      state = Bingos.new(@server_id)
+      state = Bingos.update_cells(state, make_cells())
+      state = Bingos.add_player(state, "player1", "Alice")
+      state = Bingos.add_player(state, "player2", "Bob")
+
+      # Player 1 claims cell 0
+      state = Bingos.toggle(state, 0, "player1")
+      [cell | _] = state.cells
+      assert cell.player_id == "player1"
+
+      # Player 2 tries to toggle the same cell — should be ignored
+      state = Bingos.toggle(state, 0, "player2")
+      [cell | _] = state.cells
+      assert cell.player_id == "player1"
+    end
   end
 
   describe "update_cells/2" do

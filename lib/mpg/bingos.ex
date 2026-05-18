@@ -67,6 +67,10 @@ defmodule MPG.Bingos do
     %Cell{cell | player_id: nil}
   end
 
+  defp toggle_cell(%Cell{} = cell, _player_id) do
+    cell
+  end
+
   defp get_color_for_player(num) do
     colors = [
       "Gold",
