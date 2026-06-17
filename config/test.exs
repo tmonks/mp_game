@@ -15,3 +15,10 @@ config :phoenix, :plug_init_mode, :runtime
 
 # Use mock AI client in tests
 config :mpg, :ai_client, MPG.AI.MockClient
+
+config :mpg, MPG.Repo,
+  database: Path.expand("../priv/analytics_test.db", __DIR__),
+  pool_size: 1
+
+# Don't track requests during tests (avoids analytics DB writes)
+config :mpg, analytics_enabled: false

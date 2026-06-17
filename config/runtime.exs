@@ -46,6 +46,20 @@ if config_env() == :prod do
 
   config :mpg, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
+  config :mpg, MPG.Repo,
+    database: System.get_env("ANALYTICS_DB_PATH") || "/data/analytics.db",
+    pool_size: 1
+
+  config :phoenix_analytics,
+    repo: MPG.Repo,
+    app_domain: System.get_env("PHX_HOST") || "mpgames.fly.dev"
+
+  config :mpg,
+    analytics_username: System.get_env("ANALYTICS_USERNAME") || "admin",
+    analytics_password:
+      System.get_env("ANALYTICS_PASSWORD") ||
+        raise("ANALYTICS_PASSWORD environment variable is missing")
+
   config :mpg, MPGWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
     http: [

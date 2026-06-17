@@ -9,6 +9,7 @@ defmodule MPG.Application do
   def start(_type, _args) do
     children = [
       MPGWeb.Telemetry,
+      MPG.Repo,
       {DNSCluster, query: Application.get_env(:mpg, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: MPG.PubSub},
       # Start a worker by calling: MPG.Worker.start_link(arg)

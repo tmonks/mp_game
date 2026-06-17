@@ -66,3 +66,11 @@ config :phoenix, :plug_init_mode, :runtime
 
 # Include HEEx debug annotations as HTML comments in rendered markup
 config :phoenix_live_view, :debug_heex_annotations, true
+
+config :mpg, MPG.Repo,
+  database: Path.expand("../priv/analytics_dev.db", __DIR__),
+  pool_size: 1
+
+config :mpg,
+  analytics_username: "admin",
+  analytics_password: "dev"

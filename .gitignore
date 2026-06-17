@@ -37,3 +37,8 @@ npm-debug.log
 
 # Dev config
 /config/.env.exs
+
+# Local SQLite analytics databases
+/priv/*.db
+/priv/*.db-shm
+/priv/*.db-wal
