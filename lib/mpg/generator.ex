@@ -48,6 +48,17 @@ defmodule MPG.Generator do
     )
     |> decode_json()
     |> Map.get(:questions)
+    |> Enum.map(&shuffle_answers/1)
+  end
+
+  # The model tends to list the correct answer first (mimicking the prompt's
+  # example), so we shuffle the answers and recompute the correct index.
+  defp shuffle_answers(%{answers: answers, correct_answer: correct_index} = question) do
+    correct_text = Enum.at(answers, correct_index)
+    shuffled = Enum.shuffle(answers)
+    new_index = Enum.find_index(shuffled, &(&1 == correct_text))
+
+    %{question | answers: shuffled, correct_answer: new_index}
   end
 
   @doc """
