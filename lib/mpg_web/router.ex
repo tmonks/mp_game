@@ -55,6 +55,10 @@ defmodule MPGWeb.Router do
   end
 
   pipeline :analytics_auth do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
     plug :analytics_basic_auth
   end
 
