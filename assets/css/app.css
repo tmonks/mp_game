@@ -4,8 +4,12 @@
 
 /* This file is for your main application CSS */
 
-.hide-scrollbar::-webkit-scrollbar { display: none; }
-.hide-scrollbar { scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  scrollbar-width: none;
+}
 
 /*
  * Loading Spinner

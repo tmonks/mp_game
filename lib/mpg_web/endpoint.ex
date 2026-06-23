@@ -25,7 +25,7 @@ defmodule MPGWeb.Endpoint do
     only: MPGWeb.static_paths()
 
   if Application.compile_env(:mpg, :analytics_enabled, true) do
-    plug PhoenixAnalytics.Plugs.RequestTracker
+    plug MPGWeb.Plugs.AnalyticsTracker
   end
 
   # Code reloading can be explicitly enabled under the

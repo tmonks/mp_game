@@ -358,7 +358,11 @@ defmodule MPG.LikelyTest do
       results = Likely.vote_results_for_question(state, state.current_question)
 
       # Bob should have 2 votes, Alice 1, Charlie 0
-      assert [{%Player{name: "Bob"}, 2}, {%Player{name: "Alice"}, 1}, {%Player{name: "Charlie"}, 0}] =
+      assert [
+               {%Player{name: "Bob"}, 2},
+               {%Player{name: "Alice"}, 1},
+               {%Player{name: "Charlie"}, 0}
+             ] =
                results
     end
   end
