@@ -36,12 +36,12 @@ mix assets.build   # Build CSS and JS
 
 Each game (`:quizzes`, `:things`, `:bingos`, `:likely`) follows the same structure:
 
-| Module | Role |
-|--------|------|
-| `MPG.{Game}.State` | Struct holding all game data |
-| `MPG.{Game}` | Pure functions for state transitions |
+| Module               | Role                                               |
+| -------------------- | -------------------------------------------------- |
+| `MPG.{Game}.State`   | Struct holding all game data                       |
+| `MPG.{Game}`         | Pure functions for state transitions               |
 | `MPG.{Game}.Session` | GenServer managing lifecycle, keyed by `server_id` |
-| `MPGWeb.{Game}Live` | LiveView — mounts, handles events, renders HEEx |
+| `MPGWeb.{Game}Live`  | LiveView — mounts, handles events, renders HEEx    |
 
 Player action flow: `LiveView event → Session GenServer → PubSub broadcast → all LiveViews re-render`
 

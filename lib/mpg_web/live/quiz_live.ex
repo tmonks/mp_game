@@ -194,12 +194,12 @@ defmodule MPGWeb.QuizLive do
     <% else %>
       <!-- QUIZ TITLE -->
       <div id="quiz-title" class="text-gray-600 text-2xl font-bold mb-4">
-        <%= @state.title %>
+        {@state.title}
       </div>
       <!-- GAME CODE -->
       <%= if @quiz_status in [:new, :generating, :joining] do %>
         <div id="game-code" class="text-gray-600 text-lg mb-2">
-          Game Code: <%= @server_id %>
+          Game Code: {@server_id}
         </div>
       <% end %>
       <!-- STATUS MESSAGE -->
@@ -216,7 +216,7 @@ defmodule MPGWeb.QuizLive do
       <%= if Quizzes.current_status(@state) in [:answering, :reviewing] do %>
         <!-- QUESTION COUNTER -->
         <div id="question-counter" class="text-sm text-gray-600 mb-1">
-          Question <%= @state.current_question + 1 %> of <%= length(@state.questions) %>
+          Question {@state.current_question + 1} of {length(@state.questions)}
         </div>
         <.question_component
           question={@state.questions |> Enum.at(@state.current_question)}
@@ -301,7 +301,7 @@ defmodule MPGWeb.QuizLive do
                   class="bg-gray-200 text-gray-800 py-1 px-2 rounded cursor-pointer flex-1"
                   data-role="suggested-topic"
                 >
-                  <%= topic %>
+                  {topic}
                 </a>
               </div>
             <% end %>
@@ -320,7 +320,7 @@ defmodule MPGWeb.QuizLive do
     ~H"""
     <div id="question">
       <div id="question-text" class="text-xl mb-6">
-        <%= @question.text %>
+        {@question.text}
       </div>
       <!-- ANSWERS -->
       <div id="answers" class="flex flex-col gap-4">
@@ -331,7 +331,7 @@ defmodule MPGWeb.QuizLive do
             phx-value-answer={i}
             class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded text-left"
           >
-            <%= answer %>
+            {answer}
           </button>
         <% end %>
       </div>
@@ -343,7 +343,7 @@ defmodule MPGWeb.QuizLive do
     ~H"""
     <div id="question" class="mb-6">
       <div id="question-text" class="text-gray-700 text-xl mb-4">
-        <%= @question.text %>
+        {@question.text}
       </div>
       <!-- ANSWERS -->
       <div id="answers" class="flex flex-col gap-4">
@@ -362,14 +362,14 @@ defmodule MPGWeb.QuizLive do
           <span class="font-medium text-green-500 mr-2">
             <.icon name="hero-check-circle-solid" class="h-5 w-5 mb-2" /> Correct!
           </span>
-          <%= @question.explanation %>
+          {@question.explanation}
         </div>
       <% else %>
         <div id="explanation" class="mt-6">
           <span class="font-medium text-red-500 mr-2">
             <.icon name="hero-x-circle-solid" class="h-5 w-5 mb-1" /> Incorrect.
           </span>
-          <%= @question.explanation %>
+          {@question.explanation}
         </div>
       <% end %>
     </div>
@@ -396,7 +396,7 @@ defmodule MPGWeb.QuizLive do
       class={"py-2 px-4 rounded text-left flex items-center gap-2 #{classes_for_answer_status(@status)}"}
       data-role={@status}
     >
-      <div><%= @answer %></div>
+      <div>{@answer}</div>
       <!-- player markers for players with this answer -->
       <%= for player <- Enum.filter(@players, & &1.current_answer == @index) do %>
         <.player_marker player={player} />
@@ -412,12 +412,12 @@ defmodule MPGWeb.QuizLive do
   defp status_message(assigns) do
     ~H"""
     <div id="current-status" class="text-gray-600 text-xl mb-4">
-      <%= case assigns.quiz_status do
+      {case assigns.quiz_status do
         :new -> "Host is setting a quiz topic..."
         :generating -> "Generating quiz..."
         :joining -> "Ready to start!"
         _ -> nil
-      end %>
+      end}
     </div>
     """
   end
@@ -434,7 +434,7 @@ defmodule MPGWeb.QuizLive do
       style={"background-color: #{@player.color}"}
       id={"player-" <> @player.id}
     >
-      <%= String.slice(@player.name, 0..2) %>
+      {String.slice(@player.name, 0..2)}
       <%= if @player.current_answer != nil and @show_answer_status do %>
         <div
           data-role="ready-check-mark"
@@ -465,7 +465,7 @@ defmodule MPGWeb.QuizLive do
       style={"background-color: #{@player.color}"}
       id={"player-marker-" <> @player.id}
     >
-      <%= String.slice(@player.name, 0..2) %>
+      {String.slice(@player.name, 0..2)}
     </div>
     """
   end
@@ -484,10 +484,10 @@ defmodule MPGWeb.QuizLive do
           <%= for player <- Enum.sort(assigns.players, & &1.score > &2.score) do %>
             <li class="flex items-center justify-between py-2 px-4 gap-4">
               <div class="text-xl">
-                <%= player.name %>
+                {player.name}
               </div>
               <div id={"score-#{player.id}"} class="text-xl font-bold">
-                <%= format_score(player.score, @question_quantity) %>
+                {format_score(player.score, @question_quantity)}
               </div>
             </li>
           <% end %>

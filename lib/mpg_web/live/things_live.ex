@@ -171,14 +171,14 @@ defmodule MPGWeb.ThingsLive do
       <div class="mt-2 mb-8">
         <%= if is_nil(@state.topic) do %>
           <div id="game-code" class="text-gray-600 text-xl mb-2">
-            Game Code: <%= @server_id %>
+            Game Code: {@server_id}
           </div>
           <div id="waiting-message" class="text-gray-600 text-2xl">
             Waiting for the game to begin...
           </div>
         <% else %>
           <div id="current-question" class="text-gray-600 text-2xl">
-            Things... <%= @state.topic %>
+            Things... {@state.topic}
           </div>
         <% end %>
       </div>
@@ -221,7 +221,7 @@ defmodule MPGWeb.ThingsLive do
                 My answer
               </div>
               <div id="my-answer" class="text-gray-600 text-base">
-                <%= @player.current_answer %>
+                {@player.current_answer}
               </div>
             </div>
             <%= if Things.all_players_answered?(@state) and !is_nil(@player) and !@player.revealed and @live_action != :reveal do %>
@@ -326,7 +326,7 @@ defmodule MPGWeb.ThingsLive do
         name="guesser_id"
         class="flex-auto block appearance-none bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
       >
-        <%= options_for_select(player_options(@players, @current_player), []) %>
+        {options_for_select(player_options(@players, @current_player), [])}
       </select>
       <button
         class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
@@ -356,7 +356,7 @@ defmodule MPGWeb.ThingsLive do
       style={"background-color: #{@player.color}"}
       id={"player-" <> @player.id}
     >
-      <span class="relative top-1"><%= String.slice(assigns.player.name, 0..2) %></span>
+      <span class="relative top-1">{String.slice(assigns.player.name, 0..2)}</span>
       <%= if @player.current_answer != nil and @show_answer_status do %>
         <div
           data-role="ready-check-mark"
@@ -374,7 +374,7 @@ defmodule MPGWeb.ThingsLive do
         </div>
       <% end %>
       <div data-role="score" class="w-4 h-4 text-center text-sm">
-        <%= @player.score || 0 %>
+        {@player.score || 0}
       </div>
     </div>
     """
@@ -383,7 +383,7 @@ defmodule MPGWeb.ThingsLive do
   defp player_answer(assigns) do
     ~H"""
     <li id={"answer-#{@player.id}"} class="flex items-center py-2 px-6 gap-2">
-      <p class="text-gray-600 text-base"><%= @player.current_answer %></p>
+      <p class="text-gray-600 text-base">{@player.current_answer}</p>
       <%= if @player.revealed do %>
         <.player_avatar player={@player} show_answer_status={false} />
       <% end %>

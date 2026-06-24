@@ -160,7 +160,7 @@ defmodule MPGWeb.BingoLive do
                   name="type"
                   class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 mb-4"
                 >
-                  <%= options_for_select(Generator.list_bingo_types(), []) %>
+                  {options_for_select(Generator.list_bingo_types(), [])}
                 </select>
                 <button class="w-full bg-purple-700 hover:bg-purple-600 text-white font-bold py-3 px-4 rounded-xl transition-colors">
                   Start Game
@@ -180,14 +180,14 @@ defmodule MPGWeb.BingoLive do
                 id="bingo-type-label"
                 class="px-3 py-1 text-xs font-semibold bg-slate-800 border border-slate-700 text-purple-400 rounded-full"
               >
-                <%= bingo_type_label(@state.bingo_type) %>
+                {bingo_type_label(@state.bingo_type)}
               </span>
             <% end %>
           </div>
           <!-- Players -->
           <div class="px-4 pb-3">
             <div class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">
-              Players — <%= length(@state.players) %> joined
+              Players — {length(@state.players)} joined
             </div>
             <div class="flex gap-2 overflow-x-auto hide-scrollbar p-1">
               <%= for player <- @state.players do %>
@@ -199,7 +199,7 @@ defmodule MPGWeb.BingoLive do
           <div class="px-4 pb-3">
             <div class="flex justify-between text-sm mb-1.5">
               <span class="text-slate-400">Completed</span>
-              <span class="text-purple-400 font-bold"><%= marked_count(@state.cells) %> / 25</span>
+              <span class="text-purple-400 font-bold">{marked_count(@state.cells)} / 25</span>
             </div>
             <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
               <div
@@ -222,7 +222,7 @@ defmodule MPGWeb.BingoLive do
                     class={"relative flex items-center justify-center text-center rounded-xl cursor-pointer font-medium leading-tight aspect-[1/1.1] p-1 border transition-colors #{if cell.player_id, do: "bg-purple-900 border-purple-500 text-white", else: "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:border-slate-600"} sm:text-xs text-[10px]"}
                     id={"cell-#{index}"}
                   >
-                    <%= cell.text %>
+                    {cell.text}
                     <%= if cell.player_id do %>
                       <.player_marker player={Enum.find(@state.players, &(&1.id == cell.player_id))} />
                     <% end %>
@@ -259,7 +259,7 @@ defmodule MPGWeb.BingoLive do
       style={"background-color: #{@player.color}"}
       id={"player-" <> @player.id}
     >
-      <%= String.slice(@player.name, 0..2) %>
+      {String.slice(@player.name, 0..2)}
     </div>
     """
   end
@@ -272,7 +272,7 @@ defmodule MPGWeb.BingoLive do
       class="absolute bottom-1 right-1 w-4 h-4 text-white font-bold rounded-full flex items-center justify-center text-[7px] shadow-[0_0_0_1.5px_theme(colors.slate.900)]"
       style={"background-color: #{@player.color}"}
     >
-      <%= String.slice(@player.name, 0..1) %>
+      {String.slice(@player.name, 0..1)}
     </div>
     """
   end

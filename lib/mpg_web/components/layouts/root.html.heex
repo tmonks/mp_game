@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
     <.live_title suffix=" · Phoenix Framework">
-      <%= assigns[:page_title] || "MPG" %>
+      {assigns[:page_title] || "MPG"}
     </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
@@ -14,9 +14,9 @@
   <body class="bg-white antialiased">
     <header class={"#{assigns[:primary_color] || "bg-sky-500"} text-white p-4"}>
       <h1 class="text-xl font-bold">
-        <a href="/"><%= assigns[:page_title] || "MP Games" %></a>
+        <a href="/">{assigns[:page_title] || "MP Games"}</a>
       </h1>
     </header>
-    <%= @inner_content %>
+    {@inner_content}
   </body>
 </html>

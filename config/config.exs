@@ -52,6 +52,12 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :mpg, ecto_repos: [MPG.Repo]
+
+config :phoenix_analytics,
+  repo: MPG.Repo,
+  app_domain: "mpgames.fly.dev"
+
 # import dev secrets from config/.env.exs if present
 if(config_env() == :dev) do
   dotenv_path = Path.join([__DIR__, "..", "config", ".env.exs"]) |> Path.expand()

@@ -1,5 +1,6 @@
 defmodule MPGWeb.Router do
   use MPGWeb, :router
+  use PhoenixAnalytics.Web, :router
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -51,6 +52,26 @@ defmodule MPGWeb.Router do
     live "/bingo", BingoLive, :new
     live "/bingo/:id", BingoLive, :play
     live "/bingo/:id/new", BingoLive, :new
+  end
+
+  pipeline :analytics_auth do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+    plug :analytics_basic_auth
+  end
+
+  scope "/" do
+    pipe_through :analytics_auth
+    phoenix_analytics_dashboard("/analytics")
+  end
+
+  defp analytics_basic_auth(conn, _opts) do
+    Plug.BasicAuth.basic_auth(conn,
+      username: Application.get_env(:mpg, :analytics_username, "admin"),
+      password: Application.get_env(:mpg, :analytics_password, "secret")
+    )
   end
 
   defp assign_session_id(conn, _opts) do

@@ -130,7 +130,7 @@ defmodule MPGWeb.LikelyLive do
       <!-- GAME CODE -->
       <%= if @game_status in [:new, :generating, :joining] do %>
         <div id="game-code" class="text-gray-600 text-lg mb-2">
-          Game Code: <%= @server_id %>
+          Game Code: {@server_id}
         </div>
       <% end %>
       <!-- STATUS MESSAGE -->
@@ -167,11 +167,11 @@ defmodule MPGWeb.LikelyLive do
       <%= if @game_status in [:voting, :revealing] do %>
         <!-- QUESTION COUNTER -->
         <div id="question-counter" class="text-sm text-gray-600 mb-1">
-          Question <%= @state.current_question + 1 %> of <%= length(@state.questions) %>
+          Question {@state.current_question + 1} of {length(@state.questions)}
         </div>
         <!-- QUESTION TEXT -->
         <div id="question-text" class="text-xl mb-6">
-          <%= Enum.at(@state.questions, @state.current_question).text %>
+          {Enum.at(@state.questions, @state.current_question).text}
         </div>
         <%= if @game_status == :voting do %>
           <.vote_buttons player={@player} players={@state.players} />
@@ -205,12 +205,12 @@ defmodule MPGWeb.LikelyLive do
   defp status_message(assigns) do
     ~H"""
     <div id="current-status" class="text-gray-600 text-xl mb-4">
-      <%= case assigns.game_status do
+      {case assigns.game_status do
         :new -> "Waiting for host to start..."
         :generating -> "Generating questions..."
         :joining -> "Ready to start!"
         _ -> nil
-      end %>
+      end}
     </div>
     """
   end
@@ -233,9 +233,9 @@ defmodule MPGWeb.LikelyLive do
               class="flex items-center justify-center w-8 h-8 text-white font-bold rounded-full text-sm"
               style={"background-color: #{target.color}"}
             >
-              <%= String.slice(target.name, 0..2) %>
+              {String.slice(target.name, 0..2)}
             </div>
-            <span><%= target.name %></span>
+            <span>{target.name}</span>
           </button>
         <% end %>
       </div>
@@ -250,9 +250,9 @@ defmodule MPGWeb.LikelyLive do
               class="flex items-center justify-center w-8 h-8 text-white font-bold rounded-full text-sm"
               style={"background-color: #{target.color}"}
             >
-              <%= String.slice(target.name, 0..2) %>
+              {String.slice(target.name, 0..2)}
             </div>
-            <span><%= target.name %></span>
+            <span>{target.name}</span>
             <%= if target.id == @player.current_vote do %>
               <span class="ml-auto text-amber-600 font-semibold">Your vote</span>
             <% end %>
@@ -279,17 +279,17 @@ defmodule MPGWeb.LikelyLive do
           class={"py-3 px-4 rounded flex items-center gap-3 #{if rank == 1, do: "bg-amber-100 border-2 border-amber-400", else: "bg-gray-100"}"}
         >
           <span class={"text-lg font-bold #{if rank == 1, do: "text-amber-600", else: "text-gray-400"}"}>
-            #<%= rank %>
+            #{rank}
           </span>
           <div
             class="flex items-center justify-center w-8 h-8 text-white font-bold rounded-full text-sm"
             style={"background-color: #{player.color}"}
           >
-            <%= String.slice(player.name, 0..2) %>
+            {String.slice(player.name, 0..2)}
           </div>
-          <span class="font-medium"><%= player.name %></span>
+          <span class="font-medium">{player.name}</span>
           <span class="ml-auto text-gray-600 font-bold">
-            <%= count %> <%= if count == 1, do: "vote", else: "votes" %>
+            {count} {if count == 1, do: "vote", else: "votes"}
           </span>
         </div>
       <% end %>
@@ -311,12 +311,12 @@ defmodule MPGWeb.LikelyLive do
               class="flex items-center justify-center w-10 h-10 text-white font-bold rounded-full"
               style={"background-color: #{player.color}"}
             >
-              <%= String.slice(player.name, 0..2) %>
+              {String.slice(player.name, 0..2)}
             </div>
-            <h3 class="text-lg font-bold"><%= player.name %></h3>
+            <h3 class="text-lg font-bold">{player.name}</h3>
           </div>
           <p class="text-gray-700 italic">
-            "<%= Map.get(@state.roasts, player.id, "No roast generated") %>"
+            "{Map.get(@state.roasts, player.id, "No roast generated")}"
           </p>
         </div>
       <% end %>
@@ -336,7 +336,7 @@ defmodule MPGWeb.LikelyLive do
       style={"background-color: #{@player.color}"}
       id={"player-" <> @player.id}
     >
-      <%= String.slice(@player.name, 0..2) %>
+      {String.slice(@player.name, 0..2)}
       <%= if @player.current_vote != nil and @show_vote_status do %>
         <div
           data-role="ready-check-mark"

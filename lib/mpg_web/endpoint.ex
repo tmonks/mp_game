@@ -24,6 +24,10 @@ defmodule MPGWeb.Endpoint do
     gzip: false,
     only: MPGWeb.static_paths()
 
+  if Application.compile_env(:mpg, :analytics_enabled, true) do
+    plug MPGWeb.Plugs.AnalyticsTracker
+  end
+
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
   if code_reloading? do

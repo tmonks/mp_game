@@ -31,3 +31,7 @@ kill_signal = 'SIGTERM'
   memory = '512mb'
   cpu_kind = 'shared'
   cpus = 1
+
+[[mounts]]
+  source = "mpg_analytics"
+  destination = "/data"
