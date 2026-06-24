@@ -7,9 +7,6 @@ app = 'mpgames'
 primary_region = 'ewr'
 kill_signal = 'SIGTERM'
 
-[deploy]
-  release_command = "/app/bin/mpg eval 'MPG.Release.migrate()'"
-
 [build]
 
 [env]

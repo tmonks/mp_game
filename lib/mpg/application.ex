@@ -7,6 +7,8 @@ defmodule MPG.Application do
 
   @impl true
   def start(_type, _args) do
+    maybe_run_migrations()
+
     children = [
       MPGWeb.Telemetry,
       MPG.Repo,
@@ -24,6 +26,14 @@ defmodule MPG.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: MPG.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  # In prod we migrate the SQLite analytics DB at boot rather than via Fly's
+  # release_command, since that runs on a separate machine without the volume.
+  defp maybe_run_migrations do
+    if Application.get_env(:mpg, :run_migrations_on_boot, false) do
+      MPG.Release.migrate()
+    end
   end
 
   # Tell Phoenix to update the endpoint configuration

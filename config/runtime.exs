@@ -50,6 +50,10 @@ if config_env() == :prod do
     database: System.get_env("ANALYTICS_DB_PATH") || "/data/analytics.db",
     pool_size: 1
 
+  # Run migrations at boot (see MPG.Application) instead of via a Fly
+  # release_command, which runs on a separate machine without the volume.
+  config :mpg, run_migrations_on_boot: true
+
   config :phoenix_analytics,
     repo: MPG.Repo,
     app_domain: System.get_env("PHX_HOST") || "mpgames.fly.dev"
